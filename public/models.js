@@ -1,75 +1,172 @@
 (function(module) {
 	var Schema;
-	var ObjectId;
 
 	if (require) { // Server env
-		console.log('Mongoose supported!');
+		console.log('Mangoose supported!');
 		var mongoose = require('mongoose');
 
 		Schema = mongoose.Schema;
-		ObjectId = Schema.Types.ObjectId;
-	} else { // browser env (ie. api console), faking mongoose
-		console.log('Mongoose unsupported, let\'s faking it');
-
-		var mongoose = {
-			model: function(name, obj) {
-				return obj;
-			},
+	} else { // browser env, faking mangoose
+		console.log('Mangoose unsupported, let\'s faking it');
+		Schema = {
+			Types: {
+				ObjectId: 'ObjectId'
+			}
 		};
-
-		Schema = function(obj) {
-			return obj;
-		};
-
-		ObjectId = 'ObjectId';
 	}
 
-	var schemas = {};
+	var schemas = {
+	    'Media': {
+	        'schema': {
+	            path: { type: String, required: true },
+	            type: { type: String, required: true, enum: ['image', 'video', 'audio', 'link'] },
+	            createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'media',
+	            'path_plural': 'medias',
+	            'list': true,
+	            'create': true,
+	        },
+	    },
 
-	var localeSchema = Schema({
-		isoCode: {type: String, required: true, unique: true},
-		englishName: {type: String, required: true, unique: true},
-		localeName: {type: String, required: true},
-	});
+	    'Locale': {
+	        'schema': {
+	            isoCode: { type: String, required: true, unique: true },
+	            englishName: { type: String, required: true, unique: true },
+	            localName: { type: String, required: true },
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'locale',
+	            'path_plural': 'locales',
+	            'list': true,
+	            'create': true,
+	        },
+	    },
 
-	var Locale = mongoose.model('Locale', localeSchema);
-	Locale.routes = {
-		'single': 'locale',
-		'plural': 'locales',
-	}
+	    'L10nString': {
+	        'schema': {
+	            locale: { type: Schema.Types.ObjectId, ref: 'Locale', required: true },
+	            value: { type: String, required: true },
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'l10nString',
+	            'path_plural': 'l10nStrings',
+	            'list': true,
+	            'create': true,
+	        },
+	    },
 
-	var i18nStringSchema = Schema({
-		isoCode: {type: String, required: true},
-		value: {type: String, required: true},
-	});
+	    'Comment': {
+	        'schema': {
+	            createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+	            responseTo: { type: Schema.Types.ObjectId, ref: 'Comment' },
+	            value: { type: String, required: true },
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'comment',
+	            'path_plural': 'comments',
+	            'list': true,
+	            'create': true,
+	        }
+	    },
 
-	var I18nString = mongoose.model('I18nString', i18nStringSchema);
+	    'Vote': {
+	        'schema': {
+	            createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+	            value: { type: Number, required: true },
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'vote',
+	            'path_plural': 'votes',
+	            'list': true,
+	            'create': true,
+	        },
+	    },
 
-	var achievementSchema = Schema({
-		name: [I18nString],
-		description: [I18nString],
-		requirement: {type: ObjectId, required: false}, // parent achievement id
-	});
+	    'Achievement': {
+	        'schema': {
+	            name: [{ type: Schema.Types.ObjectId, ref: 'L10nString', required: true }],
+	            description: [{ type: Schema.Types.ObjectId, ref: 'L10nString', required: true }],
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'achievement',
+	            'path_plural': 'achievements',
+	            'list': true,
+	            'create': true,
+	        }
+	    },
 
-	var Achievement = mongoose.model('Achievement', achievementSchema);
+	    'AchievementCategory': {
+	        'schema': {
+	            achievements: [{ type: Schema.Types.ObjectId, ref: 'Achievement', required: true }],
+	            name: [{ type: Schema.Types.ObjectId, ref: 'L10nString', required: true }],
+	            description: [{ type: Schema.Types.ObjectId, ref: 'L10nString', required: true }],
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'achievementCategory',
+	            'path_plural': 'achievementCategories',
+	            'list': true,
+	            'create': true,
+	        },
+	    },
 
-	var achievementCategorySchema = Schema({
-		name: [I18nString],
-		description: [I18nString],
-		achievements: [Achievement],
-		requirement: {type: ObjectId, required: false}, // parent achievement category id
-	});
+	    'UserStatus': {
+	        'schema': {
+	            status: { type: String, required: true },
+	            achievement: { type: Schema.Types.ObjectId, ref: 'Achievement', required: true },
+	            comments: [{ type: Schema.Types.ObjectId, ref: 'Comment', required: true }],
+	            votes: [{ type: Schema.Types.ObjectId, ref: 'Vote', required: true }],
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'userStatus',
+	            'path_plural': 'userStatuses',
+	            'list': true,
+	            'create': true,
+	        }
+	    },
 
-	var AchievementCategory = mongoose.model('AchievementCategory', achievementCategorySchema);
-	AchievementCategory.routes = {
-		'single': 'achievementCategory',
-		'plural': 'achievementCategories',
-	}
-
-	module.exports = {
-		Locale: Locale,
-		I18nString: I18nString,
-		Achievement: Achievement,
-		AchievementCategory: AchievementCategory,
+	    'User': {
+	        'schema': {
+	            login: { type: String, required: true, validate: [/[a-zA-Z][a-zA-Z0-9]/, 'validation.login.invalid'] },
+	            firstname: { type: String },
+	            surname: { type: String },
+	            gender: { type: String },
+	            birthdate: { type: Date, required: true  },
+	            email: { type: String },
+	            passwordHash: { type: String, required: true },
+	            passwordSalt: { type: String },
+	            avatar: { type: Schema.Types.ObjectId, ref: 'Media' },
+	            locale: { type: Schema.Types.ObjectId, ref: 'Locale' },
+	            emailCode: { type: String },
+	            verified: { type: String },
+	            created: { type: Date, default: Date.now },
+	            modified: { type: Date, default: Date.now },
+	        },
+	        'api': {
+	            'path': 'user',
+	            'path_plural': 'users',
+	            'list': true,
+	            'create': true,
+	        }
+	    },
 	};
+
+	module.exports = schemas;
 }(module));

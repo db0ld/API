@@ -7,7 +7,7 @@
 	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
 	<script src="http://code.jquery.com/jquery-migrate-1.1.1.min.js"></script>
 
-	<script>var module = {}, // dirty hack to simulate require behaviour
+	<script>var module = {},
 				require = false;</script>
 	<script src="models.js"></script>
 	<script src="api.js"></script>
@@ -26,6 +26,12 @@
 <body>
 	<div class="container">
 		<select name="object" id="object" class="span3"></select>
+		<!--
+			<select name="single-collection" id="single-collection" class="span1">
+				<option value="single">1</option>
+				<option value="collection">+</option>
+			</select>
+		-->
 		<input type="hidden" name="single-collection" id="single-collection" value="single">
 		<div class="input-prepend">
 			<span class="add-on" id="urlbase">&nbsp;</span>
@@ -48,10 +54,16 @@
 						<p class="alert alert-info">No body for DELETE requests</p>
 					</div>
 					<div id="post-tab-content" class="hidden">
-						<textarea id="textarea-POST" class="span3" style="height:500px"></textarea>
+						<div class="btn-group">
+							<button class="btn btn-info" id="default-post-fields"><i class="icon-refresh icon-white"></i> Default</button>
+							<button class="btn btn-success" id="add-post-field"><i class="icon-plus-sign icon-white"></i> Add</button>
+							<button class="btn btn-danger" id="reset-post-fields"><i class="icon-remove-sign icon-white"></i> Reset</button>
+						</div>
+						<fieldset id="objectFields">
+						</fieldset>
 					</div>
 					<div id="put-tab-content" class="hidden">
-						<textarea id="textarea-PUT" class="span3" style="height:500px"></textarea>
+						<textarea id="textarea" class="span3" style="height:500px"></textarea>
 					</div>
 				</div>
 				<pre class="span8" id="result">... Function result ...</pre>
