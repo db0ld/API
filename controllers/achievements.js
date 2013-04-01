@@ -4,19 +4,36 @@ var api_params = require('../config.js');
 module.exports = function(app, models) {
     // get all achievements
     app.get(api_utils.makePath('achievement'), function (req, res) {
-          return models.Achievement.find()
-            .limit(req.query.limit || api_params.def_limit)
-            .skip(req.query.offset || api_params.def_offset)
-            .exec(function (err, items) {
-              return api_utils.apiResponse(res, req, err || items);
-          });
+        var query = models.Achievement.find();
+
+        if (req.query.name) {
+          query = query.where('name.value', new RegExp(req.query.name, 'i'));
+
+          if (req.query.locale) {
+            query = query.where('name.isoCode', req.query.locale);
+          }
+        }
+
+        if (req.query.description) {
+          query = query.where('description.value', new RegExp(req.query.description, 'i'));
+
+          if (req.query.locale) {
+            query = query.where('description.isoCode', req.query.locale);
+          }
+        }
+
+        return query.limit(req.query.limit || api_params.def_limit)
+          .skip(req.query.offset || api_params.def_offset)
+          .exec(function (err, items) {
+            return api_utils.apiResponse(res, req, err || items);
+        });
     });
 
     // get a single achievement
     app.get(api_utils.makePath('achievement/:id'), function (req, res) {
-          return models.Achievement.findById(req.params.id, function (err, item) {
-            return api_utils.apiResponse(res, req, err || item);
-          });
+      return models.Achievement.findById(req.params.id, function (err, item) {
+        return api_utils.apiResponse(res, req, err || item);
+      });
     });
 
     // add an achievement
@@ -28,7 +45,7 @@ module.exports = function(app, models) {
       });
     });
 
-    // Update achievement
+    // Update achievement -- not really tested
     app.put(api_utils.makePath('achievement/:id'), function (req, res){
       return models.Achievement.findById(req.params.id, function (err, item) {
         item = api_utils.requestToObject(req, models.Achievement, item);
