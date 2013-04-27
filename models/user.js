@@ -9,11 +9,12 @@ var userSchema = new mongoose.Schema({
     firstname: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
     lastname: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: false},
     gender: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
+    password: { type : String, required: true},
     birthdate: { type: Date, required: true },
     account_creation : { type : Date, 'default' : Date.now },
     achievements: [{type: ObjectId, required: false}],
-    ext_oauth_identities: [oAuthIdentity.oAuthIdentitySchema],
-    oauth_tokens: [oAuthIdentity.oAuthTokenSchema]
+    ext_oauth_identities: {type: [oAuthIdentity.oAuthIdentitySchema]},
+    oauth_tokens: {type: [oAuthIdentity.oAuthTokenSchema]}
 }, { autoIndex: true });
 
 userSchema.virtual('name').get(function () {
@@ -31,8 +32,10 @@ userSchema.options.toJSON = {
     transform: function(doc, ret, options) {
 
         obj = doc.toObject();
+        delete obj.password;
         delete obj.ext_oauth_identities;
         delete obj.oauth_tokens;
+
         return obj;
     }
 };

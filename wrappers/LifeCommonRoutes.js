@@ -7,9 +7,11 @@ var LifeCommonRoutes = function(app, model) {
 };
 
 LifeCommonRoutes.prototype.update = function(route) {
+    var that = this;
+
     this.app.put(route, function (req, res){
-        return LifeQuery.findById(this.model, req.params.id, function(err, item) {
-            item = api_utils.requestToObject(req, this.model, item);
+        return LifeQuery.findById(that.model, req.params.id, function(err, item) {
+            item = api_utils.requestToObject(req, that.model, item);
 
             LifeQuery.save(item, function(err, item) {
                 return api_utils.apiResponse(res, req, item);
@@ -19,16 +21,20 @@ LifeCommonRoutes.prototype.update = function(route) {
 };
 
 LifeCommonRoutes.prototype.findOne = function(route) {
+    var that = this;
+
     this.app.get(route, function (req, res) {
-        return LifeQuery.findById(this.model, req.params.id, function(err, item) {
+        return LifeQuery.findById(that.model, req.params.id, function(err, item) {
             return api_utils.apiResponse(res, req, item);
         });
     });
 };
 
 LifeCommonRoutes.prototype.addOne = function(route) {
+    var that = this;
+
     this.app.post(route, function (req, res) {
-        var item = new this.model(api_utils.requestToObject(req, this.model));
+        var item = new this.model(api_utils.requestToObject(req, that.model));
 
         LifeQuery.save(item, function(err, item) {
             api_utils.apiResponse(res, req, item);
