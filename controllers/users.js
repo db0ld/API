@@ -53,7 +53,7 @@ module.exports = function(app, models) {
             LifeQuery.save(item, function(err, item) {
               return api_utils.apiResponse(res, req, item);
             });
-          });
+          }, next);
         });
     });
 };

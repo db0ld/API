@@ -12,8 +12,8 @@ module.exports = function(app, models) {
     commonRoutes.findOne(routeBase + '/:id');
 
     // get all achievements
-    app.get(routeBase, function (req, res) {
-        var query = LifeQuery.fromModel(models.Achievement, req, res);
+    app.get(routeBase, function (req, res, next) {
+        var query = LifeQuery.fromModel(models.Achievement, req, res, next);
 
         if (req.query.name) {
           query.filterRegexp('name.value', new RegExp(req.query.name, 'i'));

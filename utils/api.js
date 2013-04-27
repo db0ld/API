@@ -31,11 +31,6 @@ var apiPaginatedResponse = function(res, req, data, serverSize, error) {
   apiResponse(res, req, listData, error);
 };
 
-var paginateQuery = function(req, query) {
-  return query.limit(req.query.limit || api_params.def_limit)
-          .skip(req.query.offset || api_params.def_offset);
-};
-
 var requestToObject = function(req, model, data) {
   if (typeof data !== 'object') {
     data = {};
@@ -58,6 +53,5 @@ module.exports = {
   apiResponse: apiResponse,
   apiPaginatedResponse: apiPaginatedResponse,
   requestToObject: requestToObject,
-  makePath: makePath,
-  paginateQuery: paginateQuery
+  makePath: makePath
 };
