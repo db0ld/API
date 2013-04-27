@@ -1,8 +1,20 @@
 module.exports = {
   Success: {
     'code': 0,
-	'type': 'Success',
+    'type': 'Success',
     'message': 'Success'
+  },
+
+  NotFound: {
+    'code': 404,
+    'type': 'NotFound',
+    'message': 'NotFound'
+  },
+
+  NotUnique: {
+    'code': 400,
+    'type': 'NotUnique',
+    'message': 'NotUnique'
   },
 
   // 1000: User errors
@@ -30,5 +42,4 @@ module.exports = {
     'type': 'IOErrorDB',
     'message': 'An error happened while reading from or writing to the database'
   }
-
 };
