@@ -4,14 +4,15 @@ var LifeQuery = require('../wrappers/LifeQuery.js');
 
 
 module.exports = function(app, models) {
+    var routeBase = __filename.replace(/\.js$/, '');
     var commonRoutes = new LifeCommonRoutes(app, models.Achievement);
 
-    commonRoutes.addOne('achievements');
-    commonRoutes.update('achievements/:id');
-    commonRoutes.findOne('achievements/:id');
+    commonRoutes.addOne(routeBase);
+    commonRoutes.update(routeBase + '/:id');
+    commonRoutes.findOne(routeBase + '/:id');
 
     // get all achievements
-    app.get('achievements', function (req, res) {
+    app.get(routeBase, function (req, res) {
         var query = LifeQuery.fromModel(models.Achievement, req, res);
 
         if (req.query.name) {

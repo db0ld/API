@@ -4,11 +4,12 @@ var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeCommonRoutes = require('../wrappers/LifeCommonRoutes.js');
 
 module.exports = function(app, models) {
+    var routeBase = __filename.replace(/\.js$/, '');
     var commonRoutes = new LifeCommonRoutes(app, models.User);
 
-    commonRoutes.addOne('users');
-    commonRoutes.update('users/:id');
-    commonRoutes.findOne('users/:id');
+    commonRoutes.addOne(routeBase);
+    commonRoutes.update(routeBase + '/:id');
+    commonRoutes.findOne(routeBase + '/:id');
 
     var searchOAuthUser = function(provider, ext_id) {
         return new LifeQuery(models.User.find())
@@ -17,7 +18,7 @@ module.exports = function(app, models) {
     };
 
     // get all users
-    app.get('users', function (req, res) {
+    app.get(routeBase, function (req, res) {
         var query = LifeQuery.fromModel(models.User, req, res);
 
         return query.
@@ -29,7 +30,7 @@ module.exports = function(app, models) {
     });
 
     // get a single user by its oauth credentials
-    app.get('users/ext_oauth', function (req, res) {
+    app.get(routeBase + '/ext_oauth', function (req, res) {
         searchOAuthUser(req.query.provider, req.query.ext_id)
           .exec(function(err, data) {
             api_utils.apiResponse(res, req, data[0]);
@@ -37,7 +38,7 @@ module.exports = function(app, models) {
     });
 
     // add an oauth token to an user
-    app.post('users/:id/ext_oauth', function (req, res) {
+    app.post(routeBase + '/:id/ext_oauth', function (req, res) {
       searchOAuthUser(req.body.provider, req.body.ext_id)
         .exec(function(err, data) {
           if (data.length) {
