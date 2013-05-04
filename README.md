@@ -14,7 +14,14 @@ You'll need :
 Installing
 ----------
 
-npm install
+npm install†
+
+
+†On older Ubuntu versions you may need to upgrade to a newer node.js release.
+
+This PPA should be good https://launchpad.net/~chris-lea/+archive/node.js/+packages
+
+**Downside**: No Maverick repo available. That version is not maintained anymore by Canonical and is still used by the EIP Laboratory. We can only compile it on that platform.
 
 
 Launch API server
@@ -26,8 +33,7 @@ node app.js
 Open a simple API console
 -------------------------
 
-Launch server.
-iexplore.exe [http://localhost:*api port defined in app.js*](http://localhost:2048)
+iexplore.exe [http://localhost:2048](http://localhost:2048)
 
 Format POST data as a JSON encoded key/value dictionary.
 
