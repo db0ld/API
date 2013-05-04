@@ -1,4 +1,6 @@
 {
+	"name": "Life-API",
+	"version": "0.1.0",
 	"dependencies": {
 	  "express": "3.1.0",
 	  "mongoose": "3.5.6",
