@@ -4,7 +4,7 @@ var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeCommonRoutes = require('../wrappers/LifeCommonRoutes.js');
 
 module.exports = function(app, models) {
-    var routeBase = __filename.replace(/^.*\\(.*)\.js$/, '$1');
+    var routeBase = 'users';
     var commonRoutes = new LifeCommonRoutes(app, models.User);
 
     commonRoutes.addOne(routeBase);
