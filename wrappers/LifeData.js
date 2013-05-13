@@ -1,7 +1,7 @@
 var LifeErrors = require('./LifeErrors.js');
 var LifeResponse = require('./LifeResponse.js');
 
-var LifeData = function(model, res, req) {
+var LifeData = function(model, req, res) {
     this.model = model;
     this.res = res;
     this.req = req;
@@ -48,14 +48,14 @@ LifeData.prototype.delete = function(item, next, cb) {
 LifeData.prototype.saveFromRequest = function(next, cb) {
     var that = this;
 
-    var item = new that.model(LifeData.requestToObject());
+    var item = new that.model(that.requestToObject());
 
     that.save(item, function(err, item) {
         if (typeof cb !== "undefined") {
             return cb(item, that.req, that.res, next);
         }
 
-        return LifeResponse.send(that.res, that.req, item);
+        return LifeResponse.send(that.req, that.res, item);
     }, next);
 };
 

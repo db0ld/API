@@ -14,8 +14,6 @@ module.exports = function(app) {
 
     // get a single user
     app.get(routeBase + "/:login", function (req, res, next) {
-        console.log(req.route);
-
         return User.findByLogin(req.params.login, req, res, next).execOne();
     });
 

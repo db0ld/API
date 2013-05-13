@@ -16,7 +16,7 @@ module.exports = function(app) {
             oneWeekLater.setDate (oneWeekLater.getDate() + 7);
 
             var token = new OAuthToken();
-            token.tokenKey = user.login + '-' + Math.floor(Math.random() *  4294967295);
+            token.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + oneWeekLater.getTime();
             token.expiration = oneWeekLater;
 
             user.oauth_tokens.push(token);
