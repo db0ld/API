@@ -27,6 +27,24 @@ LifeData.prototype.save = function(item, next, cb) {
     });
 };
 
+LifeData.prototype.delete = function(item, next, cb) {
+    var that = this;
+
+    item.delete(function (err) {
+        if (err) {
+            var ret_err = LifeErrors.IOErrorDB;
+            ret_err.message = err;
+            return next(LifeErrors.IOErrorDB);
+        }
+
+        if (typeof cb === "function") {
+            return cb(that.req, that.res);
+        }
+
+        return LifeResponse.send(that.res, that.req, item);
+    });
+};
+
 LifeData.prototype.saveFromRequest = function(next, cb) {
     var that = this;
 

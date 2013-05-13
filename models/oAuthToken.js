@@ -7,9 +7,7 @@ var OAuthTokenSchema = new mongoose.Schema({
     expiration: { type : Date, required: true }
 });
 
-OAuthTokenSchema.statics.findByToken = function(token, req, res, next) {
-    return new LifeQuery(this.find(), req, res, next)
-      .filterEquals('token', token);
+OAuthTokenSchema.statics.findOauthToken = function(user, token, req, res, next) {
 };
 
 var OAuthToken = mongoose.model('OAuthToken', OAuthTokenSchema);

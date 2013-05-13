@@ -8,6 +8,12 @@ LifeErrors.Success = {
   'message': 'Success'
 };
 
+LifeErrors.NotImplemented = {
+  'code': 0,
+  'type': 'NotImplemented',
+  'message': 'Not Implemented'
+};
+
 LifeErrors.NotFound = {
   'code': 404,
   'type': 'NotFound',

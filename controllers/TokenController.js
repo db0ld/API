@@ -16,7 +16,7 @@ module.exports = function(app) {
             oneWeekLater.setDate (oneWeekLater.getDate() + 7);
 
             var token = new OAuthToken();
-            token.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + oneWeekLater.getTime();
+            token.tokenKey = user.login + '-' + Math.floor(Math.random() *  4294967295);
             token.expiration = oneWeekLater;
 
             user.oauth_tokens.push(token);
@@ -28,20 +28,41 @@ module.exports = function(app) {
     });
 
     app.get(['tokens', 'users/:login/tokens'], function(req, res, next) {
-        if (!req.params.login) {
-            if (req.token && req.token.user && req.token.user.login) {
-                req.params.login = req.token.user.login;
-            } else {
-                return next(LifeErrors.AuthenticationRequired);
-            }
-        }
-
-        return next(LifeErrors.UserNotFound);
+        return next(LifeErrors.NotImplemented);
     });
 
     app.get(['tokens/:token'], function(req, res, next) {
+        return User.findByOauthToken(req.params.token, req, res, next).execOne(function(user) {
+            var found = false;
+
+            user.oauth_tokens.forEach(function(item) {
+                if (item.token === req.params.token) {
+                    found = true;
+                    return new LifeResponse.send(req, res, item);
+                }
+            });
+
+            if (!found) {
+                return next(LifeErrors.NotFound);
+            }
+        });
     });
 
     app.delete(['tokens/:id', 'users/:login/tokens/:id'], function(req, res, next) {
+        return User.findByOauthToken(req.params.token, req, res, next).execOne(function(user) {
+            var token = false;
+
+            user.oauth_tokens = user.oauth_tokens.filter(function(item) {
+                if (item.token === req.params.token) {
+                    token = item;
+                }
+
+                return item.token !== req.params.token;
+            });
+
+            return new LifeData(User, req, res).save(user, next, function(data) {
+                return new LifeResponse.send(req, res, token);
+            });
+        });
     });
 };

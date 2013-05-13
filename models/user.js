@@ -36,8 +36,8 @@ UserSchema.options.toJSON = {
         });
 
         delete obj.password;
-        delete obj.ext_oauth_identities;
-        delete obj.oauth_tokens;
+        //delete obj.ext_oauth_identities;
+        //delete obj.oauth_tokens;
         delete obj.id;
         delete obj._id;
         delete obj.__v;
@@ -56,6 +56,13 @@ UserSchema.statics.findByLogin = function(login, req, res, next) {
     return new LifeQuery(this.find(), req, res, next)
       .filterEquals('login', login);
 };
+
+UserSchema.statics.findByOauthToken = function(token, req, res, next) {
+    return new LifeQuery(this.find(), req, res, next)
+      .filterEquals('oauth_tokens.token', token);
+};
+
+//return console.log(user.oauth_tokens.children);
 
 UserSchema.statics.findByCredentials = function(login, password, req, res, next) {
     return new LifeQuery(this.find(), req, res, next)
