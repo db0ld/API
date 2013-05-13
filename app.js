@@ -1,21 +1,22 @@
 var application_root = __dirname;
 var mongoose = require('mongoose');
-var models = require('./models.js');
 var express = require("express");
-var api_params = require('./config.js');
 var path = require("path");
+require('./wrappers/LifeInit.js');
+var LifeRouter = require('./wrappers/LifeRouter.js');
+var LifeConfig = require('./wrappers/LifeConfig.js');
 
-mongoose.connect(api_params['db_path']);
+mongoose.connect(LifeConfig['db_path']);
 
 var app = express();
 
 app.configure(function () {
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.static(path.join(application_root, api_params['public_path'])));
+  app.use(express.static(path.join(application_root, LifeConfig['public_path'])));
   app.use(app.router);
 
-  if (api_params['dev']) {
+  if (LifeConfig['dev']) {
 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   }
 });
@@ -24,8 +25,9 @@ app.get(['/', '/api'], function (req, res) {
   res.send('Life API is alive! <a href="apitest.html">API Console is here</a>');
 });
 
-var controllers = require('./controller.js')(app, models);
+var router = new LifeRouter(app);
+router.init();
 
 // Launch server
-console.log('Listening on port ' + api_params.port + '...');
-app.listen(api_params.port);
+console.log('Listening on port ' + LifeConfig.port + '...');
+app.listen(LifeConfig.port);

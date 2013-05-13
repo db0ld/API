@@ -1,14 +1,14 @@
 var mongoose = require('mongoose');
+var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
-var i18nString = require('./i18nString.js');
+var I18nStringSchema = require('mongoose').model('I18nString').schema;
 
-var achievementSchema = new mongoose.Schema({
-	name: [i18nString.i18nStringSchema],
-	description: [i18nString.i18nStringSchema],
-	achievements: [{type: ObjectId, required: false}]
+var AchievementSchema = new mongoose.Schema({
+    name: [I18nStringSchema],
+    description: [I18nStringSchema],
+    achievements: [{type: ObjectId, required: false}]
 });
 
-var Achievement = mongoose.model('Achievement', achievementSchema);
+var Achievement = mongoose.model('Achievement', AchievementSchema);
 
-exports.achievementSchema = achievementSchema;
-exports.Achievement = Achievement;
+module.exports = Achievement;
