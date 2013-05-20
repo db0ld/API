@@ -9,10 +9,10 @@ var UserSchema = new mongoose.Schema({
     lastname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
     gender: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
     locale: { type : String, match: /^[a-z]{2}(_[A-Z]{2})?$/, required: true},
-    password: { type : String, required: true},
+    password: { type : String, required: true, select: false},
     birthdate: { type: Date, required: true },
     account_creation : { type : Date, 'default' : Date.now },
-    achievements: [{type: ObjectId, required: false}]
+    achievements: [{type: ObjectId, required: false, ref: 'Achievement'}]
 }, { autoIndex: true });
 
 UserSchema.virtual('name').get(function () {
@@ -28,23 +28,6 @@ UserSchema.virtual('name').get(function () {
 UserSchema.virtual('profile_url').get(function () {
   return LifeConfig.website_url + 'user/' + this.login.toLowerCase();
 });
-
-UserSchema.options.toJSON = {
-    getters: true,
-    virtuals: true,
-    transform: function(doc, ret, options) {
-        obj = doc.toObject({
-          virtuals: true
-        });
-
-        delete obj.password;
-        delete obj.id;
-        delete obj._id;
-        delete obj.__v;
-
-        return obj;
-    }
-};
 
 UserSchema.statics.queryDefaults = function() {
     return {
