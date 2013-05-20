@@ -114,7 +114,7 @@ LifeQuery.prototype.filterEquals = function (field, value) {
 
 
 
-['equals', 'in', 'gt', 'lt', 'gte', 'lte', 'slice', 'ne', 'nin'].forEach(function(operation) {
+['equals', 'in', 'gt', 'lt', 'gte', 'lte', 'slice', 'ne', 'nin', 'size', 'all'].forEach(function(operation) {
     LifeQuery.prototype[operation] = function(field, value) {
         value = LifeQuery.value(value);
 

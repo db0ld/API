@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var LifeQuery = require('../wrappers/LifeQuery.js');
 
 var OAuthTokenSchema = new mongoose.Schema({
     token: {type: String, unique: true},

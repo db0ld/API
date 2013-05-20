@@ -17,6 +17,25 @@ var toJSON = function(req, res, item) {
     return item;
 };
 
+LifeResponse.paginatedList = function(req, res, data, serverSize) {
+  data = (typeof data === "undefined") ?
+    [] : data;
+
+  if (typeof req.token == "object" && typeof data == "object" && typeof data.forEach == "function") {
+    data = data.map(function(item) {
+      return toJSON(res, req, item);
+    });
+  }
+
+  serverSize = (typeof serverSize === "undefined") ?
+    data.length : serverSize;
+
+  return {
+    server_size: parseInt(serverSize, 10),
+    index: parseInt(req.query.offset || LifeConfig.def_offset, 10),
+    items: data
+  };
+};
 
 LifeResponse.send = function(req, res, data, error) {
     // handling empty parameters
@@ -38,25 +57,7 @@ LifeResponse.send = function(req, res, data, error) {
 };
 
 LifeResponse.sendList = function(req, res, data, serverSize, error) {
-  data = (typeof data === "undefined") ?
-    [] : data;
-
-  if (typeof req.token == "object" && typeof data == "object" && typeof data.forEach == "function") {
-    data = data.map(function(item) {
-      return toJSON(res, req, item);
-    });
-  }
-
-  serverSize = (typeof serverSize === "undefined") ?
-    data.length : serverSize;
-
-  var listData = {
-    server_size: parseInt(serverSize, 10),
-    index: parseInt(req.query.offset || LifeConfig.def_offset, 10),
-    items: data
-  };
-
-  LifeResponse.send(req, res, listData, error);
+  LifeResponse.send(req, res, LifeResponse.paginatedList(req, res, data, serverSize), error);
 };
 
 module.exports = LifeResponse;

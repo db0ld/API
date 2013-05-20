@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var I18nStringSchema = require('mongoose').model('I18nString').schema;
 

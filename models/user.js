@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
-var OAuthIdentitySchema = require('mongoose').model('OAuthIdentity').schema;
 var LifeConfig = require('../wrappers/LifeConfig.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
 
@@ -13,8 +12,7 @@ var UserSchema = new mongoose.Schema({
     password: { type : String, required: true},
     birthdate: { type: Date, required: true },
     account_creation : { type : Date, 'default' : Date.now },
-    achievements: [{type: ObjectId, required: false}],
-    ext_oauth_identities: {type: [OAuthIdentitySchema]}
+    achievements: [{type: ObjectId, required: false}]
 }, { autoIndex: true });
 
 UserSchema.virtual('name').get(function () {
@@ -40,8 +38,8 @@ UserSchema.options.toJSON = {
         });
 
         delete obj.password;
-        //delete obj.id;
-        //delete obj._id;
+        delete obj.id;
+        delete obj._id;
         delete obj.__v;
 
         return obj;

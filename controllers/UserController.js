@@ -1,4 +1,6 @@
 var User = require('mongoose').model('User');
+var Conversation = require('mongoose').model('Conversation');
+var Message = require('mongoose').model('Message');
 var LifeErrors = require('../wrappers/LifeErrors.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeData = require('../wrappers/LifeData.js');
@@ -31,28 +33,67 @@ module.exports = function(app) {
             .exec();
     });
 
-    // get a single user by its oauth credentials
-    app.get(routeBase + '/ext_oauth', function (req, res, next) {
-        User.findByExtOAuth(req.query.provider, req.query.ext_id).execOne();
+    // Get conversation
+    app.get(routeBase + '/:login/conversation', function (req, res, next) {
+        return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.token.user]).execOne(false, function(conversation) {
+                Message.findByConversation(new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
+                    conversation = conversation.toJSON();
+                    conversation.messages = LifeResponse.paginatedList(req, res, messages, count);
+                    return LifeResponse.send(req, res, conversation);
+                });
+            });
+        });
     });
 
-    // add an oauth token to an user
-    app.post(routeBase + '/:login/ext_oauth', function (req, res, next) {
-        // Check if this token currently exists
-        return User.findByExtOAuth(req.body.provider, req.body.ext_id).execOne(false, function(user) {
-            if (user) {
-                return LifeResponse.send(req, res, null, LifeErrors.UserExtTokenAlreadyRegistered);
-            }
+    // Post new message to conversation
+    app.post(routeBase + '/:login/conversation', function (req, res, next) {
+        return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.token.user]).execOne(true, function(conversation) {
+                var addMessageToConversation = function(conversation) {
 
-            return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-                if (!user) {
-                    return LifeResponse.send(req, res, null, LifeErrors.UserNotFound);
+                    // Search sender_ref for current user
+                    var sender_ref = null;
+                    for (var i = 0; i < conversation.referenced_users.length; i++) {
+                        if (conversation.referenced_users[i]._id == req.token.user.id) {
+                            sender_ref = i;
+                            break;
+                        }
+                    }
+
+                    if (sender_ref === null) {
+                        next(LifeErrors.NotFound);
+                    }
+
+                    // Creating message
+                    var message = new Message({
+                        sender_ref: sender_ref,
+                        content: req.body.message,
+                        conversation: conversation._id
+                    });
+
+                    return new LifeData(Message, req, res, next).save(message);
+                };
+
+                // Create conversation if it doesn't exist
+                if (conversation === null) {
+                    conversation = new Conversation({
+                        referenced_users: [user, req.token.user]
+                    });
+
+                    return new LifeData(Conversation, req, res, next).save(conversation, addMessageToConversation);
                 }
 
-                var identity = new models.OAuthIdentity(LifeQuery.requestToObject(req, models.OAuthIdentity));
-                user.ext_oauth_identities.push(identity);
+                addMessageToConversation(conversation);
+            });
+        });
+    });
 
-                return new LifeData(User, req, res, next).save(item);
+    // Delete message from conversation
+    app.delete(routeBase + '/:login/conversation/:message_id', function (req, res, next) {
+        return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.token.user]).execOne(false, function(conversation) {
+                Message.findByConversationAndId(new LifeQuery(Message, req, res, next), conversation, req.params.message_id).remove();
             });
         });
     });
