@@ -48,11 +48,11 @@ LifeResponse.sendList = function(req, res, data, serverSize, error) {
   }
 
   serverSize = (typeof serverSize === "undefined") ?
-    0 : serverSize;
+    data.length : serverSize;
 
   var listData = {
-    server_size: serverSize,
-    index: req.query.offset || LifeConfig.def_offset,
+    server_size: parseInt(serverSize, 10),
+    index: parseInt(req.query.offset || LifeConfig.def_offset, 10),
     items: data
   };
 

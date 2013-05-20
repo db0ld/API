@@ -9,6 +9,14 @@ var AchievementSchema = new mongoose.Schema({
     achievements: [{type: ObjectId, required: false}]
 });
 
+AchievementSchema.statics.queryDefaults = function() {
+    return {
+        'populate': '',
+        'limit': 10,
+        'offset': 0
+    };
+};
+
 var Achievement = mongoose.model('Achievement', AchievementSchema);
 
 module.exports = Achievement;

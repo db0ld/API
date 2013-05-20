@@ -14,7 +14,6 @@ $(document).ready(function() {
     $('#send').on('click', function(e) {
         e.preventDefault();
 
-        console.log('Sending data...');
         var url = endpoint + $('#endpoint').val();
         var httpMethod = $('#http-method-tabs li.active').text().trim();
         var data = null;

@@ -7,7 +7,7 @@ module.exports = function(app) {
 
     // get all achievements
     app.get(routeBase, function (req, res, next) {
-        var query = LifeQuery.fromModel(Achievement, req, res, next);
+        var query = new LifeQuery(Achievement, req, res, next);
 
         if (req.query.name) {
           query.filterRegexp('name.value', new RegExp(req.query.name, 'i'));
@@ -19,8 +19,7 @@ module.exports = function(app) {
           query.filterEquals('description.isoCode', req.query.locale);
         }
 
-        return query.paginate()
-          .exec(function(err, data) {
+        return query.exec(function(err, data) {
             return LifeResponse.sendList(req, res, data);
           });
     });

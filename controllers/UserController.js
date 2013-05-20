@@ -9,7 +9,7 @@ module.exports = function(app) {
 
     // add a single user
     app.post(routeBase, function (req, res, next) {
-        return new LifeData(User, req, res).saveFromRequest(next);
+        return new LifeData(User, req, res, next).saveFromRequest();
     });
 
     // get a single user
@@ -19,19 +19,17 @@ module.exports = function(app) {
 
     // update a single user
     app.put(routeBase + "/:login", function (req, res, next) {
-        return User.findByLogin(req.params.login, req, res, next).execOne(function(user) {
-            if (!user) {
-                return LifeResponse.send(req, res, null, LifeErrors.UserNotFound);
-            }
-
-            return new LifeData(User, req, res).save(LifeData.requestToObject(req, User, user), next);
+        return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            //user.firstname = "wesh gro";
+            //user.save();
+            return new LifeData(User, req, res, next).saveFromRequest(user);
+            return new LifeResponse(req, res, "plop");
         });
     });
 
     // get all users
     app.get(routeBase, function (req, res, next) {
-        return LifeQuery.fromModel(User, req, res)
-            .paginate()
+        return new LifeQuery(User, req, res, next)
             .filterRegexp('name', new RegExp(req.query.name, 'i'), typeof req.query.name !== "undefined")
             .exec(function(data, count) {
                 return LifeResponse.sendList(req, res, data, count);
@@ -46,12 +44,12 @@ module.exports = function(app) {
     // add an oauth token to an user
     app.post(routeBase + '/:login/ext_oauth', function (req, res, next) {
         // Check if this token currently exists
-        return User.findByExtOAuth(req.body.provider, req.body.ext_id).execOne(function(user) {
+        return User.findByExtOAuth(req.body.provider, req.body.ext_id).execOne(false, function(user) {
             if (user) {
                 return LifeResponse.send(req, res, null, LifeErrors.UserExtTokenAlreadyRegistered);
             }
 
-            return User.findByLogin(req.params.login, req, res, next).execOne(function(user) {
+            return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
                 if (!user) {
                     return LifeResponse.send(req, res, null, LifeErrors.UserNotFound);
                 }
@@ -59,7 +57,7 @@ module.exports = function(app) {
                 var identity = new models.OAuthIdentity(LifeQuery.requestToObject(req, models.OAuthIdentity));
                 user.ext_oauth_identities.push(identity);
 
-                return new LifeData(User, req, res).save(item);
+                return new LifeData(User, req, res, next).save(item);
             });
         });
     });

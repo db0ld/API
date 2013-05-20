@@ -62,4 +62,10 @@ LifeErrors.NonUniqueResult = {
   'message': 'Non unique result'
 };
 
+LifeErrors.AuthenticationError = {
+  'code': 665,
+  'type': 'AuthenticationError',
+  'message': 'Authentication error'
+};
+
 module.exports = LifeErrors;

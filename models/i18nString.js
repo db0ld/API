@@ -5,6 +5,14 @@ var I18nStringSchema = new mongoose.Schema({
     value: {type: String, required: true}
 });
 
+I18nStringSchema.statics.queryDefaults = function() {
+    return {
+        'populate': '',
+        'limit': 10,
+        'offset': 0
+    };
+};
+
 var I18nString = mongoose.model('I18nString', I18nStringSchema);
 
 module.exports = I18nString;

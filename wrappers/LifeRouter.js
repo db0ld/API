@@ -2,6 +2,7 @@ var fs = require('fs');
 var LifeSecurity = require('./LifeSecurity.js');
 var LifeResponse = require('./LifeResponse.js');
 var LifeConfig = require('./LifeConfig.js');
+var LifeErrors = require('./LifeErrors.js');
 
 var LifeRouter = function(app) {
     this.app = app;
@@ -37,7 +38,9 @@ var makePath = function(res) {
 
             endpoint.forEach(function(route) {
                 that.app[method](route, function(req, res, next) {
-                    return LifeSecurity.authenticationWrapper(req, res, next, function(req, res, next) {
+                    return LifeSecurity.authenticationWrapper(req, res, function(err) {
+                           return LifeResponse.send(req, res, null, LifeErrors.AuthenticationError);
+                        }, function(req, res, next) {
                         return cb(req, res, function(err) {
                             return LifeResponse.send(req, res, null, err);
                         });
