@@ -64,21 +64,6 @@ LifeData.prototype.saveFromRequest = function(item, cb) {
     }, that.next);
 };
 
-LifeData.prototype.findById = function(id, cb) {
-    return this.model.findById(id, function (err, item) {
-        if (err) {
-            console.error(err);
-            return that.next(LifeErrors.IOErrorDB);
-        }
-
-        if (item === null) {
-          return that.next(LifeErrors.NotFound);
-        }
-
-        return cb(item);
-    });
-};
-
 LifeData.requestToObject = function(req, model, data) {
     if (typeof data !== 'object') {
         data = {};

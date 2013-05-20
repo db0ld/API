@@ -42,6 +42,12 @@ var makePath = function(res) {
                            return LifeResponse.send(req, res, null, LifeErrors.AuthenticationError);
                         }, function(req, res, next) {
                         return cb(req, res, function(err) {
+                            if (typeof req.query.locale !== 'undefined') {
+                                req.locale = req.query.locale;
+                            } else if (typeof req.query.locale === 'undefined' && typeof req.token !== 'undefined') {
+                                req.locale = req.token.user.locale;
+                            }
+
                             return LifeResponse.send(req, res, null, err);
                         });
                     });

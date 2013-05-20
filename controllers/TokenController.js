@@ -40,7 +40,6 @@ module.exports = function(app) {
     app.get(['tokens/:token'], function(req, res, next) {
         return OAuthToken
             .findByToken(new LifeQuery(OAuthToken, req, res, next), req.params.token)
-            .populate('')
             .execOne();
     });
 

@@ -154,6 +154,21 @@ LifeQuery.prototype.changeValue = function(property, val) {
     this['_' + property] = val;
 };
 
+LifeQuery.prototype.findById = function(id, cb) {
+    return this.model.find(id, function (err, item) {
+        if (err) {
+            console.error(err);
+            return that.next(LifeErrors.IOErrorDB);
+        }
+
+        if (item === null) {
+          return that.next(LifeErrors.NotFound);
+        }
+
+        return cb(item);
+    });
+};
+
 ['query', 'limit', 'offset', 'populate'].forEach(function (property) {
     LifeQuery.prototype[property] = function(val) {
         this.changeValue(property, val);

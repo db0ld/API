@@ -68,4 +68,10 @@ LifeErrors.AuthenticationError = {
   'message': 'Authentication error'
 };
 
+LifeErrors.NoLocaleSpecified = {
+  'code': 665,
+  'type': 'NoLocaleSpecified',
+  'message': 'No locale specified'
+};
+
 module.exports = LifeErrors;

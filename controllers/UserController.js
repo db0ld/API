@@ -20,10 +20,7 @@ module.exports = function(app) {
     // update a single user
     app.put(routeBase + "/:login", function (req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            //user.firstname = "wesh gro";
-            //user.save();
             return new LifeData(User, req, res, next).saveFromRequest(user);
-            return new LifeResponse(req, res, "plop");
         });
     });
 
@@ -31,9 +28,7 @@ module.exports = function(app) {
     app.get(routeBase, function (req, res, next) {
         return new LifeQuery(User, req, res, next)
             .filterRegexp('name', new RegExp(req.query.name, 'i'), typeof req.query.name !== "undefined")
-            .exec(function(data, count) {
-                return LifeResponse.sendList(req, res, data, count);
-            });
+            .exec();
     });
 
     // get a single user by its oauth credentials
