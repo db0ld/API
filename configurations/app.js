@@ -4,7 +4,5 @@ module.exports = {
 	'api_path': '/api/',
 	'db_path': 'mongodb://localhost/glife',
 	'website_url': 'http://l.ohai.fr/',
-	'public_path': 'public',
-	'def_offset': 0,
-	'def_limit': 5
+	'public_path': 'public'
 };

@@ -1,4 +1,5 @@
 var User = require('mongoose').model('User');
+var Friendship = require('mongoose').model('Friendship');
 var Conversation = require('mongoose').model('Conversation');
 var Message = require('mongoose').model('Message');
 var LifeErrors = require('../wrappers/LifeErrors.js');
@@ -35,16 +36,18 @@ module.exports = function(app) {
 
     // Get conversation
     app.get(routeBase + '/:login/conversation', function (req, res, next) {
+        var messagesQuery;
+
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
             Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.token.user]).execOne(false, function(conversation) {
-                Message.findByConversation(new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
+                Message.findByConversation(messagesQuery = new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
                     conversation = conversation.toJSON();
-                    conversation.messages = LifeResponse.paginatedList(req, res, messages, count);
+                    conversation.messages = LifeResponse.paginatedList(req, res, messages, count, messagesQuery);
                     return LifeResponse.send(req, res, conversation);
                 });
             });
         });
-    });
+    }, true);
 
     // Post new message to conversation
     app.post(routeBase + '/:login/conversation', function (req, res, next) {
@@ -62,7 +65,7 @@ module.exports = function(app) {
                     }
 
                     if (sender_ref === null) {
-                        next(LifeErrors.NotFound);
+                        return next(LifeErrors.NotFound);
                     }
 
                     // Creating message
@@ -87,7 +90,7 @@ module.exports = function(app) {
                 addMessageToConversation(conversation);
             });
         });
-    });
+    }, true);
 
     // Delete message from conversation
     app.delete(routeBase + '/:login/conversation/:message_id', function (req, res, next) {
@@ -96,5 +99,54 @@ module.exports = function(app) {
                 Message.findByConversationAndId(new LifeQuery(Message, req, res, next), conversation, req.params.message_id).remove();
             });
         });
-    });
+    }, true);
+
+    // Get user friends
+    app.get(routeBase + '/:login/friends', function(req, res, next) {
+        return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            return User.findFriends(user.id, req, res, next).exec();
+        });
+    }, true);
+
+    // Become friend
+    app.post(routeBase + '/:login/friends', function(req, res, next) {
+        return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            if (user.id == req.token.user.id) {
+                return next(LifeErrors.UserLogicError);
+            }
+
+            new LifeQuery(Friendship, req, res, next)
+                .modelStatic('findByLogins', user.login, req.token.user.login).execOne(true, function(friendship) {
+                    if (friendship !== null) {
+                        if (friendship.sender_login === req.token.user.login) {
+                            return next(LifeErrors.UserLogicError);
+                        }
+
+                        friendship.acceptedDate = new Date();
+                        return new LifeData(Friendship, req, res, next).save(friendship);
+                    }
+
+                    friendship = new Friendship({
+                        sender: req.token.user,
+                        receiver: user,
+                        sender_login: req.token.user.login,
+                        receiver_login: user.login
+                    });
+
+                    return new LifeData(Friendship, req, res, next).saveFromRequest(friendship);
+            });
+        });
+    }, true);
+
+    // Get user friends
+    app.delete([routeBase + '/:login/friends', routeBase + '/:login/friends/:remover_login'], function(req, res, next) {
+        var remover_user_id = req.token.user.login;
+        if (req.params.remover_login && LifeSecurity.hasRole(req.token.user, LifeSecurity.roles.USER_MANAGEMENT)) {
+            remover_user_id = req.params.remover_login;
+        }
+
+        new LifeQuery(Friendship, req, res, next)
+            .modelStatic('findByLogins', remover_user_id, req.params.login)
+            .remove();
+    }, true);
 };

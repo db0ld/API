@@ -12,7 +12,8 @@ var UserSchema = new mongoose.Schema({
     password: { type : String, required: true, select: false},
     birthdate: { type: Date, required: true },
     account_creation : { type : Date, 'default' : Date.now },
-    achievements: [{type: ObjectId, required: false, ref: 'Achievement'}]
+    achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
+    friends: [{type: ObjectId, required: false, ref: 'User'}]
 }, { autoIndex: true });
 
 UserSchema.virtual('name').get(function () {
@@ -49,6 +50,10 @@ UserSchema.statics.findByLogin = function(login, req, res, next) {
 
 UserSchema.statics.findByCredentials = function(login, password, req, res, next) {
     return new LifeQuery(this, req, res, next, {login: login, password: password});
+};
+
+UserSchema.statics.findFriends = function(user_id, req, res, next) {
+    return new LifeQuery(this, req, res, next, {friends: user_id});
 };
 
 var User = mongoose.model('User', UserSchema);

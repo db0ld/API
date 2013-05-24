@@ -6,7 +6,7 @@ var LifeQuery = function(model, req, res, next, query) {
 
     this.req = typeof req !== 'undefined' ? req : null;
     this.res = typeof res !== 'undefined' ? res : null;
-    this.next = typeof next !== 'undefined' ? next : null;
+    this.next = typeof next !== 'undefined' ? next : function() {};
     this._query =
               typeof query == 'function' ? query
             : typeof query == 'object' ? model.find(query)
@@ -38,7 +38,7 @@ LifeQuery.prototype.exec = function(cb) {
                 return cb(data, count);
             }
 
-            return LifeResponse.sendList(that.req, that.res, data, count);
+            return LifeResponse.sendList(that.req, that.res, data, count, null, that);
         });
     });
 };
@@ -147,30 +147,33 @@ LifeQuery.prototype.filterRegexp = function (field, regexp, enabled) {
 };
 
 LifeQuery.prototype.changeValue = function(property, val) {
-    if (typeof val === "undefined") {
-        return this['_' + property];
-    }
-
     this['_' + property] = val;
 };
 
 LifeQuery.prototype.findById = function(id, cb) {
-    return this.model.find(id, function (err, item) {
-        if (err) {
-            console.error(err);
-            return that.next(LifeErrors.IOErrorDB);
-        }
+    this.query(this.model.find({'_id': id}));
 
-        if (item === null) {
-          return that.next(LifeErrors.NotFound);
-        }
+    return this.execOne(true, cb);
+};
 
-        return cb(item);
-    });
+LifeQuery.prototype.modelStatic = function(item) {
+    var args = [this];
+
+    for (var i in arguments) {
+        if (i != '0') {
+            args.push(arguments[i]);
+        }
+    }
+
+    return this.model[item].apply(this, args);
 };
 
 ['query', 'limit', 'offset', 'populate'].forEach(function (property) {
     LifeQuery.prototype[property] = function(val) {
+        if (typeof val === "undefined") {
+            return this['_' + property];
+        }
+
         this.changeValue(property, val);
         return this;
     };

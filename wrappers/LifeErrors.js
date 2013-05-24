@@ -68,10 +68,22 @@ LifeErrors.AuthenticationError = {
   'message': 'Authentication error'
 };
 
+LifeErrors.AuthenticationMissingRole = {
+  'code': 665,
+  'type': 'AuthenticationMissingRole',
+  'message': 'Authentication missing role'
+};
+
 LifeErrors.NoLocaleSpecified = {
   'code': 665,
   'type': 'NoLocaleSpecified',
   'message': 'No locale specified'
 };
+
+LifeErrors.UserLogicError = {
+  'code': 664,
+  'type': 'UserLogicError',
+  'message': 'User logic error'
+}
 
 module.exports = LifeErrors;

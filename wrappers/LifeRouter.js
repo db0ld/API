@@ -25,7 +25,7 @@ var makePath = function(res) {
 
 ['get', 'post', 'put', 'delete', 'patch', 'head']
     .forEach(function(method) {
-        LifeRouter.prototype[method] = function(endpoint, cb) {
+        LifeRouter.prototype[method] = function(endpoint, cb, authentication) {
             var that = this;
 
             if (typeof endpoint === "string") {
@@ -38,7 +38,7 @@ var makePath = function(res) {
 
             endpoint.forEach(function(route) {
                 that.app[method](route, function(req, res, next) {
-                    return LifeSecurity.authenticationWrapper(req, res, function(err) {
+                    return LifeSecurity.authenticationWrapper(req, res, authentication, function(err) {
                            return LifeResponse.send(req, res, null, LifeErrors.AuthenticationError);
                         }, function(req, res, next) {
                         return cb(req, res, function(err) {
