@@ -41,15 +41,15 @@ var makePath = function(res) {
                     return LifeSecurity.authenticationWrapper(req, res, authentication, function(err) {
                            return LifeResponse.send(req, res, null, LifeErrors.AuthenticationError);
                         }, function(req, res, next) {
-                        return cb(req, res, function(err) {
                             if (typeof req.query.locale !== 'undefined') {
                                 req.locale = req.query.locale;
-                            } else if (typeof req.query.locale === 'undefined' && typeof req.token !== 'undefined') {
-                                req.locale = req.token.user.locale;
+                            } else if (typeof req.body.locale !== 'undefined') {
+                                req.locale = req.body.locale;
                             }
 
-                            return LifeResponse.send(req, res, null, err);
-                        });
+                            return cb(req, res, function(err) {
+                                return LifeResponse.send(req, res, null, err);
+                            });
                     });
                 });
             });

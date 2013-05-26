@@ -82,4 +82,37 @@ LifeData.prototype.requestToObject = function(data) {
   return LifeData.requestToObject(this.req, this.model, data);
 };
 
+LifeData.i18nPicker = function(locale, strings) {
+    if (!locale) {
+        return strings;
+    }
+
+    var user_lang = locale.match(/^[a-z]{2}/)[0];
+    var string_user_lang = null;
+    var string_en_us = null;
+    var string_en = null;
+    var string = null;
+
+    // User lang_locale
+    for (var i in strings) {
+        if (i == locale) {
+            return strings[i];
+        } else if (!string_user_lang && i.substring(0, 2) === user_lang) {
+            string_user_lang = strings[i];
+        } else if (i == "en_US") {
+            string_en_us = strings[i];
+        } else if (!string_en && i.substring(0, 2) == 'en') {
+            string_en = strings[i];
+        } else {
+            string = strings[i];
+        }
+    }
+
+    return string_user_lang ||
+        string_en_us ||
+        string_en ||
+        string;
+};
+
+
 module.exports = LifeData;

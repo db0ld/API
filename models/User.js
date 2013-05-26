@@ -32,7 +32,7 @@ UserSchema.virtual('profile_url').get(function () {
 
 UserSchema.statics.queryDefaults = function() {
     return {
-        'populate': '',
+        'populate': 'friends',
         'limit': 10,
         'offset': 0
     };

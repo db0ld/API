@@ -1,3 +1,4 @@
+var mongoose = require('mongoose');
 var LifeConfig = require('./LifeConfig.js');
 
 var LifeResponse = function() {
@@ -5,16 +6,9 @@ var LifeResponse = function() {
 };
 
 var toJSON = function(req, res, item) {
-    if (item !== null && typeof item.toJSON == "function" && item.schema &&
-      item.schema.options && item.schema.options.toJSON) {
-
-      var jsonOptions = item.schema.options.toJSON;
-
-      if (req) {
-        jsonOptions.token = req.token;
-      }
-
-      return item.toJSON(jsonOptions);
+    if (item instanceof mongoose.Document) {
+      item._req = req;
+      return item;
     }
 
     return item;

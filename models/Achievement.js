@@ -1,16 +1,36 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
-var I18nStringSchema = require('mongoose').model('I18nString').schema;
+var LifeData = require('../wrappers/LifeData.js');
 
 var AchievementSchema = new mongoose.Schema({
-    name: [I18nStringSchema],
-    description: [I18nStringSchema],
-    achievements: [{type: ObjectId, required: false}]
+    name: mongoose.Schema.Types.Mixed,
+    description: mongoose.Schema.Types.Mixed,
+    parentAchievements: [{type: ObjectId, required: false, ref: 'Achievement'}]
 });
+
+AchievementSchema.options.toJSON = {
+    getters: true,
+    virtuals: true,
+    transform: function(doc, ret, options) {
+        obj = doc.toObject({
+          virtuals: true
+        });
+
+        if (typeof doc._req == "object") {
+            if (typeof obj.description == "object") {
+                obj.description = LifeData.i18nPicker(doc._req.locale, obj.description);
+            }
+
+            obj.name = LifeData.i18nPicker(doc._req.locale, obj.name);
+        }
+
+        return obj;
+    }
+};
 
 AchievementSchema.statics.queryDefaults = function() {
     return {
-        'populate': '',
+        'populate': 'achievements',
         'limit': 10,
         'offset': 0
     };

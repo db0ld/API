@@ -30,22 +30,22 @@ module.exports = function(app) {
         }
 
         return User.findByLogin(req.params.login ? req.params.login : req.token.user.login, req, res, next).execOne(false, function(user) {
-            return OAuthToken
-                .findByUserId(new LifeQuery(OAuthToken, req, res, next), user.id)
+            return new LifeQuery(OAuthToken, req, res, next)
+                .modelStatic('findByUserId', user.id)
                 .populate('')
                 .exec();
         });
     });
 
     app.get(['tokens/:token'], function(req, res, next) {
-        return OAuthToken
-            .findByToken(new LifeQuery(OAuthToken, req, res, next), req.params.token)
+        return new LifeQuery(OAuthToken, req, res, next)
+            .modelStatic('findByToken', req.params.token)
             .execOne();
     });
 
     app.delete(['tokens/:token', 'users/:login/tokens/:token'], function(req, res, next) {
-        return OAuthToken
-            .findByToken(new LifeQuery(OAuthToken, req, res, next), req.params.token)
+        return new LifeQuery(OAuthToken, req, res, next)
+            .modelStatic('findByToken', req.params.token)
             .remove();
     });
 };
