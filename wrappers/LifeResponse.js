@@ -8,21 +8,19 @@ var LifeResponse = function() {
 var toJSON = function(req, res, item) {
     if (item instanceof mongoose.Document) {
       item._req = req;
-      return item;
+      return item.toJSON();
     }
 
     return item;
 };
 
-LifeResponse.paginatedList = function(req, res, data, serverSize, query) {
-  data = (typeof data === "undefined") ?
-    [] : data;
+LifeResponse.paginatedList = function(req, res, in_data, serverSize, query) {
+  data = (typeof in_data === "undefined") ?
+    [] : in_data;
 
-  if (req && typeof req.token == "object" && typeof data == "object" && typeof data.forEach == "function") {
-    data = data.map(function(item) {
-      return toJSON(res, req, item);
-    });
-  }
+    for (var i in in_data) {
+      data[i] = toJSON(req, res, in_data[i]);
+    }
 
   serverSize = (typeof serverSize === "undefined") ?
     data.length : serverSize;

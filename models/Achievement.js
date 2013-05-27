@@ -16,13 +16,17 @@ AchievementSchema.options.toJSON = {
           virtuals: true
         });
 
-        if (typeof doc._req == "object") {
-            if (typeof obj.description == "object") {
-                obj.description = LifeData.i18nPicker(doc._req.locale, obj.description);
-            }
+        var locale = 'en_US';
 
-            obj.name = LifeData.i18nPicker(doc._req.locale, obj.name);
+        if (typeof doc._req == "object" && doc._req.locale) {
+            locale = doc._req.locale;
         }
+
+        if (typeof obj.description == "object") {
+            obj.description = LifeData.i18nPicker(locale, obj.description);
+        }
+
+        obj.name = LifeData.i18nPicker(locale, obj.name);
 
         return obj;
     }
