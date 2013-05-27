@@ -41,10 +41,10 @@ var makePath = function(res) {
                     return LifeSecurity.authenticationWrapper(req, res, authentication, function(err) {
                            return LifeResponse.send(req, res, null, LifeErrors.AuthenticationError);
                         }, function(req, res, next) {
-                            if (typeof req.query.locale !== 'undefined') {
-                                req.locale = req.query.locale;
-                            } else if (typeof req.body.locale !== 'undefined') {
-                                req.locale = req.body.locale;
+                            if (typeof req.query.lang !== 'undefined') {
+                                req.lang = req.query.lang;
+                            } else if (typeof req.body.lang !== 'undefined') {
+                                req.lang = req.body.lang;
                             }
 
                             return cb(req, res, function(err) {

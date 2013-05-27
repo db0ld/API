@@ -12,7 +12,7 @@ Creating an user
     "gender": "male",
     "password": "kikoolol",
     "birthdate": "Sun Oct 20 1991 02:00:00 GMT+0200 (Romance Daylight Time)",
-    "locale": "fr_FR"
+    "lang": "fr-FR"
 }
 
 Getting a token

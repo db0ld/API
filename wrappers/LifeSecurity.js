@@ -47,7 +47,7 @@ LifeSecurity.authenticationWrapper = function(req, res, authentication, next, cb
             }
 
             req.token = token;
-            req.locale = token.user.locale;
+            req.lang = token.user.lang;
 
             return cb(req, res, next);
         });

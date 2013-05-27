@@ -13,14 +13,14 @@ module.exports = function(app) {
             achievement.name = {};
         }
 
-        achievement.name[req.locale] = req.body.name;
+        achievement.name[req.lang] = req.body.name;
 
         if (typeof req.body.description == 'string') {
             if (typeof achievement.description !== "object") {
                 achievement.description = {};
             }
 
-            achievement.description[req.locale] = req.body.description;
+            achievement.description[req.lang] = req.body.description;
             achievement.markModified('description');
         }
 

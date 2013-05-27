@@ -51,10 +51,10 @@ LifeErrors.AuthenticationMissingRole = {
   'http': 401
 };
 
-LifeErrors.NoLocaleSpecified = {
+LifeErrors.NoLanguageSpecified = {
   'code': 6500,
-  'type': 'NoLocaleSpecified',
-  'message': 'No locale specified',
+  'type': 'NoLanguageSpecified',
+  'message': 'No language specified',
   'http': 400
 };
 
