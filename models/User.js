@@ -10,7 +10,7 @@ var UserSchema = new mongoose.Schema({
     gender: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
     lang: { type : String, match: /^[a-z]{2}(-[A-Z]{2})?$/, required: true},
     password: { type : String, required: true, select: false},
-    birthdate: { type: Date, required: true },
+    birthday: { type: Date, required: true },
     account_creation : { type : Date, 'default' : Date.now },
     achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
     friends: [{type: ObjectId, required: false, ref: 'User'}]

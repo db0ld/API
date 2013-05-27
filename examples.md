@@ -11,7 +11,7 @@ Creating an user
     "firstname": "Guillaume",
     "gender": "male",
     "password": "kikoolol",
-    "birthdate": "Sun Oct 20 1991 02:00:00 GMT+0200 (Romance Daylight Time)",
+    "birthday": "Sun Oct 20 1991 02:00:00 GMT+0200 (Romance Daylight Time)",
     "lang": "fr-FR"
 }
 
