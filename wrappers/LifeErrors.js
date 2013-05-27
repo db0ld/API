@@ -2,88 +2,74 @@ var LifeErrors = function() {
 
 };
 
-LifeErrors.Success = {
-  'code': 0,
-  'type': 'Success',
-  'message': 'Success'
-};
-
-LifeErrors.NotImplemented = {
-  'code': 0,
-  'type': 'NotImplemented',
-  'message': 'Not Implemented'
-};
-
 LifeErrors.NotFound = {
   'code': 404,
   'type': 'NotFound',
-  'message': 'NotFound'
+  'message': 'NotFound',
+  'http': 404
 };
 
-LifeErrors.NotUnique = {
+LifeErrors.NonUniqueResult = {
   'code': 400,
-  'type': 'NotUnique',
-  'message': 'NotUnique'
-};
-
-LifeErrors.UserNotFound = {
-  'code': 1000,
-  'type': 'UserNotFound',
-  'message': 'This user was not found'
+  'type': 'NonUniqueResult',
+  'message': 'Non unique result',
+  'http': 406
 };
 
 LifeErrors.UserExtTokenAlreadyRegistered = {
   'code': 1100,
   'type': 'UserExtTokenAlreadyRegistered',
-  'message': 'This external authentification is already used'
-};
-
-LifeErrors.AchievementNotFound = {
-  'code': 1500,
-  'type': 'AchievementNotFound',
-  'message': 'This user was not found'
+  'message': 'This external authentification is already used',
+  'http': 400
 };
 
 LifeErrors.IOErrorDB = {
   'code': 9000,
   'type': 'IOErrorDB',
-  'message': 'An error happened while reading from or writing to the database'
+  'message': 'An error happened while reading from or writing to the database',
+  'http': 400
 };
 
 LifeErrors.AuthenticationRequired = {
-  'code': 666,
+  'code': 6000,
   'type': 'AuthenticationRequired',
-  'message': 'Authentication is required for this resource'
-};
-
-LifeErrors.NonUniqueResult = {
-  'code': 667,
-  'type': 'NonUniqueResult',
-  'message': 'Non unique result'
+  'message': 'Authentication is required for this resource',
+  'http': 401
 };
 
 LifeErrors.AuthenticationError = {
-  'code': 665,
+  'code': 6010,
   'type': 'AuthenticationError',
-  'message': 'Authentication error'
+  'message': 'Authentication error',
+  'http': 403
 };
 
 LifeErrors.AuthenticationMissingRole = {
-  'code': 665,
+  'code': 6020,
   'type': 'AuthenticationMissingRole',
-  'message': 'Authentication missing role'
+  'message': 'Authentication missing role',
+  'http': 401
 };
 
 LifeErrors.NoLocaleSpecified = {
-  'code': 665,
+  'code': 6500,
   'type': 'NoLocaleSpecified',
-  'message': 'No locale specified'
+  'message': 'No locale specified',
+  'http': 400
 };
 
 LifeErrors.UserLogicError = {
   'code': 664,
   'type': 'UserLogicError',
-  'message': 'User logic error'
-}
+  'message': 'User logic error',
+  'http': 418
+};
+
+LifeErrors.NotImplemented = {
+  'code': 9999,
+  'type': 'NotImplemented',
+  'message': 'Not Implemented',
+  'http': 501
+};
 
 module.exports = LifeErrors;

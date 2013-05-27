@@ -45,11 +45,17 @@ LifeResponse.send = function(req, res, data, error) {
       "element": data
     };
 
-    if (req && req.callback) {
+    if (req && req.query.callback) {
         return res.jsonp(returnData);
     }
 
-    return res.send(returnData);
+    var http_code = 200;
+    if (error && error.http) {
+      http_code = error.http;
+      delete error.http;
+    }
+
+    return res.send(http_code, returnData);
 };
 
 LifeResponse.sendList = function(req, res, data, serverSize, error, query) {

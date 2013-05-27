@@ -10,7 +10,7 @@ module.exports = function(app) {
     app.post(['tokens'], function(req, res, next) {
         User.findByCredentials(req.body.login, req.body.password, req, res, next).execOne(false, function(user) {
             if (!user) {
-                return next(LifeErrors.UserNotFound);
+                return next(LifeErrors.NotFound);
             }
 
             var token = new OAuthToken();
@@ -26,7 +26,7 @@ module.exports = function(app) {
     app.get(['tokens', 'users/:login/tokens'], function(req, res, next) {
         if (!LifeSecurity.hasRole(req, LifeSecurity.roles.USER_MANAGEMENT) &&
             req.params.login != req.token.user.login) {
-            return next(LifeErrors.UserNotFound);
+            return next(LifeErrors.NotFound);
         }
 
         return User.findByLogin(req.params.login ? req.params.login : req.token.user.login, req, res, next).execOne(false, function(user) {
