@@ -30,6 +30,32 @@ UserSchema.virtual('profile_url').get(function () {
   return LifeConfig.website_url + 'user/' + this.login.toLowerCase();
 });
 
+UserSchema.options.toJSON = {
+    getters: true,
+    virtuals: true,
+    transform: function(doc, ret, options) {
+        obj = doc.toObject({
+          virtuals: true
+        });
+
+        if (typeof doc._req !== "object" || !doc._req.token || !doc._req.token.user) {
+            return obj;
+        }
+
+        var isFriend = false;
+
+        doc.friends.forEach(function(friend) {
+          if ((doc._req.token.user.id || doc._req.token.user) == (friend.id || friend)) {
+            isFriend = true;
+          }
+        });
+
+        obj.is_friend = isFriend;
+
+        return obj;
+    }
+};
+
 UserSchema.statics.queryDefaults = function() {
     return {
         'populate': 'friends',
