@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeConfig = require('../wrappers/LifeConfig.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
+var element = require('./Element.js');
 
 var UserSchema = new mongoose.Schema({
     login: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true, unique: true},
@@ -11,10 +12,11 @@ var UserSchema = new mongoose.Schema({
     lang: { type : String, match: /^[a-z]{2}(-[A-Z]{2})?$/, required: true},
     password: { type : String, required: true, select: false},
     birthday: { type: Date, required: true },
-    account_creation : { type : Date, 'default' : Date.now },
     achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
     friends: [{type: ObjectId, required: false, ref: 'User'}]
 }, { autoIndex: true });
+
+UserSchema.plugin(element);
 
 UserSchema.virtual('name').get(function () {
   var name = this.firstname;

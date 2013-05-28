@@ -2,15 +2,17 @@ var User = require('mongoose').model('User');
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeQuery = require('../wrappers/LifeQuery.js');
+var element = require('./Element.js');
 
 var FriendshipSchema = new mongoose.Schema({
     sender: {type: ObjectId, required: true, ref: 'User'},
     receiver: {type: ObjectId, required: true, ref: 'User'},
     sender_login: {type: String, required: true},
     receiver_login: {type: String, required: true},
-    requestDate: {type: Date, 'default' : Date.now },
     acceptedDate: {type: Date, required: false}
 });
+
+FriendshipSchema.plugin(element);
 
 FriendshipSchema.statics.queryDefaults = function() {
     return {

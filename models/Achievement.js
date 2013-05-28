@@ -1,12 +1,15 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeData = require('../wrappers/LifeData.js');
+var element = require('./Element.js');
 
 var AchievementSchema = new mongoose.Schema({
     name: mongoose.Schema.Types.Mixed,
     description: mongoose.Schema.Types.Mixed,
     parentAchievements: [{type: ObjectId, required: false, ref: 'Achievement'}]
 });
+
+AchievementSchema.plugin(element);
 
 AchievementSchema.options.toJSON = {
     getters: true,
