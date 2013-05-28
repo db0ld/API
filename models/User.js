@@ -38,6 +38,8 @@ UserSchema.options.toJSON = {
           virtuals: true
         });
 
+	delete obj.password;
+
         if (typeof doc._req !== "object" || !doc._req.token || !doc._req.token.user) {
             return obj;
         }
