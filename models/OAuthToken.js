@@ -1,11 +1,13 @@
 var mongoose = require('mongoose');
+var element = require('./Element.js');
 
 var OAuthTokenSchema = new mongoose.Schema({
     token: {type: String, unique: true},
-    creation : { type : Date, 'default' : Date.now },
     expiration: { type : Date, required: true },
     user: {type : mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 });
+
+OAuthTokenSchema.plugin(element);
 
 OAuthTokenSchema.statics.queryDefaults = function() {
     return {

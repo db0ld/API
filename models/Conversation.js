@@ -1,8 +1,11 @@
 var mongoose = require('mongoose');
+var element = require('./Element.js');
 
 var ConversationSchema = new mongoose.Schema({
     referenced_users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
+
+ConversationSchema.plugin(element);
 
 ConversationSchema.statics.findByUsers = function(query, users) {
     var user_ids = [];

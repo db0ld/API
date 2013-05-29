@@ -1,11 +1,13 @@
 var mongoose = require('mongoose');
+var element = require('./Element.js');
 
 var MessageSchema = new mongoose.Schema({
     conversation: {type : mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
     sender_ref: { type: Number, required: true },
-    content: {type: String, required: true },
-    sent_date: {type: Date, 'default' : Date.now }
+    content: {type: String, required: true }
 });
+
+MessageSchema.plugin(element);
 
 MessageSchema.statics.queryDefaults = function() {
     return {
