@@ -11,7 +11,7 @@ var UserSchema = new mongoose.Schema({
     lastname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
     gender: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
     lang: { type : String, match: /^[a-z]{2}(-[A-Z]{2})?$/, required: true},
-    password: { type : String, required: true, select: false},
+    password: { type : String, required: true },
     birthday: { type: Date, required: true },
     _achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
     _friends: [{type: ObjectId, required: false, ref: 'User'}]

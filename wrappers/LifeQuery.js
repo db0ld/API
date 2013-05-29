@@ -11,8 +11,8 @@ var LifeQuery = function(model, req, res, next, query) {
               typeof query == 'function' ? query
             : typeof query == 'object' ? model.find(query)
             : model.find();
-    this._limit = (this.req && this.req.query.limit ? this.req.query.limit : this.model.queryDefaults().limit);
-    this._offset = (this.req && this.req.query.offset ? this.req.query.offset : this.model.queryDefaults().offset);
+    this._limit = parseInt(this.req && this.req.query.limit ? this.req.query.limit : this.model.queryDefaults().limit, 10);
+    this._offset = parseInt(this.req && this.req.query.offset ? this.req.query.offset : this.model.queryDefaults().offset, 10);
     this._populate = this.model.queryDefaults().populate;
 
     return this;

@@ -32,7 +32,6 @@ module.exports = function(app) {
         return User.findByLogin(req.params.login ? req.params.login : req.token.user.login, req, res, next).execOne(false, function(user) {
             return new LifeQuery(OAuthToken, req, res, next)
                 .modelStatic('findByUserId', user.id)
-                .populate('')
                 .exec();
         });
     });

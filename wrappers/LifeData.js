@@ -1,5 +1,6 @@
 var LifeErrors = require('./LifeErrors.js');
 var LifeResponse = require('./LifeResponse.js');
+var LifeQuery = require('./LifeQuery.js');
 
 var LifeData = function(model, req, res, next) {
     this.model = model;
@@ -24,7 +25,7 @@ LifeData.prototype.save = function(item, cb) {
             return cb(item);
         }
 
-        return LifeResponse.send(that.req, that.res, item);
+        return new LifeQuery(that.model, that.req, that.res).findById(item._id);
     });
 };
 

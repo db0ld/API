@@ -23,7 +23,7 @@ LifeResponse.dateToString = function(d) {
 };
 
 LifeResponse.dateTimeToString = function(d) {
-    return LifeResponse.dateToString(d) + " T" +
+    return LifeResponse.dateToString(d) + "T" +
       LifeResponse.zeroPad(d.getUTCHours(), 2) + ":" +
       LifeResponse.zeroPad(d.getUTCMinutes(), 2) + ":" +
       LifeResponse.zeroPad(d.getUTCSeconds(), 2) + "Z";
