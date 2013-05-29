@@ -5,10 +5,45 @@ var LifeResponse = function() {
 
 };
 
+LifeResponse.zeroPad = function(num, numZeros) {
+    var n = Math.abs(num);
+    var zeros = Math.max(0, numZeros - Math.floor(n).toString().length );
+    var zeroString = Math.pow(10,zeros).toString().substr(1);
+    if( num < 0 ) {
+        zeroString = '-' + zeroString;
+    }
+
+    return zeroString+n;
+};
+
+LifeResponse.dateToString = function(d) {
+    return LifeResponse.zeroPad(d.getUTCFullYear(), 4) + "-" +
+      LifeResponse.zeroPad(d.getUTCMonth() + 1, 2) + "-" +
+      LifeResponse.zeroPad(d.getUTCDate(), 2);
+};
+
+LifeResponse.dateTimeToString = function(d) {
+    return LifeResponse.dateToString(d) + " T" +
+      LifeResponse.zeroPad(d.getUTCHours(), 2) + ":" +
+      LifeResponse.zeroPad(d.getUTCMinutes(), 2) + ":" +
+      LifeResponse.zeroPad(d.getUTCSeconds(), 2) + "Z";
+};
+
 var toJSON = function(req, res, item) {
     if (item instanceof mongoose.Document) {
       item._req = req;
-      return item.toJSON();
+
+      var doc = item.toJSON();
+
+      for (var i in doc) {
+          if (i.substring(0, 1) == '_') {
+              delete doc[i];
+          } else if (doc[i] instanceof Date) {
+              doc[i] = LifeResponse.dateTimeToString(doc[i]);
+          }
+      }
+
+      return doc;
     }
 
     return item;

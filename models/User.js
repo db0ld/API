@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeConfig = require('../wrappers/LifeConfig.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
+var LifeResponse = require('../wrappers/LifeResponse.js');
 var element = require('./Element.js');
 
 var UserSchema = new mongoose.Schema({
@@ -12,7 +13,7 @@ var UserSchema = new mongoose.Schema({
     lang: { type : String, match: /^[a-z]{2}(-[A-Z]{2})?$/, required: true},
     password: { type : String, required: true, select: false},
     birthday: { type: Date, required: true },
-    achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
+    _achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
     friends: [{type: ObjectId, required: false, ref: 'User'}]
 }, { autoIndex: true });
 
@@ -40,7 +41,8 @@ UserSchema.options.toJSON = {
           virtuals: true
         });
 
-	delete obj.password;
+        delete obj.password;
+        obj.birthday = LifeResponse.dateToString(doc.birthday);
 
         if (typeof doc._req !== "object" || !doc._req.token || !doc._req.token.user) {
             return obj;
@@ -48,7 +50,7 @@ UserSchema.options.toJSON = {
 
         var isFriend = false;
 
-        doc.friends.forEach(function(friend) {
+        doc._friends.forEach(function(friend) {
           if ((doc._req.token.user.id || doc._req.token.user) == (friend.id || friend)) {
             isFriend = true;
           }
@@ -62,7 +64,7 @@ UserSchema.options.toJSON = {
 
 UserSchema.statics.queryDefaults = function() {
     return {
-        'populate': 'friends',
+        'populate': '_friends',
         'limit': 10,
         'offset': 0
     };
@@ -83,7 +85,7 @@ UserSchema.statics.findByCredentials = function(login, password, req, res, next)
 };
 
 UserSchema.statics.findFriends = function(user_id, req, res, next) {
-    return new LifeQuery(this, req, res, next, {friends: user_id});
+    return new LifeQuery(this, req, res, next, {_friends: user_id});
 };
 
 var User = mongoose.model('User', UserSchema);
