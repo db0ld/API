@@ -14,7 +14,7 @@ var UserSchema = new mongoose.Schema({
     password: { type : String, required: true, select: false},
     birthday: { type: Date, required: true },
     _achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
-    friends: [{type: ObjectId, required: false, ref: 'User'}]
+    _friends: [{type: ObjectId, required: false, ref: 'User'}]
 }, { autoIndex: true });
 
 UserSchema.plugin(element);

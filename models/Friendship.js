@@ -29,20 +29,20 @@ FriendshipSchema.post('save', function(doc) {
                 new LifeQuery(User).findById(userPair.b, function(userb) {
                     var alreadyFriend = false;
 
-                    for (var i in usera.friends) {
-                        if (usera.friends[i].id == userb.id) {
+                    for (var i in usera._friends) {
+                        if (usera._friends[i].id == userb.id) {
                             alreadyFriend = true;
                             break;
                         }
                     }
 
-                    if (!usera.friends instanceof Array) {
-                        usera.friends = [];
+                    if (!usera._friends instanceof Array) {
+                        usera._friends = [];
                     }
 
 
                     if (!alreadyFriend) {
-                        usera.friends.push(userb);
+                        usera._friends.push(userb);
 
                         usera.save();
                     }
@@ -59,7 +59,7 @@ FriendshipSchema.post('remove', function(doc) {
             if (error)
                 return;
 
-            user.friends.remove(userPair.b);
+            user._friends.remove(userPair.b);
             user.save();
         });
     });
