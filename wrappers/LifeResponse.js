@@ -29,7 +29,11 @@ LifeResponse.dateTimeToString = function(d) {
       LifeResponse.zeroPad(d.getUTCSeconds(), 2) + "Z";
 };
 
-var toJSON = function(req, res, item) {
+var toJSON = function(req, res, item, level) {
+    if (typeof level != "Number") {
+      level = 0;
+    }
+
     if (item instanceof mongoose.Document) {
       item._req = req;
 
@@ -40,6 +44,12 @@ var toJSON = function(req, res, item) {
               delete doc[i];
           } else if (doc[i] instanceof Date) {
               doc[i] = LifeResponse.dateTimeToString(doc[i]);
+          } else if (item[i] && item[i] instanceof mongoose.Document) {
+              if (level == 3) {
+                doc[i] = item[i]._id;
+              } else {
+                doc[i] = toJSON(req, res, item[i], level + 1);
+              }
           }
       }
 
