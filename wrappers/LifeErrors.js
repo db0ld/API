@@ -38,6 +38,13 @@ LifeErrors.AuthenticationRequired = {
 };
 
 LifeErrors.AuthenticationError = {
+  'code': 6000,
+  'type': 'AuthenticationError',
+  'message': 'Authentication has failed',
+  'http': 401
+};
+
+LifeErrors.AuthenticationError = {
   'code': 6010,
   'type': 'AuthenticationError',
   'message': 'Authentication error',

@@ -8,9 +8,9 @@ var LifeData = require('../wrappers/LifeData.js');
 
 module.exports = function(app) {
     app.post(['tokens'], function(req, res, next) {
-        User.findByCredentials(req.body.login, req.body.password, req, res, next).execOne(false, function(user) {
+        User.findByCredentials(req.body.login, req.body.password, req, res, next).execOne(true, function(user) {
             if (!user) {
-                return next(LifeErrors.NotFound);
+                return next(LifeErrors.AuthenticationError);
             }
 
             var token = new OAuthToken();
