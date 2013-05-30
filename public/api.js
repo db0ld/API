@@ -28,7 +28,7 @@ $(document).ready(function() {
                 $('#result').text(JSON.stringify(data, null, 4));
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                $('#result').text('Error: ' + textStatus + '\n' + errorThrown);
+                $('#result').text('Error: ' + textStatus + '\n' + errorThrown + '\n' + jqXHR.responseText);
             },
             data: data
         });
