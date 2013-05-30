@@ -42,7 +42,7 @@ UserSchema.virtual('name').get(function () {
   return name;
 });
 
-UserSchema.virtual('profile_url').get(function () {
+UserSchema.virtual('url').get(function () {
   return LifeConfig.website_url + 'user/' + this.login.toLowerCase();
 });
 

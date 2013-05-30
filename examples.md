@@ -25,3 +25,14 @@ Getting a token
     "login": "tuxkowo",
     "password": "kikoolol"
 }
+
+
+Creating an achievement
+-----------------------
+
+**POST /api/v1/achievements **
+
+{
+
+
+}
