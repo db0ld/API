@@ -7,7 +7,7 @@ var element = require('./Element.js');
 
 var UserSchema = new mongoose.Schema({
     login: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true, unique: true},
-    firstname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: true},
+    firstname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
     lastname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
     gender: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
     lang: { type : String, match: /^[a-z]{2}(-[A-Z]{2})?$/, required: true},
@@ -20,10 +20,22 @@ var UserSchema = new mongoose.Schema({
 UserSchema.plugin(element);
 
 UserSchema.virtual('name').get(function () {
-  var name = this.firstname;
+  var name = '';
+
+  if (typeof this.firstname === 'string') {
+    name = this.firstname;
+  }
 
   if (typeof this.lastname === 'string') {
-    name = name + ' ' + this.lastname;
+    if (typeof this.firstname === 'string') {
+      name = name + ' ';
+    }
+
+    name = name + this.lastname;
+  }
+
+  if (name.length === 0) {
+    name = this.login;
   }
 
   return name;
