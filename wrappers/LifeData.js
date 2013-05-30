@@ -83,6 +83,81 @@ LifeData.prototype.requestToObject = function(data) {
   return LifeData.requestToObject(this.req, this.model, data);
 };
 
+LifeData.prototype.whitelist = function(method, values, mustBePresent) {
+    var input = {};
+    var ret = {};
+    var whitelist_errors = [];
+    mustBePresent = typeof mustBePresent == 'boolean' ? mustBePresent : false;
+
+    var checkString = function(i) {
+        if (input[i] instanceof String) {
+            ret[i] = input[i];
+        } else if (typeof input[i] !== "undefined" && typeof input[i].toString === 'function') {
+            ret[i] = input[i].toString();
+        }
+    };
+
+    if (typeof method === 'object') {
+        input = method;
+    } else if (method == 'POST' || method == 'PUT') {
+        input = this.req.body;
+    } else {
+        input = this.req.query;
+    }
+
+    for (var i in values) {
+        if (values[i] == Number) {
+            ret[i] = parseFloat(input[i]);
+
+            if (isNaN(ret[i])) {
+                console.log(i + ' is not a number');
+                error = true;
+            }
+
+        } else if (values[i] == String) {
+            checkString(i);
+        } else if (values[i] == Date) {
+            if (input[i] instanceof Date) {
+                ret[i] = input[i];
+            } else {
+                ret[i] = Date.parse(input[i]);
+                if (isNaN(ret[i])) {
+                    error = true;
+                } else {
+                    ret[i] = new Date(ret[i]);
+                }
+            }
+
+        } else if (values[i] instanceof RegExp) {
+            checkString(i);
+
+            if (typeof ret[i] === "string" && !ret[i].match(values[i])) {
+                error = true;
+            }
+
+        } else {
+            ret[i] = input[i];
+        }
+
+        if (error || (mustBePresent && typeof ret[i] === 'undefined')) {
+            whitelist_errors.push(i);
+        }
+    }
+
+    if (whitelist_errors.length) {
+        var error = {};
+
+        for (var i in LifeErrors.InvalidParameters) {
+            error[i] = LifeErrors.InvalidParameters[i];
+        }
+
+        error.message += ' (' + whitelist_errors.join() + ')';
+        return this.next(error);
+    }
+
+    return ret;
+};
+
 LifeData.i18nPicker = function(lang, strings) {
     if (!lang) {
         lang = 'en-US';

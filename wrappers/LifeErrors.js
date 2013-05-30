@@ -37,6 +37,13 @@ LifeErrors.AuthenticationRequired = {
   'http': 401
 };
 
+LifeErrors.InvalidParameters = {
+  'code': 4000,
+  'type': 'InvalidParameters',
+  'message': 'One or serveral parameters are missing or invalid',
+  'http': 400
+};
+
 LifeErrors.AuthenticationError = {
   'code': 6000,
   'type': 'AuthenticationError',

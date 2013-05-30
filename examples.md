@@ -30,9 +30,10 @@ Getting a token
 Creating an achievement
 -----------------------
 
-**POST /api/v1/achievements **
+**POST /api/v1/achievements**
 
 {
-
-
+    "token": "TOKEN",
+    "name": "Pastektime",
+    "description": "Descriptime"
 }

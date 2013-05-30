@@ -8,7 +8,9 @@ var LifeData = require('../wrappers/LifeData.js');
 
 module.exports = function(app) {
     app.post(['tokens'], function(req, res, next) {
-        User.findByCredentials(req.body.login, req.body.password, req, res, next).execOne(true, function(user) {
+        var params = new LifeData(null, req, res, next).whitelist('POST', {'login': Date, 'password': String}, true);
+
+        User.findByCredentials(params.login, params.password, req, res, next).execOne(true, function(user) {
             if (!user) {
                 return next(LifeErrors.AuthenticationError);
             }
