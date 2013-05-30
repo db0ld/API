@@ -1,3 +1,4 @@
+var mongoose = require('mongoose');
 var LifeErrors = require('./LifeErrors.js');
 var LifeResponse = require('./LifeResponse.js');
 var LifeQuery = require('./LifeQuery.js');
@@ -47,13 +48,26 @@ LifeData.prototype.delete = function(item, cb) {
     });
 };
 
-LifeData.prototype.saveFromRequest = function(item, cb) {
+LifeData.prototype.saveFromRequest = function(item, validation, cb) {
     var that = this;
 
-    if (typeof item === 'undefined') {
-        item = new that.model(that.requestToObject(item));
+    if (validation !== null && typeof validation == 'object') {
+        var validated_item = this.whitelist(validation);
+
+        if (item === null || typeof item != 'object') {
+            item = {};
+        }
+
+        for (var i in validated_item) {
+            item[i] = validated_item[i];
+        }
+
     } else {
         item = that.requestToObject(item);
+    }
+
+    if (!(item instanceof mongoose.Document)) {
+        item = new that.model(item);
     }
 
     that.save(item, function(item) {
@@ -66,7 +80,7 @@ LifeData.prototype.saveFromRequest = function(item, cb) {
 };
 
 LifeData.requestToObject = function(req, model, data) {
-    if (typeof data !== 'object') {
+    if (data === null || typeof data !== 'object') {
         data = {};
     }
 
@@ -83,44 +97,46 @@ LifeData.prototype.requestToObject = function(data) {
   return LifeData.requestToObject(this.req, this.model, data);
 };
 
-LifeData.prototype.whitelist = function(method, values, mustBePresent) {
-    var input = {};
+LifeData.prototype.whitelist = function(validation, input) {
     var ret = {};
-    var whitelist_errors = [];
-    mustBePresent = typeof mustBePresent == 'boolean' ? mustBePresent : false;
+    var errors = [];
 
     var checkString = function(i) {
-        if (input[i] instanceof String) {
-            ret[i] = input[i];
-        } else if (typeof input[i] !== "undefined" && typeof input[i].toString === 'function') {
-            ret[i] = input[i].toString();
+        if (inputVal instanceof String) {
+            ret[i] = inputVal;
+        } else if (typeof inputVal !== "undefined" && typeof inputVal.toString === 'function') {
+            ret[i] = inputVal.toString();
         }
     };
 
-    if (typeof method === 'object') {
-        input = method;
-    } else if (method == 'POST' || method == 'PUT') {
-        input = this.req.body;
-    } else {
-        input = this.req.query;
+    if (input === null || typeof input !== 'object') {
+        if (this.req.route.method == 'post' || this.req.route.method == 'put') {
+            input = this.req.body;
+        } else {
+            input = this.req.query;
+        }
     }
 
-    for (var i in values) {
-        if (values[i] == Number) {
-            ret[i] = parseFloat(input[i]);
+    for (var i in validation) {
+        valueType = validation[i].type;
+        required = validation[i].required;
+        inputVal = input[i];
+        error = false;
+
+        if (valueType == Number) {
+            ret[i] = parseFloat(inputVal);
 
             if (isNaN(ret[i])) {
-                console.log(i + ' is not a number');
                 error = true;
             }
 
-        } else if (values[i] == String) {
+        } else if (valueType == String) {
             checkString(i);
-        } else if (values[i] == Date) {
-            if (input[i] instanceof Date) {
-                ret[i] = input[i];
+        } else if (valueType == Date) {
+            if (inputVal instanceof Date) {
+                ret[i] = inputVal;
             } else {
-                ret[i] = Date.parse(input[i]);
+                ret[i] = Date.parse(inputVal);
                 if (isNaN(ret[i])) {
                     error = true;
                 } else {
@@ -128,30 +144,30 @@ LifeData.prototype.whitelist = function(method, values, mustBePresent) {
                 }
             }
 
-        } else if (values[i] instanceof RegExp) {
+        } else if (valueType instanceof RegExp) {
             checkString(i);
 
-            if (typeof ret[i] === "string" && !ret[i].match(values[i])) {
+            if (typeof ret[i] === "string" && !ret[i].match(valueType)) {
                 error = true;
             }
 
         } else {
-            ret[i] = input[i];
+            ret[i] = inputVal;
         }
 
-        if (error || (mustBePresent && typeof ret[i] === 'undefined')) {
-            whitelist_errors.push(i);
+        if (error || (required && typeof ret[i] === 'undefined')) {
+            errors.push(i);
         }
     }
 
-    if (whitelist_errors.length) {
+    if (errors.length) {
         var error = {};
 
         for (var i in LifeErrors.InvalidParameters) {
             error[i] = LifeErrors.InvalidParameters[i];
         }
 
-        error.message += ' (' + whitelist_errors.join() + ')';
+        error.message += ' (' + errors.join() + ')';
         return this.next(error);
     }
 
@@ -189,5 +205,12 @@ LifeData.i18nPicker = function(lang, strings) {
         string;
 };
 
+LifeData.regexps = {
+  'login': /^[a-zA-Z0-9-_]+$/,
+  'email': /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/,
+  'name': /^[a-zA-Z0-9-._ ]+$/,
+  'gender': /^male|female|other$/,
+  'lang': /^[a-z]{2}(-[A-Z]{2})?$/
+};
 
 module.exports = LifeData;

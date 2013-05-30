@@ -8,7 +8,7 @@ var LifeData = require('../wrappers/LifeData.js');
 
 module.exports = function(app) {
     app.post(['tokens'], function(req, res, next) {
-        var params = new LifeData(null, req, res, next).whitelist('POST', {'login': Date, 'password': String}, true);
+        var params = new LifeData(null, req, res, next).whitelist(OAuthToken.creationValidation);
 
         User.findByCredentials(params.login, params.password, req, res, next).execOne(true, function(user) {
             if (!user) {

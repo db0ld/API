@@ -44,6 +44,11 @@ OAuthTokenSchema.statics.findByUserId = function(query, userId, activeOnly) {
     return query.and(conditions);
 };
 
+OAuthTokenSchema.statics.creationValidation = {
+    'login': {type: String, required: true},
+    'password': {type: String, required: true}
+};
+
 var OAuthToken = mongoose.model('OAuthToken', OAuthTokenSchema);
 
 module.exports = OAuthToken;

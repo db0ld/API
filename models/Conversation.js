@@ -11,7 +11,7 @@ ConversationSchema.statics.findByUsers = function(query, users) {
     var user_ids = [];
 
     users.forEach(function(user) {
-        if (typeof user === 'object') {
+        if (user !== null && typeof user === 'object') {
             user_ids.push(user._id);
         } else {
             user_ids.push(user);

@@ -8,19 +8,21 @@ var LifeResponse = require('../wrappers/LifeResponse.js');
 module.exports = function(app) {
     var routeBase = 'achievements';
 
-    var bindRequestToAchievement = function(achievement, req) {
-        if (typeof achievement.name !== "object") {
+    var bindRequestToAchievement = function(req, res, next, achievement) {
+        var params = new LifeData(Achievement, req, res, next).whitelist(Achievement.creationValidation);
+
+        if (achievement.name === null || typeof achievement.name !== "object") {
             achievement.name = {};
         }
 
-        achievement.name[req.lang] = req.body.name;
+        achievement.name[req.lang] = params.name;
 
-        if (typeof req.body.description == 'string') {
-            if (typeof achievement.description !== "object") {
+        if (typeof params.description == 'string') {
+            if (achievement.description === null || typeof achievement.description !== "object") {
                 achievement.description = {};
             }
 
-            achievement.description[req.lang] = req.body.description;
+            achievement.description[req.lang] = params.description;
             achievement.markModified('description');
         }
 
@@ -33,7 +35,7 @@ module.exports = function(app) {
     app.post(routeBase, function (req, res, next) {
         var achievement = new Achievement();
 
-        return new LifeData(Achievement, req, res, next).save(bindRequestToAchievement(achievement, req));
+        return new LifeData(Achievement, req, res, next).save(bindRequestToAchievement(req, res, next, achievement));
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
     // get a single achievement
@@ -48,7 +50,7 @@ module.exports = function(app) {
                 return next(LifeErrors.NotFound);
             }
 
-            return new LifeData(Achievement, req, res, next).save(bindRequestToAchievement(achievement, req));
+            return new LifeData(Achievement, req, res, next).save(bindRequestToAchievement(req, res, next, achievement));
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 

@@ -2,18 +2,19 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeConfig = require('../wrappers/LifeConfig.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
+var LifeData = require('../wrappers/LifeData.js');
 var LifeResponse = require('../wrappers/LifeResponse.js');
 var element = require('./Element.js');
 
 var UserSchema = new mongoose.Schema({
-    login: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true, unique: true},
-    email: { type : String, match: /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/, required: true, unique: true},
-    firstname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
-    lastname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
-    gender: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
-    lang: { type : String, match: /^[a-z]{2}(-[A-Z]{2})?$/, required: true},
+    login: { type : String, match: LifeData.regexps.login, required: true, unique: true},
+    email: { type : String, match: LifeData.regexps.email, required: true, unique: true},
+    firstname: { type : String, match: LifeData.regexps.name, required: false},
+    lastname: { type : String, match: LifeData.regexps.name, required: false},
+    gender: { type : String, match: LifeData.regexps.gender, required: true},
+    lang: { type : String, match: LifeData.regexps.lang, required: true},
     password: { type : String, required: true },
-    birthday: { type: Date, required: true },
+    birthday: { type: Date, required: false },
     _achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
     _friends: [{type: ObjectId, required: false, ref: 'User'}]
 }, { autoIndex: true });
@@ -57,7 +58,7 @@ UserSchema.options.toJSON = {
         delete obj.password;
         obj.birthday = LifeResponse.dateToString(doc.birthday);
 
-        if (typeof doc._req !== "object" || !doc._req.token || !doc._req.token.user) {
+        if (doc._req === null || typeof doc._req !== "object" || !doc._req.token || !doc._req.token.user) {
             delete obj.email;
             return obj;
         }
@@ -86,6 +87,26 @@ UserSchema.statics.queryDefaults = function() {
         'limit': 10,
         'offset': 0
     };
+};
+
+UserSchema.statics.creationValidation = {
+    login: { type : LifeData.regexps.login, required: true },
+    email: { type : LifeData.regexps.email, required: true },
+    firstname: { type : LifeData.regexps.name, required: false },
+    lastname: { type : LifeData.regexps.name, required: false },
+    gender: { type : LifeData.regexps.gender, required: true },
+    lang: { type : LifeData.regexps.lang, required: true },
+    password: { type : String, required: true },
+    birthday: { type: Date, required: false }
+};
+
+UserSchema.statics.modificationValidation = {
+    email: { type : LifeData.regexps.email, required: false },
+    firstname: { type : LifeData.regexps.name, required: false },
+    lastname: { type : LifeData.regexps.name, required: false },
+    gender: { type : LifeData.regexps.gender, required: false },
+    password: { type : String, required: false },
+    birthday: { type: Date, required: false }
 };
 
 UserSchema.statics.findByExtOAuth = function(provider, ext_id, req, res, next) {

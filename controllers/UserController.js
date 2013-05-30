@@ -12,7 +12,7 @@ module.exports = function(app) {
 
     // add a single user
     app.post(routeBase, function (req, res, next) {
-        return new LifeData(User, req, res, next).saveFromRequest();
+        return new LifeData(User, req, res, next).saveFromRequest(null, User.creationValidation);
     });
 
     // get a single user
@@ -23,7 +23,7 @@ module.exports = function(app) {
     // update a single user
     app.put(routeBase + "/:login", function (req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            return new LifeData(User, req, res, next).saveFromRequest(user);
+            return new LifeData(User, req, res, next).saveFromRequest(user, User.modificationValidation);
         });
     });
 
@@ -133,7 +133,7 @@ module.exports = function(app) {
                         receiver_login: user.login
                     });
 
-                    return new LifeData(Friendship, req, res, next).saveFromRequest(friendship);
+                    return new LifeData(Friendship, req, res, next).save(friendship);
             });
         });
     }, true);

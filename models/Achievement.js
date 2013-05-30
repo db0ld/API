@@ -26,11 +26,11 @@ AchievementSchema.options.toJSON = {
 
         var lang = 'en_US';
 
-        if (typeof doc._req == "object" && doc._req.lang) {
+        if (doc._req !== null && typeof doc._req == "object" && doc._req.lang) {
             lang = doc._req.lang;
         }
 
-        if (typeof obj.description == "object") {
+        if (obj.description !== null && typeof obj.description == "object") {
             obj.description = LifeData.i18nPicker(lang, obj.description);
         }
 
@@ -46,6 +46,11 @@ AchievementSchema.statics.queryDefaults = function() {
         'limit': 10,
         'offset': 0
     };
+};
+
+AchievementSchema.statics.creationValidation = {
+    'name': {type: String, required: true},
+    'description': {type: String, required: false}
 };
 
 var Achievement = mongoose.model('Achievement', AchievementSchema);
