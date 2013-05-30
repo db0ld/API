@@ -7,6 +7,7 @@ var element = require('./Element.js');
 
 var UserSchema = new mongoose.Schema({
     login: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true, unique: true},
+    email: { type : String, match: /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/, required: true, unique: true},
     firstname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
     lastname: { type : String, match: /^[a-zA-Z0-9-._ ]+$/, required: false},
     gender: { type : String, match: /^[a-zA-Z0-9-_]+$/, required: true},
@@ -57,6 +58,7 @@ UserSchema.options.toJSON = {
         obj.birthday = LifeResponse.dateToString(doc.birthday);
 
         if (typeof doc._req !== "object" || !doc._req.token || !doc._req.token.user) {
+            delete obj.email;
             return obj;
         }
 
@@ -67,6 +69,10 @@ UserSchema.options.toJSON = {
             isFriend = true;
           }
         });
+
+        if (doc._req.token.user.id !== doc.id) {
+          delete obj.email;
+        }
 
         obj.is_friend = isFriend;
 
