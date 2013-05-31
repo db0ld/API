@@ -44,6 +44,8 @@ var toJSON = function(req, res, item, level) {
               delete doc[i];
           } else if (doc[i] instanceof Date) {
               doc[i] = LifeResponse.dateTimeToString(doc[i]);
+          } else if (doc[i] instanceof Array) {
+              doc[i] = LifeResponse.paginatedList(req, res, item[i], item[i].length);
           } else if (item[i] && item[i] instanceof mongoose.Document) {
               if (level == 3) {
                 doc[i] = item[i]._id;
@@ -63,9 +65,9 @@ LifeResponse.paginatedList = function(req, res, in_data, serverSize, query) {
   data = (typeof in_data === "undefined") ?
     [] : in_data;
 
-    for (var i in in_data) {
-      data[i] = toJSON(req, res, in_data[i]);
-    }
+    data = data.map(function(item) {
+      return toJSON(req, res, item);
+    });
 
   serverSize = (typeof serverSize === "undefined") ?
     data.length : serverSize;
@@ -73,7 +75,7 @@ LifeResponse.paginatedList = function(req, res, in_data, serverSize, query) {
   return {
     server_size: parseInt(serverSize, 10),
     index: (query && typeof query.offset === 'function') ? query.offset() : 0,
-    limit: (query && typeof query.limit === 'function') ? query.limit() : 0,
+    limit: (query && typeof query.limit === 'function') ? query.limit() : in_data.length,
     items: data
   };
 };

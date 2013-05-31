@@ -68,18 +68,18 @@ module.exports = function(app) {
     app.post(routeBase + '/:id/children', function (req, res, next) {
         var params = new LifeData(Achievement, req, res, next).whitelist({achievement_id: {type: String}});
 
-        return new LifeQuery(Achievement, req, res, next).populate('').findById(params.achievement_id, function(achievement) {
+        return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
             if (achievement === null) {
                 return next(LifeErrors.NotFound);
             }
 
-            if (!achievement.child_achievements.indexOf(req.params.id)) {
-                achievement.child_achievements.push(req.params.id);
+            if (achievement.child_achievements.indexOf(req.params.id) === -1) {
+                achievement.child_achievements.push(params.achievement_id);
 
                 return new LifeData(Achievement, req, res, next).save(achievement);
             }
 
-            return LifeResponse.send(req, res, achievement);
+            return next(LifeErrors.NothingHasChanged);
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
@@ -97,7 +97,7 @@ module.exports = function(app) {
                 return new LifeData(Achievement, req, res, next).save(achievement);
             }
 
-            return LifeResponse.send(req, res, achievement);
+            return next(LifeErrors.NothingHasChanged);
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 

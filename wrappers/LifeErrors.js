@@ -72,6 +72,13 @@ LifeErrors.NoLanguageSpecified = {
   'http': 400
 };
 
+LifeErrors.NothingHasChanged = {
+  'code': 665,
+  'type': 'NothingHasChanged',
+  'message': 'Nothing has changed',
+  'http': 409
+};
+
 LifeErrors.UserLogicError = {
   'code': 664,
   'type': 'UserLogicError',
