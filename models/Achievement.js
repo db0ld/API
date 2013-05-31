@@ -7,7 +7,7 @@ var element = require('./Element.js');
 var AchievementSchema = new mongoose.Schema({
     name: mongoose.Schema.Types.Mixed,
     description: mongoose.Schema.Types.Mixed,
-    parentAchievements: [{type: ObjectId, required: false, ref: 'Achievement'}]
+    child_achievements: [{type: ObjectId, required: false, ref: 'Achievement'}]
 });
 
 AchievementSchema.virtual('url').get(function () {
@@ -42,7 +42,7 @@ AchievementSchema.options.toJSON = {
 
 AchievementSchema.statics.queryDefaults = function() {
     return {
-        'populate': 'achievements',
+        'populate': 'child_achievements',
         'limit': 10,
         'offset': 0
     };

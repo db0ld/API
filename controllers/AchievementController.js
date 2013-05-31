@@ -66,52 +66,54 @@ module.exports = function(app) {
 
     // add a child achievement to an achievement
     app.post(routeBase + '/:id/children', function (req, res, next) {
-        return new LifeQuery(Achievement, req, res, next).findById(req.params.id, function(achievement) {
+        var params = new LifeData(Achievement, req, res, next).whitelist({achievement_id: {type: String}});
+
+        return new LifeQuery(Achievement, req, res, next).populate('').findById(params.achievement_id, function(achievement) {
             if (achievement === null) {
-                return next();
+                return next(LifeErrors.NotFound);
             }
 
-            return new LifeQuery(Achievement, req, res, next).findById(req.body.achievement_id, function(child_achievement) {
-                if (child_achievement === null) {
-                    return next();
-                }
+            if (!achievement.child_achievements.indexOf(req.params.id)) {
+                achievement.child_achievements.push(req.params.id);
 
-                child_achievement.parentAchievements.push(achievement.id);
-                return new LifeData(Achievement, req, res, next).save(child_achievement);
-            });
+                return new LifeData(Achievement, req, res, next).save(achievement);
+            }
+
+            return LifeResponse.send(req, res, achievement);
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
     // delete a child achievement to an achievement
     app.delete(routeBase + '/:id/children/:child_id', function (req, res, next) {
-        return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.child_id, function(child_achievement) {
-            if (child_achievement === null) {
-                return next();
+        return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
+            if (achievement === null) {
+                return next(LifeErrors.NotFound);
             }
 
-            var parent_pos = child_achievement.parentAchievements.indexOf(req.params.id);
-            if (parent_pos !== -1) {
-                child_achievement.parentAchievements.splice(parent_pos, 1);
-                return new LifeData(Achievement, req, res, next).save(child_achievement);
-            } else {
-                next();
+            var pos = achievement.child_achievements.indexOf(req.params.child_id);
+            if (pos !== -1) {
+                achievement.child_achievements.splice(pos, 1);
+
+                return new LifeData(Achievement, req, res, next).save(achievement);
             }
+
+            return LifeResponse.send(req, res, achievement);
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
     // find achievement children
     app.get(routeBase + '/:id/children', function(req, res, next) {
-        return new LifeQuery(Achievement, req, res, next, {parentAchievements: req.params.id}).exec();
+        return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
+            if (achievement === null) {
+                return next(LifeErrors.NotFound);
+            }
+
+            return new LifeQuery(Achievement, req, res, next, {_id: {$in: achievement.child_achievements}}).exec();
+        });
     });
 
     // find achievement parents
     app.get(routeBase + '/:id/parents', function(req, res, next) {
-        return new LifeQuery(Achievement, req, res, next).findById(req.params.id, function(achievement) {
-            if (achievement === null) {
-                return next();
-            }
-
-            return new LifeQuery(Achievement, req, res, next, {_id: {$in: achievement.parentAchievements}}).exec();
-        });
+        return new LifeQuery(Achievement, req, res, next, {child_achievements: req.params.id}).exec();
     });
 };

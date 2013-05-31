@@ -119,7 +119,7 @@ LifeData.prototype.whitelist = function(validation, input) {
 
     for (var i in validation) {
         valueType = validation[i].type;
-        required = validation[i].required;
+        required = typeof validation[i].required == 'boolean' ? validation[i].required : true;
         inputVal = input[i];
         error = false;
 
