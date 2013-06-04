@@ -4,10 +4,21 @@ var LifeResponse = require('./LifeResponse.js');
 var LifeConfig = require('./LifeConfig.js');
 var LifeErrors = require('./LifeErrors.js');
 
+/**
+ * An utility class that routes requests on top of ExpressJS.
+ *
+ * @class LifeRouter
+ * @constructor
+ */
 var LifeRouter = function(app) {
     this.app = app;
 };
 
+/**
+ * Init routing
+ *
+ * @method
+ */
 LifeRouter.prototype.init = function() {
     var that = this;
 
@@ -19,27 +30,35 @@ LifeRouter.prototype.init = function() {
     });
 };
 
-var makePath = function(res) {
+/**
+ * Create an API path, with current version and prefix
+ *
+ * @param {String} res
+ * @function
+ */
+LifeRouter.makePath = function(res) {
   return LifeConfig['api_path'] + 'v' + LifeConfig['version'] + '/' + res;
 };
 
 ['get', 'post', 'put', 'delete', 'patch', 'head']
     .forEach(function(method) {
-        LifeRouter.prototype[method] = function(endpoint, cb, authentication) {
+        LifeRouter.prototype[method] = function(endpoint, cb, auth) {
             var that = this;
 
-            if (typeof endpoint === "string") {
+            if (typeof endpoint === 'string') {
                 endpoint = [endpoint];
             }
 
             endpoint = endpoint.map(function(item) {
-                return makePath(item);
+                return LifeRouter.makePath(item);
             });
 
             endpoint.forEach(function(route) {
                 that.app[method](route, function(req, res, next) {
-                    return LifeSecurity.authenticationWrapper(req, res, authentication, function(err) {
-                           return LifeResponse.send(req, res, null, LifeErrors.AuthenticationError);
+                    return LifeSecurity.authWrapper(req, res, auth,
+                        function(err) {
+                           err = err ? err : LifeErrors.AuthenticationError;
+                           return LifeResponse.send(req, res, null, err);
                         }, function(req, res, next) {
                             if (typeof req.query.lang !== 'undefined') {
                                 req.lang = req.query.lang;
@@ -50,7 +69,8 @@ var makePath = function(res) {
                             return cb(req, res, function(err) {
                                 return LifeResponse.send(req, res, null, err);
                             });
-                    });
+                        }
+                    );
                 });
             });
         };

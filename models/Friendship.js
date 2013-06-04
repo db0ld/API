@@ -24,45 +24,49 @@ FriendshipSchema.statics.queryDefaults = function() {
 
 FriendshipSchema.post('save', function(doc) {
     if (doc.acceptedDate) {
-        [{a: doc.sender, b: doc.receiver}, {b: doc.sender, a: doc.receiver}].forEach(function(userPair) {
-            new LifeQuery(User).findById(userPair.a, function(usera) {
-                new LifeQuery(User).findById(userPair.b, function(userb) {
-                    var alreadyFriend = false;
+        [{a: doc.sender, b: doc.receiver},
+            {b: doc.sender, a: doc.receiver}].forEach(function(userPair) {
+                new LifeQuery(User).findById(userPair.a, function(usera) {
+                    new LifeQuery(User).findById(userPair.b, function(userb) {
+                        var alreadyFriend = false;
 
-                    for (var i in usera._friends) {
-                        if (usera._friends[i].id == userb.id) {
-                            alreadyFriend = true;
-                            break;
+                        for (var i in usera._friends) {
+                            if (usera._friends[i].id == userb.id) {
+                                alreadyFriend = true;
+                                break;
+                            }
                         }
-                    }
 
-                    if (!usera._friends instanceof Array) {
-                        usera._friends = [];
-                    }
+                        if (!usera._friends instanceof Array) {
+                            usera._friends = [];
+                        }
 
 
-                    if (!alreadyFriend) {
-                        usera._friends.push(userb);
+                        if (!alreadyFriend) {
+                            usera._friends.push(userb);
 
-                        usera.save();
-                    }
+                            usera.save();
+                        }
+                    });
                 });
-            });
-        });
+            }
+        );
     }
 });
 
 FriendshipSchema.post('remove', function(doc) {
     // remove from friends property for both user
-    [{a: doc.sender, b: doc.receiver}, {b: doc.sender, a: doc.receiver}].forEach(function(userPair) {
-        User.find(userPair.a, function(error, user) {
-            if (error)
-                return;
+    [{a: doc.sender, b: doc.receiver},
+        {b: doc.sender, a: doc.receiver}].forEach(function(userPair) {
+            User.find(userPair.a, function(error, user) {
+                if (error)
+                    return;
 
-            user._friends.remove(userPair.b);
-            user.save();
-        });
-    });
+                user._friends.remove(userPair.b);
+                user.save();
+            });
+        }
+    );
 });
 
 FriendshipSchema.statics.findByLogins = function(query, login1, login2) {

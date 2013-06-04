@@ -16,12 +16,12 @@ module.exports = function(app) {
     });
 
     // get a single user
-    app.get(routeBase + "/:login", function (req, res, next) {
+    app.get(routeBase + '/:login', function (req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne();
     });
 
     // update a single user
-    app.put(routeBase + "/:login", function (req, res, next) {
+    app.put(routeBase + '/:login', function (req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
             return new LifeData(User, req, res, next).saveFromRequest(user, User.modificationValidation);
         });
@@ -30,7 +30,7 @@ module.exports = function(app) {
     // get all users
     app.get(routeBase, function (req, res, next) {
         return new LifeQuery(User, req, res, next)
-            .filterRegexp('name', new RegExp(req.query.name, 'i'), typeof req.query.name !== "undefined")
+            .filterRegexp('name', new RegExp(req.query.name, 'i'), typeof req.query.name !== 'undefined')
             .exec();
     });
 

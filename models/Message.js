@@ -1,8 +1,9 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    ObjectId = mongoose.Schema.Types.ObjectId;
 var element = require('./Element.js');
 
 var MessageSchema = new mongoose.Schema({
-    conversation: {type : mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
+    conversation: {type : ObjectId, ref: 'Conversation', required: true },
     sender_ref: { type: Number, required: true },
     content: {type: String, required: true }
 });
@@ -23,7 +24,8 @@ MessageSchema.statics.findByConversation = function(query, conversation) {
     });
 };
 
-MessageSchema.statics.findByConversationAndId = function(query, conversation, id) {
+MessageSchema.statics.findByConversationAndId = function(query, conversation,
+    id) {
     return query.and({
         conversation: conversation,
         _id: id

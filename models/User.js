@@ -2,17 +2,18 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeConfig = require('../wrappers/LifeConfig.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeData = require('../wrappers/LifeData.js');
+var LifeData = require('../wrappers/LifeData.js'),
+    regexps = LifeData.regexps;
 var LifeResponse = require('../wrappers/LifeResponse.js');
 var element = require('./Element.js');
 
 var UserSchema = new mongoose.Schema({
-    login: { type : String, match: LifeData.regexps.login, required: true, unique: true},
-    email: { type : String, match: LifeData.regexps.email, required: true, unique: true},
-    firstname: { type : String, match: LifeData.regexps.name, required: false},
-    lastname: { type : String, match: LifeData.regexps.name, required: false},
-    gender: { type : String, match: LifeData.regexps.gender, required: true},
-    lang: { type : String, match: LifeData.regexps.lang, required: true},
+    login: { type : String, match: regexps.login, required: true, unique: true},
+    email: { type : String, match: regexps.email, required: true, unique: true},
+    firstname: { type : String, match: regexps.name, required: false},
+    lastname: { type : String, match: regexps.name, required: false},
+    gender: { type : String, match: regexps.gender, required: true},
+    lang: { type : String, match: regexps.lang, required: true},
     password: { type : String, required: true },
     birthday: { type: Date, required: false },
     _achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
@@ -58,7 +59,8 @@ UserSchema.options.toJSON = {
         delete obj.password;
         obj.birthday = LifeResponse.dateToString(doc.birthday);
 
-        if (doc._req === null || typeof doc._req !== "object" || !doc._req.token || !doc._req.token.user) {
+        if (doc._req === null || typeof doc._req !== 'object' ||
+            !doc._req.token || !doc._req.token.user) {
             delete obj.email;
             return obj;
         }
@@ -66,7 +68,8 @@ UserSchema.options.toJSON = {
         var isFriend = false;
 
         doc._friends.forEach(function(friend) {
-          if ((doc._req.token.user.id || doc._req.token.user) == (friend.id || friend)) {
+          if ((doc._req.token.user.id || doc._req.token.user) ==
+            (friend.id || friend)) {
             isFriend = true;
           }
         });
@@ -90,37 +93,33 @@ UserSchema.statics.queryDefaults = function() {
 };
 
 UserSchema.statics.creationValidation = {
-    login: { type : LifeData.regexps.login, required: true },
-    email: { type : LifeData.regexps.email, required: true },
-    firstname: { type : LifeData.regexps.name, required: false },
-    lastname: { type : LifeData.regexps.name, required: false },
-    gender: { type : LifeData.regexps.gender, required: true },
-    lang: { type : LifeData.regexps.lang, required: true },
+    login: { type : regexps.login, required: true },
+    email: { type : regexps.email, required: true },
+    firstname: { type : regexps.name, required: false },
+    lastname: { type : regexps.name, required: false },
+    gender: { type : regexps.gender, required: true },
+    lang: { type : regexps.lang, required: true },
     password: { type : String, required: true },
     birthday: { type: Date, required: false }
 };
 
 UserSchema.statics.modificationValidation = {
-    email: { type : LifeData.regexps.email, required: false },
-    firstname: { type : LifeData.regexps.name, required: false },
-    lastname: { type : LifeData.regexps.name, required: false },
-    gender: { type : LifeData.regexps.gender, required: false },
+    email: { type : regexps.email, required: false },
+    firstname: { type : regexps.name, required: false },
+    lastname: { type : regexps.name, required: false },
+    gender: { type : regexps.gender, required: false },
     password: { type : String, required: false },
     birthday: { type: Date, required: false }
-};
-
-UserSchema.statics.findByExtOAuth = function(provider, ext_id, req, res, next) {
-    return new LifeQuery(this, req, res, next)
-      .filterEquals('ext_oauth_identities.provider', provider)
-      .filterEquals('ext_oauth_identities.ext_id', ext_id);
 };
 
 UserSchema.statics.findByLogin = function(login, req, res, next) {
     return new LifeQuery(this, req, res, next, {login: login});
 };
 
-UserSchema.statics.findByCredentials = function(login, password, req, res, next) {
-    return new LifeQuery(this, req, res, next, {login: login, password: password});
+UserSchema.statics.findByCredentials = function(login, password, req, res,
+    next) {
+    return new LifeQuery(this, req, res, next,
+        {login: login, password: password});
 };
 
 UserSchema.statics.findFriends = function(user_id, req, res, next) {

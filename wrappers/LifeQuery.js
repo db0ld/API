@@ -1,6 +1,18 @@
 var LifeErrors = require('./LifeErrors.js');
 var LifeResponse = require('./LifeResponse.js');
 
+/**
+ * An utility class that performs queries on MongoDB
+ * and handles errors returned by mongoosejs.
+ *
+ * @class LifeQuery
+ * @param {Object} model Mongoose model to be used
+ * @param {Object} req Express request
+ * @param {Object} res Express response
+ * @param {Function} next Error handling function
+ * @param {Object} [query] Default query parameters
+ * @constructor
+ */
 var LifeQuery = function(model, req, res, next, query) {
     this.model = model;
 
@@ -11,13 +23,24 @@ var LifeQuery = function(model, req, res, next, query) {
               typeof query == 'function' ? query
             : (query !== null || typeof query == 'object') ? model.find(query)
             : model.find();
-    this._limit = parseInt(this.req && this.req.query.limit ? this.req.query.limit : this.model.queryDefaults().limit, 10);
-    this._offset = parseInt(this.req && this.req.query.offset ? this.req.query.offset : this.model.queryDefaults().offset, 10);
+    this._limit = this.req && this.req.query.limit ? this.req.query.limit
+        : this.model.queryDefaults().limit;
+    this._offset = this.req && this.req.query.offset ? this.req.query.offset
+        : this.model.queryDefaults().offset;
+
+    this._limit = parseInt(this._limit, 10);
+    this._offset = parseInt(this._offset, 10);
     this._populate = this.model.queryDefaults().populate;
 
     return this;
 };
 
+/**
+ * Execute query, if no callback is provided data is returned to the client
+ *
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
 LifeQuery.prototype.exec = function(cb) {
     var that = this;
 
@@ -34,15 +57,24 @@ LifeQuery.prototype.exec = function(cb) {
                 return that.next(LifeErrors.IOErrorDB);
             }
 
-            if (typeof cb === "function") {
+            if (typeof cb === 'function') {
                 return cb(data, count);
             }
 
-            return LifeResponse.sendList(that.req, that.res, data, count, null, that);
+            return LifeResponse.sendList(that.req, that.res,
+                data, count, null, that);
         });
     });
 };
 
+/**
+ * Execute query, if no callback is provided data is returned to the client.
+ * Expects a single result.
+ *
+ * @param {boolean} [allow_empty=false] Is empty a suitable result
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
 LifeQuery.prototype.execOne = function(allow_empty, cb) {
     var that = this;
 
@@ -66,7 +98,7 @@ LifeQuery.prototype.execOne = function(allow_empty, cb) {
             return that.next(LifeErrors.NonUniqueResult);
         }
 
-        if (typeof cb === "function") {
+        if (typeof cb === 'function') {
             return cb(data[0]);
         }
 
@@ -74,6 +106,13 @@ LifeQuery.prototype.execOne = function(allow_empty, cb) {
     });
 };
 
+/**
+ * Execute query, remove results from database. Returns number of removed
+ * documents. If no callback is provided data is returned to the client.
+ *
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
 LifeQuery.prototype.remove = function(cb) {
     var that = this;
 
@@ -85,7 +124,7 @@ LifeQuery.prototype.remove = function(cb) {
             return that.next(LifeErrors.IOErrorDB);
         }
 
-        if (typeof cb === "function") {
+        if (typeof cb === 'function') {
             return cb(data);
         }
 
@@ -93,19 +132,33 @@ LifeQuery.prototype.remove = function(cb) {
     });
 };
 
-LifeQuery.value = function(value) {
-    if (this.req && typeof value === "undefined" &&
-        typeof this.req.query[field] !== "undefined") {
+/**
+ * Execute query, remove results from database. Returns number of removed
+ * documents. If no callback is provided data is returned to the client.
+ *
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
+LifeQuery.prototype.value = function(value) {
+    if (this.req && typeof value === 'undefined' &&
+        typeof this.req.query[field] !== 'undefined') {
         return this.req.query[field];
     }
 
     return value;
 };
 
+/**
+ * Add an equality filter to the query.
+ *
+ * @param {string} field Field on which the filter should be placed
+ * @param {string} value Searched value
+ * @method
+ */
 LifeQuery.prototype.filterEquals = function (field, value) {
     value = LifeQuery.value(field);
 
-    if (typeof LifeQuery.value() !== "undefined") {
+    if (typeof value !== 'undefined') {
         this._query.where(field).equals(value);
     }
 
@@ -114,11 +167,12 @@ LifeQuery.prototype.filterEquals = function (field, value) {
 
 
 
-['equals', 'in', 'gt', 'lt', 'gte', 'lte', 'slice', 'ne', 'nin', 'size', 'all'].forEach(function(operation) {
+['equals', 'in', 'gt', 'lt', 'gte', 'lte',
+    'slice', 'ne', 'nin', 'size', 'all'].forEach(function(operation) {
     LifeQuery.prototype[operation] = function(field, value) {
         value = LifeQuery.value(value);
 
-        if (typeof value !== "undefined") {
+        if (typeof value !== 'undefined') {
             this._query.where(field)[operation](value);
         }
 
@@ -134,8 +188,16 @@ LifeQuery.prototype.filterEquals = function (field, value) {
     };
 });
 
+/**
+ * Add an regular expression filter to the query.
+ *
+ * @param {string} field Field on which the filter should be placed
+ * @param {string} regexp Searched value
+ * @param {boolean} [enabled=true] Is this filter enabled
+ * @method
+ */
 LifeQuery.prototype.filterRegexp = function (field, regexp, enabled) {
-    if (typeof enabled === "undefined") {
+    if (typeof enabled === 'undefined') {
         enabled = true;
     }
 
@@ -146,16 +208,39 @@ LifeQuery.prototype.filterRegexp = function (field, regexp, enabled) {
     return this;
 };
 
+/**
+ * Change a private property value.
+ *
+ * @param {string} property Property name.
+ * @param {*} val The new value
+ * @method
+ */
 LifeQuery.prototype.changeValue = function(property, val) {
     this['_' + property] = val;
 };
 
+/**
+ * Find a document by its identifier. If no callback provided returns document
+ * as the API response.
+ * Expects a single or no result.
+ *
+ * @param {string} id Searched id.
+ * @param {Function} [cb=null] Callback function to be executed on success.
+ * @method
+ */
 LifeQuery.prototype.findById = function(id, cb) {
     this.query(this.model.find({'_id': id}));
 
     return this.execOne(true, cb);
 };
 
+/**
+ * Execute a static function from the model. Pass the query as the first
+ * argument.
+ *
+ * @param {string} item Function to be executed.
+ * @method
+ */
 LifeQuery.prototype.modelStatic = function(item) {
     var args = [this];
 
@@ -170,7 +255,7 @@ LifeQuery.prototype.modelStatic = function(item) {
 
 ['query', 'limit', 'offset', 'populate'].forEach(function (property) {
     LifeQuery.prototype[property] = function(val) {
-        if (typeof val === "undefined") {
+        if (typeof val === 'undefined') {
             return this['_' + property];
         }
 

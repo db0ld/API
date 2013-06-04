@@ -26,15 +26,15 @@ AchievementSchema.options.toJSON = {
 
         var lang = 'en_US';
 
-        if (doc._req !== null && typeof doc._req == "object" && doc._req.lang) {
+        if (doc._req !== null && typeof doc._req == 'object' && doc._req.lang) {
             lang = doc._req.lang;
         }
 
-        if (obj.description !== null && typeof obj.description == "object") {
-            obj.description = LifeData.i18nPicker(lang, obj.description);
+        if (obj.description !== null && typeof obj.description == 'object') {
+            obj.description = LifeData.i18nPicker(obj.description, lang);
         }
 
-        obj.name = LifeData.i18nPicker(lang, obj.name);
+        obj.name = LifeData.i18nPicker(obj.name, lang);
 
         return obj;
     }

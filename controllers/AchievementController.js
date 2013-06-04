@@ -11,14 +11,14 @@ module.exports = function(app) {
     var bindRequestToAchievement = function(req, res, next, achievement) {
         var params = new LifeData(Achievement, req, res, next).whitelist(Achievement.creationValidation);
 
-        if (achievement.name === null || typeof achievement.name !== "object") {
+        if (achievement.name === null || typeof achievement.name !== 'object') {
             achievement.name = {};
         }
 
         achievement.name[req.lang] = params.name;
 
         if (typeof params.description == 'string') {
-            if (achievement.description === null || typeof achievement.description !== "object") {
+            if (achievement.description === null || typeof achievement.description !== 'object') {
                 achievement.description = {};
             }
 
@@ -39,12 +39,12 @@ module.exports = function(app) {
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
     // get a single achievement
-    app.get(routeBase + "/:id", function (req, res, next) {
+    app.get(routeBase + '/:id', function (req, res, next) {
         return new LifeQuery(Achievement, req, res, next).findById(req.params.id);
     });
 
     // update a single achievement
-    app.put(routeBase + "/:id", function (req, res, next) {
+    app.put(routeBase + '/:id', function (req, res, next) {
         return new LifeQuery(Achievement, req, res, next).findById(req.params.id, function(achievement) {
             if (!achievement) {
                 return next(LifeErrors.NotFound);
@@ -54,7 +54,7 @@ module.exports = function(app) {
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
-    app.delete(routeBase + "/:id", function(req, res, next) {
+    app.delete(routeBase + '/:id', function(req, res, next) {
         return new LifeQuery(Achievement, req, res, next, {_id: req.params.id})
             .remove();
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);

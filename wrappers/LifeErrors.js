@@ -1,28 +1,50 @@
+/**
+ * A class listing all errors returned by the API
+ *
+ * @class LifeErrors
+ * @constructor
+ */
 var LifeErrors = function() {
 
 };
 
+/**
+ * The requested document was not found
+ * @inner
+ */
 LifeErrors.NotFound = {
   'code': 404,
   'type': 'NotFound',
-  'message': 'NotFound',
+  'message': 'The requested document was not found',
   'http': 404
 };
 
+/**
+ * An unique result was expected, several found
+ * @inner
+ */
 LifeErrors.NonUniqueResult = {
   'code': 400,
   'type': 'NonUniqueResult',
-  'message': 'Non unique result',
+  'message': 'An unique result was expected, several found',
   'http': 406
 };
 
+/**
+ * The provided external authentification is already used
+ * @inner
+ */
 LifeErrors.UserExtTokenAlreadyRegistered = {
   'code': 1100,
   'type': 'UserExtTokenAlreadyRegistered',
-  'message': 'This external authentification is already used',
+  'message': 'The provided external authentification is already used',
   'http': 400
 };
 
+/**
+ * An error happened while reading from or writing to the database
+ * @inner
+ */
 LifeErrors.IOErrorDB = {
   'code': 9000,
   'type': 'IOErrorDB',
@@ -30,6 +52,10 @@ LifeErrors.IOErrorDB = {
   'http': 400
 };
 
+/**
+ * Authentication is required for this resource
+ * @inner
+ */
 LifeErrors.AuthenticationRequired = {
   'code': 6000,
   'type': 'AuthenticationRequired',
@@ -37,6 +63,10 @@ LifeErrors.AuthenticationRequired = {
   'http': 401
 };
 
+/**
+ * One or serveral parameters are missing or invalid
+ * @inner
+ */
 LifeErrors.InvalidParameters = {
   'code': 4000,
   'type': 'InvalidParameters',
@@ -44,6 +74,10 @@ LifeErrors.InvalidParameters = {
   'http': 400
 };
 
+/**
+ * Authentication has failed
+ * @inner
+ */
 LifeErrors.AuthenticationError = {
   'code': 6000,
   'type': 'AuthenticationError',
@@ -51,20 +85,21 @@ LifeErrors.AuthenticationError = {
   'http': 401
 };
 
-LifeErrors.AuthenticationError = {
-  'code': 6010,
-  'type': 'AuthenticationError',
-  'message': 'Authentication error',
-  'http': 403
-};
-
+/**
+ * The required role for this method is missing
+ * @inner
+ */
 LifeErrors.AuthenticationMissingRole = {
   'code': 6020,
   'type': 'AuthenticationMissingRole',
-  'message': 'Authentication missing role',
+  'message': 'The required role for this method is missing',
   'http': 401
 };
 
+/**
+ * No language specified
+ * @inner
+ */
 LifeErrors.NoLanguageSpecified = {
   'code': 6500,
   'type': 'NoLanguageSpecified',
@@ -72,13 +107,21 @@ LifeErrors.NoLanguageSpecified = {
   'http': 400
 };
 
+/**
+ * Nothing has been changed whilst it was expected
+ * @inner
+ */
 LifeErrors.NothingHasChanged = {
   'code': 665,
   'type': 'NothingHasChanged',
-  'message': 'Nothing has changed',
+  'message': 'Nothing has been changed',
   'http': 409
 };
 
+/**
+ * User logic error
+ * @inner
+ */
 LifeErrors.UserLogicError = {
   'code': 664,
   'type': 'UserLogicError',
@@ -86,6 +129,10 @@ LifeErrors.UserLogicError = {
   'http': 418
 };
 
+/**
+ * Not Implemented
+ * @inner
+ */
 LifeErrors.NotImplemented = {
   'code': 9999,
   'type': 'NotImplemented',

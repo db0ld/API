@@ -1,3 +1,8 @@
+/**
+ * Gets the configuration in app.js and app_dev.js if present
+ *
+ * @module LifeConfig
+ */
 var fs = require('fs');
 var config = require('../configurations/app.js');
 

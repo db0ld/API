@@ -1,7 +1,7 @@
 var application_root = __dirname;
 var mongoose = require('mongoose');
-var express = require("express");
-var path = require("path");
+var express = require('express');
+var path = require('path');
 require('./wrappers/LifeInit.js');
 var LifeRouter = require('./wrappers/LifeRouter.js');
 var LifeConfig = require('./wrappers/LifeConfig.js');
@@ -13,7 +13,7 @@ var app = express();
 app.configure(function () {
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.static(path.join(application_root, LifeConfig['public_path'])));
+  app.use(express.static(path.join(application_root, LifeConfig.public_path)));
   app.use(app.router);
 
   if (LifeConfig['dev']) {
@@ -22,7 +22,7 @@ app.configure(function () {
 });
 
 app.get(['/', '/api'], function (req, res) {
-  res.send('Life API is alive! <a href="/apitest.html">API Console is here</a>');
+  res.send('Life API is alive! <a href="/apitest.html">API Console</a>');
 });
 
 var router = new LifeRouter(app);

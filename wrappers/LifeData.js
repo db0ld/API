@@ -3,6 +3,17 @@ var LifeErrors = require('./LifeErrors.js');
 var LifeResponse = require('./LifeResponse.js');
 var LifeQuery = require('./LifeQuery.js');
 
+/**
+ * An utility class that performs simple operations such as saving or deleting
+ * documents and handles errors returned by mongoosejs.
+ *
+ * @class LifeData
+ * @param {Object} model Mongoose model to be used
+ * @param {Object} req Express request
+ * @param {Object} res Express response
+ * @param {Function} next Error handling function
+ * @constructor
+ */
 var LifeData = function(model, req, res, next) {
     this.model = model;
     this.res = res;
@@ -12,6 +23,13 @@ var LifeData = function(model, req, res, next) {
     return this;
 };
 
+/**
+ * Save a new item or changes to an existing item
+ *
+ * @param {Object} item Item to save
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
 LifeData.prototype.save = function(item, cb) {
     var that = this;
 
@@ -22,7 +40,7 @@ LifeData.prototype.save = function(item, cb) {
             return that.next(LifeErrors.IOErrorDB);
         }
 
-        if (typeof cb === "function") {
+        if (typeof cb === 'function') {
             return cb(item);
         }
 
@@ -30,6 +48,13 @@ LifeData.prototype.save = function(item, cb) {
     });
 };
 
+/**
+ * Delete an existing item
+ *
+ * @param {Object} item Item to delete
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
 LifeData.prototype.delete = function(item, cb) {
     var that = this;
 
@@ -40,7 +65,7 @@ LifeData.prototype.delete = function(item, cb) {
             return that.next(LifeErrors.IOErrorDB);
         }
 
-        if (typeof cb === "function") {
+        if (typeof cb === 'function') {
             return cb(item);
         }
 
@@ -48,6 +73,14 @@ LifeData.prototype.delete = function(item, cb) {
     });
 };
 
+/**
+ * Save an existing or new document from request
+ *
+ * @param {Object} [item=null] Existing item to update
+ * @param {Object} [validation=null] Whitelist rules to be applied
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
 LifeData.prototype.saveFromRequest = function(item, validation, cb) {
     var that = this;
 
@@ -71,7 +104,7 @@ LifeData.prototype.saveFromRequest = function(item, validation, cb) {
     }
 
     that.save(item, function(item) {
-        if (typeof cb !== "undefined") {
+        if (typeof cb !== 'undefined') {
             return cb(item, that.req, that.res, that.next);
         }
 
@@ -79,24 +112,22 @@ LifeData.prototype.saveFromRequest = function(item, validation, cb) {
     }, that.next);
 };
 
-LifeData.requestToObject = function(req, model, data) {
-    if (data === null || typeof data !== 'object') {
-        data = {};
-    }
-
-    for (var label in model.schema.paths) {
-        if (req.body[label]) {
-            data[label] = req.body[label];
-        }
-    }
-
-    return data;
+/**
+ * Convert request to object
+ *
+ * @param {Object} [item=null] Existing item to update
+ * @method
+ */
+LifeData.prototype.requestToObject = function(item) {
+  return LifeData.requestToObject(this.req, this.model, item);
 };
 
-LifeData.prototype.requestToObject = function(data) {
-  return LifeData.requestToObject(this.req, this.model, data);
-};
-
+/**
+ * Convert request to object
+ *
+ * @param {Object} [item=null] Existing item to update
+ * @method
+ */
 LifeData.prototype.whitelist = function(validation, input) {
     var ret = {};
     var errors = [];
@@ -104,7 +135,8 @@ LifeData.prototype.whitelist = function(validation, input) {
     var checkString = function(i) {
         if (inputVal instanceof String) {
             ret[i] = inputVal;
-        } else if (typeof inputVal !== "undefined" && typeof inputVal.toString === 'function') {
+        } else if (typeof inputVal !== 'undefined' &&
+                typeof inputVal.toString === 'function') {
             ret[i] = inputVal.toString();
         }
     };
@@ -119,7 +151,9 @@ LifeData.prototype.whitelist = function(validation, input) {
 
     for (var i in validation) {
         valueType = validation[i].type;
-        required = typeof validation[i].required == 'boolean' ? validation[i].required : true;
+        required = typeof validation[i].required == 'boolean' ?
+              validation[i].required
+            : true;
         inputVal = input[i];
         error = false;
 
@@ -147,7 +181,7 @@ LifeData.prototype.whitelist = function(validation, input) {
         } else if (valueType instanceof RegExp) {
             checkString(i);
 
-            if (typeof ret[i] === "string" && !ret[i].match(valueType)) {
+            if (typeof ret[i] === 'string' && !ret[i].match(valueType)) {
                 error = true;
             }
 
@@ -174,7 +208,36 @@ LifeData.prototype.whitelist = function(validation, input) {
     return ret;
 };
 
-LifeData.i18nPicker = function(lang, strings) {
+/**
+ * Convert request to object
+ *
+ * @param {Object} req ExpressJS request
+ * @param {Object} model Mongoose base model
+ * @param {Object} [data] Existing data
+ * @function
+ */
+LifeData.requestToObject = function(req, model, data) {
+    if (data === null || typeof data !== 'object') {
+        data = {};
+    }
+
+    for (var label in model.schema.paths) {
+        if (req.body[label]) {
+            data[label] = req.body[label];
+        }
+    }
+
+    return data;
+};
+
+/**
+ * Get an internationalized string from a collection of strings
+ *
+ * @param {String} lang
+ * @param {Object} strings
+ * @function
+ */
+LifeData.i18nPicker = function(strings, lang) {
     if (!lang) {
         lang = 'en-US';
     }
@@ -190,7 +253,7 @@ LifeData.i18nPicker = function(lang, strings) {
             return strings[i];
         } else if (!string_user_lang && i.substring(0, 2) === user_lang) {
             string_user_lang = strings[i];
-        } else if (i == "en_US") {
+        } else if (i == 'en_US') {
             string_en_us = strings[i];
         } else if (!string_en && i.substring(0, 2) == 'en') {
             string_en = strings[i];
