@@ -126,6 +126,19 @@ UserSchema.statics.findFriends = function(user_id, req, res, next) {
     return new LifeQuery(this, req, res, next, {_friends: user_id});
 };
 
+UserSchema.post('remove', function(doc) {
+    var Friendship = require('./Friendship.js');
+    var Conversation = require('./Conversation.js');
+
+    new LifeQuery(Friendship, null, null, function(err) {})
+        .modelStatic('findByLogin', doc.login)
+        .remove();
+
+    new LifeQuery(Conversation, null, null, function(err) {})
+        .modelStatic('findByUser', doc.login)
+        .remove();
+});
+
 var User = mongoose.model('User', UserSchema);
 
 module.exports = User;

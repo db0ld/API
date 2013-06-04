@@ -20,6 +20,15 @@ module.exports = function(app) {
         return User.findByLogin(req.params.login, req, res, next).execOne();
     });
 
+    // get a single user
+    app.delete(routeBase + '/:login', function (req, res, next) {
+        if (req.token.user.login !== req.params.login) {
+            return next();
+        }
+
+        return User.findByLogin(req.params.login, req, res, next).remove();
+    }, true);
+
     // update a single user
     app.put(routeBase + '/:login', function (req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {

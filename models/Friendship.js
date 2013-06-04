@@ -74,4 +74,8 @@ FriendshipSchema.statics.findByLogins = function(query, login1, login2) {
         {sender_login: login2, receiver_login: login1}]);
 };
 
+FriendshipSchema.statics.findByLogin = function(query, login) {
+    return query.or([{receiver_login: login}, {sender_login: login}]);
+};
+
 var Friendship = mongoose.model('Friendship', FriendshipSchema);

@@ -22,6 +22,21 @@ ConversationSchema.statics.findByUsers = function(query, users) {
         .all('referenced_users', users);
 };
 
+ConversationSchema.statics.findByUser = function(query, user) {
+    var user_ids = [];
+
+    users.forEach(function(user) {
+        if (user !== null && typeof user === 'object') {
+            user_ids.push(user._id);
+        } else {
+            user_ids.push(user);
+        }
+    });
+
+    return query
+        .in('referenced_users', users);
+};
+
 ConversationSchema.statics.queryDefaults = function() {
     return {
         'populate': 'referenced_users',
