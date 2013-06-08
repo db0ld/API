@@ -12,7 +12,7 @@ var UserSchema = new mongoose.Schema({
     email: { type : String, match: regexps.email, required: true, unique: true},
     firstname: { type : String, match: regexps.name, required: false},
     lastname: { type : String, match: regexps.name, required: false},
-    gender: { type : String, match: regexps.gender, required: true},
+    gender: { type : String, match: regexps.gender, required: true, default: 'other'},
     lang: { type : String, match: regexps.lang, required: true},
     password: { type : String, required: true },
     birthday: { type: Date, required: false },
@@ -57,7 +57,10 @@ UserSchema.options.toJSON = {
         });
 
         delete obj.password;
-        obj.birthday = LifeResponse.dateToString(doc.birthday);
+
+	if (obj.birthday) {
+            obj.birthday = LifeResponse.dateToString(doc.birthday);
+	}
 
         if (doc._req === null || typeof doc._req !== 'object' ||
             !doc._req.token || !doc._req.token.user) {
@@ -97,7 +100,7 @@ UserSchema.statics.creationValidation = {
     email: { type : regexps.email, required: true },
     firstname: { type : regexps.name, required: false },
     lastname: { type : regexps.name, required: false },
-    gender: { type : regexps.gender, required: true },
+    gender: { type : regexps.gender, required: false },
     lang: { type : regexps.lang, required: true },
     password: { type : String, required: true },
     birthday: { type: Date, required: false }

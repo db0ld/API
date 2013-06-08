@@ -66,6 +66,21 @@ LifeRouter.makePath = function(res) {
                                 req.lang = req.body.lang;
                             }
 
+			    if (LifeConfig.dev) {
+				console.log(new Date());
+				console.log(method + ':' + req.url + '(' + route + ')');
+				console.log('PARAMS POST: ' + JSON.stringify(req.body, null, 4));
+				console.log('PARAMS GET : ' + JSON.stringify(req.query, null, 4));
+				console.log();
+				console.log();
+				console.log();
+			    }
+
+			    // Overwrite missing parameters
+			    req.query.lang = req.lang;
+			    req.body.lang = req.lang;
+			    
+
                             return cb(req, res, function(err) {
                                 return LifeResponse.send(req, res, null, err);
                             });

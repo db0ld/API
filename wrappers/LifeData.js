@@ -172,7 +172,11 @@ LifeData.prototype.whitelist = function(validation, input) {
             } else {
                 ret[i] = Date.parse(inputVal);
                 if (isNaN(ret[i])) {
-                    error = true;
+		    if (required) {
+			error = true;
+		    } else {
+			delete ret[i];
+		    }
                 } else {
                     ret[i] = new Date(ret[i]);
                 }
