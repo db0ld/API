@@ -55,7 +55,7 @@ LifeRouter.makePath = function(res) {
 
             endpoint.forEach(function(route) {
                 that.app[method](route, function(req, res, next) {
-                    return LifeSecurity.authWrapper(req, res, auth,
+                    return new LifeSecurity(req, res, auth,
                         function(err) {
                            err = err ? err : LifeErrors.AuthenticationError;
                            return LifeResponse.send(req, res, null, err);

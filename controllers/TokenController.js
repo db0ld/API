@@ -26,12 +26,7 @@ module.exports = function(app) {
     });
 
     app.get(['tokens', 'users/:login/tokens'], function(req, res, next) {
-        if (!LifeSecurity.hasRole(req, LifeSecurity.roles.USER_MANAGEMENT) &&
-            req.params.login != req.token.user.login) {
-            return next(LifeErrors.NotFound);
-        }
-
-        return User.findByLogin(req.params.login ? req.params.login : req.token.user.login, req, res, next).execOne(false, function(user) {
+        return User.findByLogin(req.security.getLogin(req.params.login), req, res, next).execOne(false, function(user) {
             return new LifeQuery(OAuthToken, req, res, next)
                 .modelStatic('findByUserId', user.id)
                 .exec();

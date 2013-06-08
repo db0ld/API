@@ -17,21 +17,17 @@ module.exports = function(app) {
 
     // get a single user
     app.get(routeBase + '/:login', function (req, res, next) {
-        return User.findByLogin(req.params.login, req, res, next).execOne();
+        return User.findByLogin(req.security.getUsername(req.params.login), req, res, next).execOne();
     });
 
     // get a single user
     app.delete(routeBase + '/:login', function (req, res, next) {
-        if (req.token.user.login !== req.params.login) {
-            return next();
-        }
-
-        return User.findByLogin(req.params.login, req, res, next).remove();
+        return User.findByLogin(req.security.getUsername(req.params.login), req, res, next).remove();
     }, true);
 
     // update a single user
     app.put(routeBase + '/:login', function (req, res, next) {
-        return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+        return User.findByLogin(req.security.getUsername(req.params.login), req, res, next).execOne(false, function(user) {
             return new LifeData(User, req, res, next).saveFromRequest(user, User.modificationValidation);
         });
     });
@@ -150,7 +146,7 @@ module.exports = function(app) {
     // Get user friends
     app.delete([routeBase + '/:login/friends', routeBase + '/:login/friends/:remover_login'], function(req, res, next) {
         var remover_user_id = req.token.user.login;
-        if (req.params.remover_login && LifeSecurity.hasRole(req.token.user, LifeSecurity.roles.USER_MANAGEMENT)) {
+        if (req.params.remover_login && req.security.hasRole(req.token.user, LifeSecurity.roles.USER_MANAGEMENT)) {
             remover_user_id = req.params.remover_login;
         }
 
