@@ -116,7 +116,8 @@ UserSchema.statics.modificationValidation = {
 };
 
 UserSchema.statics.findByLogin = function(login, req, res, next) {
-    return new LifeQuery(this, req, res, next, {login: login});
+    return new LifeQuery(this, req, res, next)
+        .or([{login: login}, {id: login}]);
 };
 
 UserSchema.statics.findByCredentials = function(login, password, req, res,

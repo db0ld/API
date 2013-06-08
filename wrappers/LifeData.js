@@ -273,7 +273,7 @@ LifeData.i18nPicker = function(strings, lang) {
 };
 
 LifeData.regexps = {
-  'login': /^[a-zA-Z0-9-_]+$/,
+  'login': /^[a-zA-Z0-9-_]{3,20}$/,
   'email': /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/,
   'name': /^[a-zA-Z0-9-._ ]+$/,
   'gender': /^male|female|other$/,
