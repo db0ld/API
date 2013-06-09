@@ -12,7 +12,8 @@ var UserSchema = new mongoose.Schema({
     email: { type : String, match: regexps.email, required: true, unique: true},
     firstname: { type : String, match: regexps.name, required: false},
     lastname: { type : String, match: regexps.name, required: false},
-    gender: { type : String, match: regexps.gender, required: true, default: 'other'},
+    gender: { type : String, match: regexps.gender, required: true,
+        'default': 'other'},
     lang: { type : String, match: regexps.lang, required: true},
     password: { type : String, required: true },
     birthday: { type: Date, required: false },
@@ -116,8 +117,17 @@ UserSchema.statics.modificationValidation = {
 };
 
 UserSchema.statics.findByLogin = function(login, req, res, next) {
-    return new LifeQuery(this, req, res, next)
-        .or([{login: login}, {id: login}]);
+    console.log(login);
+
+    var params = [];
+
+    if (login && login.length == 24) {
+        params = {_id: login};
+    } else {
+        params = {login: login};
+    }
+
+    return new LifeQuery(this, req, res, next, params);
 };
 
 UserSchema.statics.findByCredentials = function(login, password, req, res,

@@ -17,10 +17,10 @@ module.exports = function(app) {
 
     // get a single user
     app.get(routeBase + '/:login', function (req, res, next) {
-        return User.findByLogin(req.security.getUsername(req.params.login), req, res, next).execOne();
+        return User.findByLogin(req.params.login, req, res, next).execOne();
     });
 
-    // get a single user
+    // delete a single user
     app.delete(routeBase + '/:login', function (req, res, next) {
         return User.findByLogin(req.security.getUsername(req.params.login), req, res, next).remove();
     }, true);
