@@ -64,7 +64,7 @@ UserSchema.options.toJSON = {
 	}
 
         if (doc._req === null || typeof doc._req !== 'object' ||
-            !doc._req.token || !doc._req.token.user) {
+            !doc._req.token || !doc._req.user) {
             delete obj.email;
             return obj;
         }
@@ -72,13 +72,13 @@ UserSchema.options.toJSON = {
         var isFriend = false;
 
         doc._friends.forEach(function(friend) {
-          if ((doc._req.token.user.id || doc._req.token.user) ==
+          if ((doc._req.user.id || doc._req.user) ==
             (friend.id || friend)) {
             isFriend = true;
           }
         });
 
-        if (doc._req.token.user.id !== doc.id) {
+        if (doc._req.user.id !== doc.id) {
           delete obj.email;
         }
 
@@ -117,8 +117,6 @@ UserSchema.statics.modificationValidation = {
 };
 
 UserSchema.statics.findByLogin = function(login, req, res, next) {
-    console.log(login);
-
     var params = [];
 
     if (login && login.length == 24) {

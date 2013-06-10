@@ -152,6 +152,10 @@ LifeResponse.send = function(req, res, data, error) {
       'element': data
     };
 
+    if (LifeConfig.dev && error !== null && typeof error !== 'undefined') {
+      console.error(error);
+    }
+
     if (req && req.query.callback) {
         return res.jsonp(returnData);
     }

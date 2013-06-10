@@ -44,7 +44,7 @@ module.exports = function(app) {
         var messagesQuery;
 
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.token.user]).execOne(false, function(conversation) {
+            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.user]).execOne(false, function(conversation) {
                 Message.findByConversation(messagesQuery = new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
                     conversation = conversation.toJSON();
                     conversation.messages = LifeResponse.paginatedList(req, res, messages, count, messagesQuery);
@@ -57,13 +57,13 @@ module.exports = function(app) {
     // Post new message to conversation
     app.post(routeBase + '/:login/conversation', function (req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.token.user]).execOne(true, function(conversation) {
+            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.user]).execOne(true, function(conversation) {
                 var addMessageToConversation = function(conversation) {
 
                     // Search sender_ref for current user
                     var sender_ref = null;
                     for (var i = 0; i < conversation.referenced_users.length; i++) {
-                        if (conversation.referenced_users[i]._id == req.token.user.id) {
+                        if (conversation.referenced_users[i]._id == req.user.id) {
                             sender_ref = i;
                             break;
                         }
@@ -86,7 +86,7 @@ module.exports = function(app) {
                 // Create conversation if it doesn't exist
                 if (conversation === null) {
                     conversation = new Conversation({
-                        referenced_users: [user, req.token.user]
+                        referenced_users: [user, req.user]
                     });
 
                     return new LifeData(Conversation, req, res, next).save(conversation, addMessageToConversation);
@@ -100,7 +100,7 @@ module.exports = function(app) {
     // Delete message from conversation
     app.delete(routeBase + '/:login/conversation/:message_id', function (req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.token.user]).execOne(false, function(conversation) {
+            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.user]).execOne(false, function(conversation) {
                 Message.findByConversationAndId(new LifeQuery(Message, req, res, next), conversation, req.params.message_id).remove();
             });
         });
@@ -116,14 +116,14 @@ module.exports = function(app) {
     // Become friend
     app.post(routeBase + '/:login/friends', function(req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            if (user.id == req.token.user.id) {
+            if (user.id == req.user.id) {
                 return next(LifeErrors.UserLogicError);
             }
 
             new LifeQuery(Friendship, req, res, next)
-                .modelStatic('findByLogins', user.login, req.token.user.login).execOne(true, function(friendship) {
+                .modelStatic('findByLogins', user.login, req.user.login).execOne(true, function(friendship) {
                     if (friendship !== null) {
-                        if (friendship.sender_login === req.token.user.login) {
+                        if (friendship.sender_login === req.user.login) {
                             return next(LifeErrors.UserLogicError);
                         }
 
@@ -132,9 +132,9 @@ module.exports = function(app) {
                     }
 
                     friendship = new Friendship({
-                        sender: req.token.user,
+                        sender: req.user,
                         receiver: user,
-                        sender_login: req.token.user.login,
+                        sender_login: req.user.login,
                         receiver_login: user.login
                     });
 
@@ -145,8 +145,8 @@ module.exports = function(app) {
 
     // Get user friends
     app.delete([routeBase + '/:login/friends', routeBase + '/:login/friends/:remover_login'], function(req, res, next) {
-        var remover_user_id = req.token.user.login;
-        if (req.params.remover_login && req.security.hasRole(req.token.user, LifeSecurity.roles.USER_MANAGEMENT)) {
+        var remover_user_id = req.user.login;
+        if (req.params.remover_login && req.security.hasRole(req.user, LifeSecurity.roles.USER_MANAGEMENT)) {
             remover_user_id = req.params.remover_login;
         }
 

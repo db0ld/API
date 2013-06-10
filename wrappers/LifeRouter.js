@@ -55,6 +55,17 @@ LifeRouter.makePath = function(res) {
 
             endpoint.forEach(function(route) {
                 that.app[method](route, function(req, res, next) {
+
+                    if (LifeConfig.dev) {
+                        console.log(new Array(80).join('-').toString());
+                        console.log(new Date().toISOString());
+                        console.log(method + ':' + req.url);
+                        if (req.body && Object.keys(req.body).length) {
+                            console.log('PARAMS POST: ' +
+                                JSON.stringify(req.body, null, 4));
+                        }
+                    }
+
                     return new LifeSecurity(req, res, auth,
                         function(err) {
                            err = err ? err : LifeErrors.AuthenticationError;
@@ -66,20 +77,9 @@ LifeRouter.makePath = function(res) {
                                 req.lang = req.body.lang;
                             }
 
-			    if (LifeConfig.dev) {
-				console.log(new Date());
-				console.log(method + ':' + req.url + '(' + route + ')');
-				console.log('PARAMS POST: ' + JSON.stringify(req.body, null, 4));
-				console.log('PARAMS GET : ' + JSON.stringify(req.query, null, 4));
-				console.log();
-				console.log();
-				console.log();
-			    }
-
-			    // Overwrite missing parameters
-			    req.query.lang = req.lang;
-			    req.body.lang = req.lang;
-			    
+                            // Overwrite missing parameters
+                            req.query.lang = req.lang;
+                            req.body.lang = req.lang;
 
                             return cb(req, res, function(err) {
                                 return LifeResponse.send(req, res, null, err);
