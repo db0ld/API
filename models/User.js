@@ -119,13 +119,13 @@ UserSchema.statics.modificationValidation = {
 UserSchema.statics.findByLogin = function(login, req, res, next) {
     var params = [];
 
-    if (login && login.length == 24) {
+    if (LifeData.isObjectId(login)) {
         params = {_id: login};
     } else {
         params = {login: login};
     }
 
-    return new LifeQuery(this, req, res, next, params);
+    return new LifeQuery(mongoose.model('User'), req, res, next, params);
 };
 
 UserSchema.statics.findByCredentials = function(login, password, req, res,

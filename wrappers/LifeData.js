@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeErrors = require('./LifeErrors.js');
 var LifeResponse = require('./LifeResponse.js');
 var LifeQuery = require('./LifeQuery.js');
@@ -51,14 +52,14 @@ LifeData.prototype.save = function(item, cb) {
 /**
  * Delete an existing item
  *
- * @param {Object} item Item to delete
+ * @param {Object} item Item to remove
  * @param {Function} [cb=null] Callback function to be executed on success
  * @method
  */
-LifeData.prototype.delete = function(item, cb) {
+LifeData.prototype.remove = function(item, cb) {
     var that = this;
 
-    item.delete(function (err) {
+    item.remove(function (err) {
         if (err) {
             var ret_err = LifeErrors.IOErrorDB;
             ret_err.message = err;
@@ -69,7 +70,7 @@ LifeData.prototype.delete = function(item, cb) {
             return cb(item);
         }
 
-        return LifeResponse.send(that.res, that.req, item);
+        return LifeResponse.send(that.req, that.res, item);
     });
 };
 
@@ -270,6 +271,11 @@ LifeData.i18nPicker = function(strings, lang) {
         string_en_us ||
         string_en ||
         string;
+};
+
+LifeData.isObjectId = function(item) {
+    return (item instanceof ObjectId ||
+        (item && typeof item == "string" && (item.length == 24)));
 };
 
 LifeData.regexps = {

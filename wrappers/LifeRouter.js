@@ -59,7 +59,7 @@ LifeRouter.makePath = function(res) {
                     if (LifeConfig.dev) {
                         console.log(new Array(80).join('-').toString());
                         console.log(new Date().toISOString());
-                        console.log(method + ':' + req.url);
+                        console.log(method + ': ' + req.url);
                         if (req.body && Object.keys(req.body).length) {
                             console.log('PARAMS POST: ' +
                                 JSON.stringify(req.body, null, 4));

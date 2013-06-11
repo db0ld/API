@@ -2,6 +2,7 @@ var User = require('mongoose').model('User');
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeQuery = require('../wrappers/LifeQuery.js');
+var LifeData = require('../wrappers/LifeData.js');
 var element = require('./Element.js');
 
 var FriendshipSchema = new mongoose.Schema({
@@ -55,26 +56,48 @@ FriendshipSchema.post('save', function(doc) {
 });
 
 FriendshipSchema.post('remove', function(doc) {
-    // remove from friends property for both user
-    [{a: doc.sender, b: doc.receiver},
-        {b: doc.sender, a: doc.receiver}].forEach(function(userPair) {
-            User.find(userPair.a, function(error, user) {
-                if (error)
-                    return;
-
-                user._friends.remove(userPair.b);
-                user.save();
+    [{a: doc.sender_login, b: doc.receiver},
+        {b: doc.sender, a: doc.receiver_login}].forEach(function(userPair) {
+            new User.findByLogin(userPair.a)
+                .populate('')
+                .execOne(false, function(user) {
+                    user._friends.remove(userPair.b);
+                    user.save();
             });
         }
     );
 });
 
 FriendshipSchema.statics.findByLogins = function(query, login1, login2) {
-    return query.or([{sender_login: login1, receiver_login: login2},
-        {sender_login: login2, receiver_login: login1}]);
+    var first_order = {};
+    var second_order = {};
+
+    if (LifeData.isObjectId(login1)) {
+        first_order.sender = login1;
+        second_order.receiver = login1;
+    } else {
+        first_order.sender_login = login1;
+        second_order.receiver_login = login1;
+    }
+
+    if (LifeData.isObjectId(login2)) {
+        second_order.sender = login2;
+        first_order.receiver = login2;
+    } else {
+        second_order.sender_login = login2;
+        first_order.receiver_login = login2;
+    }
+
+    return query.or([first_order, second_order]);
 };
 
 FriendshipSchema.statics.findByLogin = function(query, login) {
+    var criteria = [{receiver_login: login}, {sender_login: login}];
+
+    if (LifeData.isObjectId(login)) {
+        criteria = [{receiver: login}, {sender: login}];
+    }
+
     return query.or([{receiver_login: login}, {sender_login: login}]);
 };
 

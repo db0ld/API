@@ -143,15 +143,15 @@ module.exports = function(app) {
         });
     }, true);
 
-    // Get user friends
+    // Remove friendship
     app.delete([routeBase + '/:login/friends', routeBase + '/:login/friends/:remover_login'], function(req, res, next) {
-        var remover_user_id = req.user.login;
-        if (req.params.remover_login && req.security.hasRole(req.user, LifeSecurity.roles.USER_MANAGEMENT)) {
-            remover_user_id = req.params.remover_login;
-        }
+        var remover_user_id = req.security.getUsername(req.params.remover_login);
 
         new LifeQuery(Friendship, req, res, next)
             .modelStatic('findByLogins', remover_user_id, req.params.login)
-            .remove();
+            .execOne(false, function(friendship) {
+                return new LifeData(Friendship, req, res, next)
+                    .remove(friendship);
+            });
     }, true);
 };

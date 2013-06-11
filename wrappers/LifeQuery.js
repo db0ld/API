@@ -18,10 +18,12 @@ var LifeQuery = function(model, req, res, next, query) {
 
     this.req = typeof req !== 'undefined' ? req : null;
     this.res = typeof res !== 'undefined' ? res : null;
-    this.next = typeof next !== 'undefined' ? next : function() {};
+    this.next = (typeof next !== 'undefined' && next !== null) ?
+              next
+            : function() {};
     this._query =
               typeof query == 'function' ? query
-            : (query !== null || typeof query == 'object') ? model.find(query)
+            : (query !== null && typeof query == 'object') ? model.find(query)
             : model.find();
     this._limit = this.req && this.req.query.limit ? this.req.query.limit
         : this.model.queryDefaults().limit;
