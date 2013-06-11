@@ -7,9 +7,12 @@ lib-cov
 *.pid
 *.gz
 
+configurations/app_dev.js
+
 pids
 logs
 results
 
 npm-debug.log
 node_modules/
+out/
