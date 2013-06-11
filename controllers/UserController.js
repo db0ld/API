@@ -44,7 +44,7 @@ module.exports = function(app) {
         var messagesQuery;
 
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.user]).execOne(false, function(conversation) {
+            new LifeQuery(Conversation, req, res, next).modelStatic('findByUsers', [user, req.user]).execOne(false, function(conversation) {
                 Message.findByConversation(messagesQuery = new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
                     conversation = conversation.toJSON();
                     conversation.messages = LifeResponse.paginatedList(req, res, messages, count, messagesQuery);

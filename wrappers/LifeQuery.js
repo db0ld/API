@@ -141,7 +141,7 @@ LifeQuery.prototype.remove = function(cb) {
  * @param {Function} [cb=null] Callback function to be executed on success
  * @method
  */
-LifeQuery.prototype.value = function(value) {
+LifeQuery.prototype.value = function(field, value) {
     if (this.req && typeof value === 'undefined' &&
         typeof this.req.query[field] !== 'undefined') {
         return this.req.query[field];
@@ -158,7 +158,7 @@ LifeQuery.prototype.value = function(value) {
  * @method
  */
 LifeQuery.prototype.filterEquals = function (field, value) {
-    value = LifeQuery.value(field);
+    value = LifeQuery.value(field, value);
 
     if (typeof value !== 'undefined') {
         this._query.where(field).equals(value);
@@ -172,7 +172,7 @@ LifeQuery.prototype.filterEquals = function (field, value) {
 ['equals', 'in', 'gt', 'lt', 'gte', 'lte',
     'slice', 'ne', 'nin', 'size', 'all'].forEach(function(operation) {
     LifeQuery.prototype[operation] = function(field, value) {
-        value = LifeQuery.value(value);
+        value = this.value(field, value);
 
         if (typeof value !== 'undefined') {
             this._query.where(field)[operation](value);
