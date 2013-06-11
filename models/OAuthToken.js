@@ -5,9 +5,13 @@ var OAuthTokenSchema = new mongoose.Schema({
     token: {type: String, unique: true},
     expiration: { type : Date, required: true },
     user: {type : mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
-});
+}, { id: false });
 
 OAuthTokenSchema.plugin(element);
+
+OAuthTokenSchema.virtual('id').get(function () {
+    return this.token;
+});
 
 OAuthTokenSchema.statics.queryDefaults = function() {
     return {
