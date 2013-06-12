@@ -77,8 +77,16 @@ LifeResponse.toJSON = function(req, res, item, level) {
       var doc = item.toJSON();
 
       for (var i in doc) {
-          if (i.substring(0, 1) == '_') {
-              delete doc[i];
+          if (typeof doc['-' + i] !== 'undefined') {
+            delete doc['-' + i];
+
+            if (item[i] instanceof Array) {
+              doc[i] = item[i].map(function(array_item) {
+                return LifeResponse.toJSON(req, res, array_item, level + 1);
+              });
+            }
+          } else if (i.substring(0, 1) == '_') {
+            delete doc[i];
           } else if (doc[i] instanceof Date) {
               doc[i] = LifeResponse.dateTimeToString(doc[i]);
           } else if (doc[i] instanceof Array) {

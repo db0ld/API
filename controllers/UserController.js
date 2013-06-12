@@ -39,14 +39,26 @@ module.exports = function(app) {
             .exec();
     });
 
+    var createConversation = function(lifedata, usera, userb, callback) {
+        var conversation = new Conversation({
+            referenced_users: [usera, userb]
+        });
+
+        return lifedata.save(conversation, callback);
+    };
+
     // Get conversation
     app.get(routeBase + '/:login/conversation', function (req, res, next) {
         var messagesQuery;
 
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            new LifeQuery(Conversation, req, res, next).modelStatic('findByUsers', [user, req.user]).execOne(false, function(conversation) {
+            new LifeQuery(Conversation, req, res, next).modelStatic('findByUsers', [user, req.user]).execOne(true, function(conversation) {
+                if (conversation === null) {
+                    return createConversation(new LifeData(Conversation, req, res, next), user, req.user);
+                }
+
                 Message.findByConversation(messagesQuery = new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
-                    conversation = conversation.toJSON();
+                    conversation = LifeResponse.toJSON(req, res, conversation);
                     conversation.messages = LifeResponse.paginatedList(req, res, messages, count, messagesQuery);
                     return LifeResponse.send(req, res, conversation);
                 });
@@ -85,11 +97,7 @@ module.exports = function(app) {
 
                 // Create conversation if it doesn't exist
                 if (conversation === null) {
-                    conversation = new Conversation({
-                        referenced_users: [user, req.user]
-                    });
-
-                    return new LifeData(Conversation, req, res, next).save(conversation, addMessageToConversation);
+                    return createConversation(new LifeData(Conversation, req, res, next), user, req.user, addMessageToConversation);
                 }
 
                 addMessageToConversation(conversation);

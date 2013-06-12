@@ -37,6 +37,20 @@ ConversationSchema.statics.findByUser = function(query, user) {
         .in('referenced_users', users);
 };
 
+ConversationSchema.options.toJSON = {
+    getters: true,
+    virtuals: true,
+    transform: function(doc, ret, options) {
+        obj = doc.toObject({
+          virtuals: true
+        });
+
+        obj['-referenced_users'] = true;
+
+        return obj;
+    }
+};
+
 ConversationSchema.statics.queryDefaults = function() {
     return {
         'populate': 'referenced_users',
