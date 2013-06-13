@@ -20,6 +20,17 @@ LifeErrors.NotFound = {
 };
 
 /**
+ * The requested method was not found
+ * @inner
+ */
+LifeErrors.MethodNotFound = {
+  'code': 404,
+  'type': 'MethodNotFound',
+  'message': 'The requested method was not found',
+  'http': 404
+};
+
+/**
  * An unique result was expected, several found
  * @inner
  */
