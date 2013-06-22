@@ -22,6 +22,10 @@ ConversationSchema.statics.findByUsers = function(query, users) {
         .all('referenced_users', users);
 };
 
+ConversationSchema.virtual('messages').get(function() {
+    return [];
+});
+
 ConversationSchema.statics.findByUser = function(query, user) {
     var user_ids = [];
 
