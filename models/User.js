@@ -6,6 +6,7 @@ var LifeData = require('../wrappers/LifeData.js'),
     regexps = LifeData.regexps;
 var LifeResponse = require('../wrappers/LifeResponse.js');
 var element = require('./Element.js');
+var bcrypt = require('bcryptjs');
 
 var UserSchema = new mongoose.Schema({
     login: { type : String, match: regexps.login, required: true, unique: true},
@@ -15,13 +16,21 @@ var UserSchema = new mongoose.Schema({
     gender: { type : String, match: regexps.gender, required: true,
         'default': 'other'},
     lang: { type : String, match: regexps.lang, required: true},
-    password: { type : String, required: true },
     birthday: { type: Date, required: false },
+    _password: { type : String, required: true },
     _achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
     _friends: [{type: ObjectId, required: false, ref: 'User'}]
 }, { autoIndex: true });
 
 UserSchema.plugin(element);
+
+UserSchema.virtual('password').set(function (value) {
+    this._password = bcrypt.hashSync(value, 8);
+});
+
+UserSchema.virtual('password').get(function (value) {
+    return this._password;
+});
 
 UserSchema.virtual('name').get(function () {
   var name = '';
@@ -126,12 +135,6 @@ UserSchema.statics.findByLogin = function(login, req, res, next) {
     }
 
     return new LifeQuery(mongoose.model('User'), req, res, next, params);
-};
-
-UserSchema.statics.findByCredentials = function(login, password, req, res,
-    next) {
-    return new LifeQuery(this, req, res, next,
-        {login: login, password: password});
 };
 
 UserSchema.statics.findFriends = function(user_id, req, res, next) {

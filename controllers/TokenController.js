@@ -5,13 +5,18 @@ var LifeSecurity = require('../wrappers/LifeSecurity.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeErrors = require('../wrappers/LifeErrors.js');
 var LifeData = require('../wrappers/LifeData.js');
+var bcrypt = require('bcryptjs');
 
 module.exports = function(app) {
     app.post(['tokens'], function(req, res, next) {
         var params = new LifeData(null, req, res, next).whitelist(OAuthToken.creationValidation);
 
-        User.findByCredentials(params.login, params.password, req, res, next).execOne(true, function(user) {
-            if (!user) {
+        if (LifeData.isObjectId(params.login)) {
+            return next(LifeErrors.AuthenticationError);
+        }
+
+        User.findByLogin(params.login, req, res, next).execOne(true, function(user) {
+            if (!user || !bcrypt.compareSync(params.password, user.password)) {
                 return next(LifeErrors.AuthenticationError);
             }
 
