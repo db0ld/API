@@ -3,6 +3,7 @@ var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeErrors = require('./LifeErrors.js');
 var LifeResponse = require('./LifeResponse.js');
 var LifeQuery = require('./LifeQuery.js');
+var LifeUpload = require('../wrappers/LifeUpload.js');
 
 /**
  * An utility class that performs simple operations such as saving or deleting
@@ -34,7 +35,7 @@ var LifeData = function(model, req, res, next) {
 LifeData.prototype.save = function(item, cb) {
     var that = this;
 
-    item.save(function (err) {
+    return item.save(function (err) {
         if (err) {
             var ret_err = LifeErrors.IOErrorDB;
             ret_err.message = err;
@@ -84,33 +85,36 @@ LifeData.prototype.remove = function(item, cb) {
  */
 LifeData.prototype.saveFromRequest = function(item, validation, cb) {
     var that = this;
+    var saveItem = function(item) {
+        if (!(item instanceof mongoose.Document)) {
+            item = new that.model(item);
+        }
+
+        return that.save(item, function(item) {
+            if (typeof cb !== 'undefined') {
+                return cb(item, that.req, that.res, that.next);
+            }
+
+            return LifeResponse.send(that.req, that.res, item);
+        }, that.next);
+    };
+
 
     if (validation !== null && typeof validation == 'object') {
-        var validated_item = this.whitelist(validation);
+        return this.whitelist(validation, null, function(validated_item) {
+            if (item === null || typeof item != 'object') {
+                item = {};
+            }
 
-        if (item === null || typeof item != 'object') {
-            item = {};
-        }
+            for (var i in validated_item) {
+                item[i] = validated_item[i];
+            }
 
-        for (var i in validated_item) {
-            item[i] = validated_item[i];
-        }
-
-    } else {
-        item = that.requestToObject(item);
+            return saveItem(item);
+        });
     }
 
-    if (!(item instanceof mongoose.Document)) {
-        item = new that.model(item);
-    }
-
-    that.save(item, function(item) {
-        if (typeof cb !== 'undefined') {
-            return cb(item, that.req, that.res, that.next);
-        }
-
-        return LifeResponse.send(that.req, that.res, item);
-    }, that.next);
+    return saveItem(that.requestToObject(item));
 };
 
 /**
@@ -123,15 +127,73 @@ LifeData.prototype.requestToObject = function(item) {
   return LifeData.requestToObject(this.req, this.model, item);
 };
 
+LifeData.prototype.uploadsRec = function(whitelisted, files, validation, input, cb) {
+    var that = this;
+
+    if (files.length === 0) {
+        return cb(whitelisted);
+    }
+
+    var file = files.pop();
+    var path = '';
+
+    if (that.req.user) {
+        path += that.req.user.id + '-';
+    }
+
+    path += Date.now();
+
+    var required = typeof validation[file].required == 'boolean' ?
+                      validation[file].required
+                    : true;
+
+    if (typeof that.req.files === 'undefined' ||
+        typeof that.req.files[file] === 'undefined') {
+        if (required) {
+            return that.next(LifeErrors.UploadMissingFile);
+        } else {
+            return that.uploadsRec(whitelisted, files, validation, input, cb);
+        }
+    }
+
+    return validation[file].type.upload(that.req, that.res, that.next, file, path, function(uploaded) {
+        whitelisted[file] = uploaded;
+
+        return that.uploadsRec(whitelisted, files, validation, input, cb);
+    });
+};
+
+/**
+ * Private function to handle uploads
+ *
+ * @callback
+ */
+LifeData.prototype.uploads = function(whitelisted, validation, input, cb) {
+    var files = [];
+
+    for (var i in validation) {
+        if (validation[i].type instanceof LifeUpload) {
+            files.push(i);
+        }
+    }
+
+    if (files.length > 0) {
+        return this.uploadsRec(whitelisted, files, validation, input, cb);
+    }
+
+    return cb(whitelisted);
+};
+
 /**
  * Convert request to object
  *
  * @param {Object} [item=null] Existing item to update
  * @method
  */
-LifeData.prototype.whitelist = function(validation, input) {
+LifeData.prototype.whitelist = function(validation, input, cb) {
     var ret = {};
     var errors = [];
+    var i;
 
     var checkString = function(i) {
         if (inputVal instanceof String) {
@@ -150,9 +212,9 @@ LifeData.prototype.whitelist = function(validation, input) {
         }
     }
 
-    for (var i in validation) {
-        valueType = validation[i].type;
-        required = typeof validation[i].required == 'boolean' ?
+    for (i in validation) {
+        var valueType = validation[i].type;
+        var required = typeof validation[i].required == 'boolean' ?
               validation[i].required
             : true;
         inputVal = input[i];
@@ -202,7 +264,7 @@ LifeData.prototype.whitelist = function(validation, input) {
     if (errors.length) {
         var error = {};
 
-        for (var i in LifeErrors.InvalidParameters) {
+        for (i in LifeErrors.InvalidParameters) {
             error[i] = LifeErrors.InvalidParameters[i];
         }
 
@@ -210,7 +272,7 @@ LifeData.prototype.whitelist = function(validation, input) {
         return this.next(error);
     }
 
-    return ret;
+    return this.uploads(ret, validation, input, cb);
 };
 
 /**
@@ -273,6 +335,14 @@ LifeData.i18nPicker = function(strings, lang) {
         string;
 };
 
+/**
+ * Check whenever something can be converted to an ObjectId
+ *
+ * @todo hexa check
+ * @param {Object|String} item
+ * @return boolean
+ * @function
+ */
 LifeData.isObjectId = function(item) {
     return (item instanceof ObjectId ||
         (item && typeof item == "string" && (item.length == 24)));

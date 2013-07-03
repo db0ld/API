@@ -9,24 +9,24 @@ var bcrypt = require('bcryptjs');
 
 module.exports = function(app) {
     app.post(['tokens'], function(req, res, next) {
-        var params = new LifeData(null, req, res, next).whitelist(OAuthToken.creationValidation);
-
-        if (LifeData.isObjectId(params.login)) {
-            return next(LifeErrors.AuthenticationError);
-        }
-
-        User.findByLogin(params.login, req, res, next).execOne(true, function(user) {
-            if (!user || !bcrypt.compareSync(params.password, user.password)) {
+        new LifeData(null, req, res, next).whitelist(OAuthToken.creationValidation, null, function(params) {
+            if (LifeData.isObjectId(params.login)) {
                 return next(LifeErrors.AuthenticationError);
             }
 
-            var token = new OAuthToken();
-            token.expiration = new Date();
-            token.expiration.setDate(token.expiration.getDate() + 7);
-            token.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + token.expiration.getTime();
-            token.user = user;
+            User.findByLogin(params.login, req, res, next).execOne(true, function(user) {
+                if (!user || !bcrypt.compareSync(params.password, user.password)) {
+                    return next(LifeErrors.AuthenticationError);
+                }
 
-            return new LifeData(OAuthToken, req, res, next).save(token);
+                var token = new OAuthToken();
+                token.expiration = new Date();
+                token.expiration.setDate(token.expiration.getDate() + 7);
+                token.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + token.expiration.getTime();
+                token.user = user;
+
+                return new LifeData(OAuthToken, req, res, next).save(token);
+            });
         });
     });
 

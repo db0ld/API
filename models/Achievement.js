@@ -2,11 +2,14 @@ var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeConfig = require('../wrappers/LifeConfig.js');
 var LifeData = require('../wrappers/LifeData.js');
+var Picture = mongoose.model('Picture');
+var LifeUpload = require('../wrappers/LifeUpload.js');
 var element = require('./Element.js');
 
 var AchievementSchema = new mongoose.Schema({
     name: mongoose.Schema.Types.Mixed,
     description: mongoose.Schema.Types.Mixed,
+    badge: {type: ObjectId, required: false, ref: 'Picture'},
     child_achievements: [{type: ObjectId, required: false, ref: 'Achievement'}]
 });
 
@@ -42,7 +45,7 @@ AchievementSchema.options.toJSON = {
 
 AchievementSchema.statics.queryDefaults = function() {
     return {
-        'populate': 'child_achievements',
+        'populate': 'child_achievements badge',
         'limit': 10,
         'offset': 0
     };
@@ -50,7 +53,8 @@ AchievementSchema.statics.queryDefaults = function() {
 
 AchievementSchema.statics.creationValidation = {
     'name': {type: String, required: true},
-    'description': {type: String, required: false}
+    'description': {type: String, required: false},
+    'badge': { type: LifeUpload.Avatar, required: false }
 };
 
 var Achievement = mongoose.model('Achievement', AchievementSchema);

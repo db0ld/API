@@ -1,6 +1,6 @@
 var LifeData = require('../wrappers/LifeData.js');
 
-module.exports = exports = function (schema, options) {
+module.exports = function (schema, options) {
     schema.add({
         modification: Date,
         creation: {type: Date, 'default' : Date.now }

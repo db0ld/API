@@ -30,9 +30,11 @@ LifeRouter.prototype.init = function() {
     });
 
     // Handle 404
+    /*
     this.app.use(function(req, res) {
         return LifeResponse.send(req, res, null, LifeErrors.MethodNotFound);
     });
+    */
 };
 
 /**

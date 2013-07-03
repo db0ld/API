@@ -151,4 +151,26 @@ LifeErrors.NotImplemented = {
   'http': 501
 };
 
+/**
+ * Not Implemented
+ * @inner
+ */
+LifeErrors.UploadError = {
+  'code': 4978,
+  'type': 'UploadError',
+  'message': 'An error occured while uploading some file',
+  'http': 500
+};
+
+/**
+ * Not Implemented
+ * @inner
+ */
+LifeErrors.UploadMissingFile = {
+  'code': 4979,
+  'type': 'UploadMissingFile',
+  'message': 'A required file is missing',
+  'http': 500
+};
+
 module.exports = LifeErrors;

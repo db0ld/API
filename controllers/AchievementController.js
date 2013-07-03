@@ -8,34 +8,42 @@ var LifeResponse = require('../wrappers/LifeResponse.js');
 module.exports = function(app) {
     var routeBase = 'achievements';
 
-    var bindRequestToAchievement = function(req, res, next, achievement) {
-        var params = new LifeData(Achievement, req, res, next).whitelist(Achievement.creationValidation);
-
-        if (achievement.name === null || typeof achievement.name !== 'object') {
-            achievement.name = {};
-        }
-
-        achievement.name[req.lang] = params.name;
-
-        if (typeof params.description == 'string') {
-            if (achievement.description === null || typeof achievement.description !== 'object') {
-                achievement.description = {};
+    var bindRequestToAchievement = function(req, res, next, achievement, cb) {
+        new LifeData(Achievement, req, res, next).whitelist(Achievement.creationValidation, null, function(params) {
+            if (achievement.name === null || typeof achievement.name !== 'object') {
+                achievement.name = {};
             }
 
-            achievement.description[req.lang] = params.description;
-            achievement.markModified('description');
-        }
+            if (achievement.name[req.lang] != params.name) {
+                achievement.markModified('name');
+            }
 
-        achievement.markModified('name');
+            achievement.name[req.lang] = params.name;
 
-        return achievement;
+            if (typeof params.description == 'string') {
+                if (achievement.description === null || typeof achievement.description !== 'object') {
+                    achievement.description = {};
+                }
+
+                achievement.description[req.lang] = params.description;
+                achievement.markModified('description');
+            }
+
+            if (typeof params.badge !== 'undefined') {
+                achievement.badge = params.badge;
+            }
+
+            return cb(achievement);
+        });
     };
 
     // add a single achievement
     app.post(routeBase, function (req, res, next) {
         var achievement = new Achievement();
 
-        return new LifeData(Achievement, req, res, next).save(bindRequestToAchievement(req, res, next, achievement));
+        return bindRequestToAchievement(req, res, next, achievement, function(achievement) {
+            return new LifeData(Achievement, req, res, next).save(achievement);
+        });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
     // get a single achievement
@@ -50,7 +58,9 @@ module.exports = function(app) {
                 return next(LifeErrors.NotFound);
             }
 
-            return new LifeData(Achievement, req, res, next).save(bindRequestToAchievement(req, res, next, achievement));
+            return bindRequestToAchievement(req, res, next, achievement, function(achievement) {
+                return new LifeData(Achievement, req, res, next).save(achievement);
+            });
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
@@ -66,20 +76,20 @@ module.exports = function(app) {
 
     // add a child achievement to an achievement
     app.post(routeBase + '/:id/children', function (req, res, next) {
-        var params = new LifeData(Achievement, req, res, next).whitelist({achievement_id: {type: String}});
+        new LifeData(Achievement, req, res, next).whitelist({achievement_id: {type: String}}, null, function(params) {
+            return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
+                if (achievement === null) {
+                    return next(LifeErrors.NotFound);
+                }
 
-        return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
-            if (achievement === null) {
-                return next(LifeErrors.NotFound);
-            }
+                if (achievement.child_achievements.indexOf(req.params.id) === -1) {
+                    achievement.child_achievements.push(params.achievement_id);
 
-            if (achievement.child_achievements.indexOf(req.params.id) === -1) {
-                achievement.child_achievements.push(params.achievement_id);
+                    return new LifeData(Achievement, req, res, next).save(achievement);
+                }
 
-                return new LifeData(Achievement, req, res, next).save(achievement);
-            }
-
-            return next(LifeErrors.NothingHasChanged);
+                return next(LifeErrors.NothingHasChanged);
+            });
         });
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 

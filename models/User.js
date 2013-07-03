@@ -1,9 +1,11 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
+var Picture = mongoose.model('Picture');
 var LifeConfig = require('../wrappers/LifeConfig.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeData = require('../wrappers/LifeData.js'),
     regexps = LifeData.regexps;
+var LifeUpload = require('../wrappers/LifeUpload.js');
 var LifeResponse = require('../wrappers/LifeResponse.js');
 var element = require('./Element.js');
 var bcrypt = require('bcryptjs');
@@ -17,6 +19,7 @@ var UserSchema = new mongoose.Schema({
         'default': 'other'},
     lang: { type : String, match: regexps.lang, required: true},
     birthday: { type: Date, required: false },
+    avatar: {type: ObjectId, required: false, ref: 'Picture'},
     _password: { type : String, required: true },
     _achievements: [{type: ObjectId, required: false, ref: 'Achievement'}],
     _friends: [{type: ObjectId, required: false, ref: 'User'}]
@@ -68,9 +71,9 @@ UserSchema.options.toJSON = {
 
         delete obj.password;
 
-	if (obj.birthday) {
-            obj.birthday = LifeResponse.dateToString(doc.birthday);
-	}
+        if (obj.birthday) {
+                obj.birthday = LifeResponse.dateToString(doc.birthday);
+        }
 
         if (doc._req === null || typeof doc._req !== 'object' ||
             !doc._req.token || !doc._req.user) {
@@ -99,7 +102,7 @@ UserSchema.options.toJSON = {
 
 UserSchema.statics.queryDefaults = function() {
     return {
-        'populate': '_friends',
+        'populate': '_achievements _friends avatar',
         'limit': 10,
         'offset': 0
     };
@@ -113,7 +116,8 @@ UserSchema.statics.creationValidation = {
     gender: { type : regexps.gender, required: false },
     lang: { type : regexps.lang, required: true },
     password: { type : String, required: true },
-    birthday: { type: Date, required: false }
+    birthday: { type: Date, required: false },
+    avatar: { type: LifeUpload.Avatar, required: false }
 };
 
 UserSchema.statics.modificationValidation = {
@@ -122,7 +126,8 @@ UserSchema.statics.modificationValidation = {
     lastname: { type : regexps.name, required: false },
     gender: { type : regexps.gender, required: false },
     password: { type : String, required: false },
-    birthday: { type: Date, required: false }
+    birthday: { type: Date, required: false },
+    avatar: { type: LifeUpload.Avatar, required: false }
 };
 
 UserSchema.statics.findByLogin = function(login, req, res, next) {

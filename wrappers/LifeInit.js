@@ -4,6 +4,7 @@
  * @module LifeInit
  */
 
+require('../models/Picture.js');
 require('../models/OAuthToken.js');
 require('../models/Achievement.js');
 require('../models/User.js');
