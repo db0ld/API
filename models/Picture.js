@@ -1,19 +1,8 @@
 var mongoose = require('mongoose');
-var element = require('./Element.js');
+var media = require('./Media.js');
 
-var PictureSchema = new mongoose.Schema({
-    _filepath: {type: String, unique: true}
-});
-
-PictureSchema.plugin(element);
-
-PictureSchema.virtual('url').get(function () {
-    if (this._req && this._req.headers && this._req.headers.host) {
-        return 'http://' + this._req.headers.host + '/' + this._filepath;
-    }
-
-    return this._filepath;
-});
+var PictureSchema = new mongoose.Schema({});
+PictureSchema.plugin(media);
 
 PictureSchema.virtual('url_small').get(function () {
     if (this._req && this._req.headers && this._req.headers.host) {
