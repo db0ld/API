@@ -35,7 +35,7 @@ module.exports = function(app) {
     // get all users
     app.get(routeBase, function (req, res, next) {
         return new LifeQuery(User, req, res, next)
-            .filterRegexp('name', new RegExp(req.query.name, 'i'), typeof req.query.name !== 'undefined')
+            .modelStatic('term', req.query.term)
             .exec();
     });
 
@@ -117,7 +117,8 @@ module.exports = function(app) {
     // Get user friends
     app.get(routeBase + '/:login/friends', function(req, res, next) {
         return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
-            return User.findFriends(user.id, req, res, next).exec();
+            return User.findFriends(user.id, req, res, next)
+                .modelStatic('term', req.query.term).exec();
         });
     }, true);
 

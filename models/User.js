@@ -146,6 +146,20 @@ UserSchema.statics.findFriends = function(user_id, req, res, next) {
     return new LifeQuery(this, req, res, next, {_friends: user_id});
 };
 
+UserSchema.statics.term = function(query, term) {
+    if (typeof term != "undefined" && term !== null) {
+        var re = new RegExp(term, 'i');
+        query.and({$or: [
+            { 'firstname': { $regex: re }},
+            { 'lastname': { $regex: re }},
+            { 'email': term },
+            { 'login': { $regex: re }}
+        ]});
+    }
+
+    return query;
+};
+
 UserSchema.post('remove', function(doc) {
     var Friendship = require('./Friendship.js');
     var Conversation = require('./Conversation.js');
