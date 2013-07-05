@@ -127,7 +127,55 @@ LifeData.prototype.requestToObject = function(item) {
   return LifeData.requestToObject(this.req, this.model, item);
 };
 
-LifeData.prototype.uploadsRec = function(whitelisted, files, validation, input, cb) {
+
+LifeData.prototype.objectIdsRec = function(whitelisted, parameters, validation, cb) {
+    var that = this;
+
+    if (parameters.length === 0) {
+        return this.uploads(whitelisted, validation, cb);
+    }
+
+    var parameter = parameters.pop();
+
+    var type = parameters[parameter].type;
+    var required = typeof validation[file].required == 'boolean' ?
+                  validation[file].required
+                : true;
+
+    if (typeof that.req.body === 'undefined' ||
+        typeof that.req.body[parameter] === 'undefined') {
+        if (required) {
+            return that.next(LifeErrors.InvalidParameters);
+        } else {
+            return this.objectIdsRec(whitelisted, parameters, validation, cb);
+        }
+    }
+
+    return new LifeQuery(type, this.req, this.res, this.next)
+        .findById(that.req.body[parameter], function(item) {
+            if (!item) {
+                return that.next(LifeErrors.InvalidParameters);
+            }
+
+            whitelisted[parameter] = item;
+
+            return this.objectIdsRec(whitelisted, parameters, validation, cb);
+    });
+};
+
+LifeData.prototype.objectIds = function(whitelisted, validation, cb) {
+    var parameters = [];
+
+    for (var i in validation) {
+        if (validation[i].type instanceof TODO) {
+            parameters.push(i);
+        }
+    }
+
+    return this.objectIdsRec(whitelisted, parameters, validation, cb);
+};
+
+LifeData.prototype.uploadsRec = function(whitelisted, files, validation, cb) {
     var that = this;
 
     if (files.length === 0) {
@@ -152,14 +200,14 @@ LifeData.prototype.uploadsRec = function(whitelisted, files, validation, input, 
         if (required) {
             return that.next(LifeErrors.UploadMissingFile);
         } else {
-            return that.uploadsRec(whitelisted, files, validation, input, cb);
+            return that.uploadsRec(whitelisted, files, validation, cb);
         }
     }
 
     return validation[file].type.upload(that.req, that.res, that.next, file, path, function(uploaded) {
         whitelisted[file] = uploaded;
 
-        return that.uploadsRec(whitelisted, files, validation, input, cb);
+        return that.uploadsRec(whitelisted, files, validation, cb);
     });
 };
 
@@ -168,7 +216,7 @@ LifeData.prototype.uploadsRec = function(whitelisted, files, validation, input, 
  *
  * @callback
  */
-LifeData.prototype.uploads = function(whitelisted, validation, input, cb) {
+LifeData.prototype.uploads = function(whitelisted, validation, cb) {
     var files = [];
 
     for (var i in validation) {
@@ -178,7 +226,7 @@ LifeData.prototype.uploads = function(whitelisted, validation, input, cb) {
     }
 
     if (files.length > 0) {
-        return this.uploadsRec(whitelisted, files, validation, input, cb);
+        return this.uploadsRec(whitelisted, files, validation, cb);
     }
 
     return cb(whitelisted);
@@ -272,7 +320,7 @@ LifeData.prototype.whitelist = function(validation, input, cb) {
         return this.next(error);
     }
 
-    return this.uploads(ret, validation, input, cb);
+    return this.uploads(ret, validation, cb);
 };
 
 /**
@@ -353,7 +401,8 @@ LifeData.regexps = {
   'email': /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/,
   'name': /^[a-zA-Z0-9-._ ]+$/,
   'gender': /^male|female|other$/,
-  'lang': /^[a-z]{2}(-[A-Z]{2})?$/
+  'lang': /^[a-z]{2}(-[A-Z]{2})?$/,
+  'achievementState': /^not_planned|planned|in_progress|done$/
 };
 
 module.exports = LifeData;

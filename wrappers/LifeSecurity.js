@@ -46,9 +46,9 @@ var LifeSecurity = function(req, res, auth, next, cb) {
         OAuthToken
             .findByToken(new LifeQuery(OAuthToken, req, res, next), token_str)
             .execOne(true, function(token) {
-        if (token === null) {
-            return next(LifeErrors.AuthenticationError);
-        }
+                if (token === null) {
+                    return next(LifeErrors.AuthenticationError);
+                }
 
                 if (typeof auth === 'object' &&
                     auth instanceof Array) {
