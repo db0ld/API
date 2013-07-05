@@ -43,7 +43,7 @@ AchievementStatusSchema.statics.validation.edition = {
 
 AchievementStatusSchema.statics.queryDefaults = function() {
     return {
-        'populate': 'achievement attached_picture',
+        'populate': 'achievement attached_picture owner',
         'limit': 10,
         'offset': 0
     };

@@ -137,29 +137,30 @@ LifeData.prototype.objectIdsRec = function(whitelisted, parameters, validation, 
 
     var parameter = parameters.pop();
 
-    var type = parameters[parameter].type;
-    var required = typeof validation[file].required == 'boolean' ?
-                  validation[file].required
+    var type = validation[parameter].type;
+    var required = typeof validation[parameter].required == 'boolean' ?
+                  validation[parameter].required
                 : true;
 
     if (typeof that.req.body === 'undefined' ||
-        typeof that.req.body[parameter] === 'undefined') {
+        (typeof that.req.body[parameter] === 'undefined' &&
+         typeof that.req.body[parameter + '_id'] === 'undefined')) {
         if (required) {
             return that.next(LifeErrors.InvalidParameters);
         } else {
-            return this.objectIdsRec(whitelisted, parameters, validation, cb);
+            return that.objectIdsRec(whitelisted, parameters, validation, cb);
         }
     }
 
     return new LifeQuery(type, this.req, this.res, this.next)
-        .findById(that.req.body[parameter], function(item) {
+        .findById(that.req.body[parameter] || that.req.body[parameter + '_id'], function(item) {
             if (!item) {
                 return that.next(LifeErrors.InvalidParameters);
             }
 
             whitelisted[parameter] = item;
 
-            return this.objectIdsRec(whitelisted, parameters, validation, cb);
+            return that.objectIdsRec(whitelisted, parameters, validation, cb);
     });
 };
 
@@ -167,7 +168,8 @@ LifeData.prototype.objectIds = function(whitelisted, validation, cb) {
     var parameters = [];
 
     for (var i in validation) {
-        if (validation[i].type instanceof TODO) {
+        if (typeof validation[i].type == 'function' &&
+            new validation[i].type() instanceof mongoose.Document) {
             parameters.push(i);
         }
     }
@@ -300,8 +302,11 @@ LifeData.prototype.whitelist = function(validation, input, cb) {
                 error = true;
             }
 
-        } else {
+        } else if (!(typeof valueType == 'function' && new valueType() instanceof mongoose.Document) &&
+                !(valueType instanceof LifeUpload)) {
             ret[i] = inputVal;
+        } else {
+            required = false;
         }
 
         if (error || (required && typeof ret[i] === 'undefined')) {
@@ -320,7 +325,7 @@ LifeData.prototype.whitelist = function(validation, input, cb) {
         return this.next(error);
     }
 
-    return this.uploads(ret, validation, cb);
+    return this.objectIds(ret, validation, cb);
 };
 
 /**

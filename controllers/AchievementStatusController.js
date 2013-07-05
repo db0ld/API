@@ -19,7 +19,7 @@ module.exports = function(app) {
     var routeBase = 'achievements_status';
 
     app.get('users/:user_id/achievements_status', function(req, res, next) {
-        User.findByLogin(req.security.getUsername(req.params.user_id), req, res, next)
+        User.findByLogin(req.params.user_id, req, res, next)
             .execOne(false, function(user) {
                 return new LifeQuery(AchievementStatus, req, res, next)
                     .modelStatic('findByUser', user.id)
