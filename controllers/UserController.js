@@ -5,6 +5,7 @@ var Message = require('mongoose').model('Message');
 var LifeErrors = require('../wrappers/LifeErrors.js');
 var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeData = require('../wrappers/LifeData.js');
+var LifeUpload = require('../wrappers/LifeUpload.js');
 var LifeResponse = require('../wrappers/LifeResponse.js');
 
 module.exports = function(app) {
@@ -163,4 +164,44 @@ module.exports = function(app) {
                     .remove(friendship);
             });
     }, true);
+
+    app.post(routeBase + '/:login/avatar', function (req, res, next) {
+        return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)
+            .execOne(false, function(user) {
+                new LifeData(User, req, res, next).whitelist({avatar: { type: LifeUpload.Avatar, required: true }}, null, function(params) {
+                    if (user.avatar) {
+                        return user.avatar.remove();
+                    }
+
+                    user.avatar = params.avatar;
+
+                    return new LifeData(User, req, res, next).save(user);
+                });
+            });
+    }, true);
+
+    app.get(routeBase + '/:login/avatar', function (req, res, next) {
+        return User.findByLogin(req.params.login, req, res, next)
+            .execOne(false, function(user) {
+                if (!user.avatar) {
+                    return next(LifeErrors.NotFound);
+                }
+
+                return LifeResponse.send(req, res, user.avatar);
+            });
+    });
+
+    app.delete(routeBase + '/:login/avatar', function (req, res, next) {
+        return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)
+            .execOne(false, function(user) {
+                if (user.avatar) {
+                    user.avatar.remove();
+                }
+
+                user.avatar = null;
+
+                return new LifeData(User, req, res, next).save(user);
+            });
+    }, true);
+
 };
