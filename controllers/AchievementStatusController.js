@@ -16,9 +16,9 @@ module.exports = function(app) {
         return false;
     };
 
-    var routeBase = 'achievements_status';
+    var routeBase = 'achievement_statuses';
 
-    app.get('users/:user_id/achievements_status', function(req, res, next) {
+    app.get('users/:user_id/achievement_statuses', function(req, res, next) {
         User.findByLogin(req.params.user_id, req, res, next)
             .execOne(false, function(user) {
                 return new LifeQuery(AchievementStatus, req, res, next)
@@ -27,7 +27,7 @@ module.exports = function(app) {
             });
     });
 
-    app.post('users/:src_user_id/achievements_status', function(req, res, next) {
+    app.post('users/:src_user_id/achievement_statuses', function(req, res, next) {
         var ac = new AchievementStatus();
 
         ac.owner = req.user;
@@ -43,7 +43,7 @@ module.exports = function(app) {
 
     app.delete([
         routeBase + '/:id',
-        'users/:src_user_id/achievements_status/:id'
+        'users/:src_user_id/achievement_statuses/:id'
     ], function (req, res, next) {
         return new LifeQuery(AchievementStatus, req, res, next)
             .modelStatic('findByUser', req.user.id)
