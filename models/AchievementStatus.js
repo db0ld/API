@@ -22,6 +22,14 @@ AchievementStatusSchema.virtual('score').get(function() {
     return this._approvers - this._non_approvers;
 });
 
+AchievementStatusSchema.virtual('approvers_count').get(function() {
+    return this._approvers.length;
+});
+
+AchievementStatusSchema.virtual('non_approvers_count').get(function() {
+    return this._non_approvers.length;
+});
+
 AchievementStatusSchema.virtual('state_code').get(function() {
     return 42;
 });
