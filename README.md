@@ -43,3 +43,5 @@ Code
 Models are in models/*.js
 
 API methods in controllers/*.js
+
+http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
