@@ -255,6 +255,13 @@ LifeQuery.prototype.modelStatic = function(item) {
     return this.model[item].apply(this, args);
 };
 
+LifeQuery.prototype.inList = function(ids) {
+    this.and({_id: {$in: ids}});
+
+    return this;
+};
+
+
 ['query', 'limit', 'offset', 'populate'].forEach(function (property) {
     LifeQuery.prototype[property] = function(val) {
         if (typeof val === 'undefined') {

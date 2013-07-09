@@ -13,7 +13,7 @@ var User = require('mongoose').model('User');
 
 module.exports = function(app) {
     var isDislikeRoute = function(req) {
-        return false;
+        return req.route.path.match(/disapprovers/) !== null;
     };
 
     var routeBase = 'achievement_statuses';
@@ -66,11 +66,15 @@ module.exports = function(app) {
         routeBase + '/:id/approvers',
         routeBase + '/:id/disapprovers'
     ], function (req, res, next) {
+        var key = isDislikeRoute(req) ? '_non_approvers' : '_approvers';
+
         return new LifeQuery(AchievementStatus, req, res, next)
             .modelStatic('findById', req.params.id)
             .populate('')
-            .execOne(function(achievement_status) {
-                // TODO
+            .execOne(false, function(achievement_status) {
+                return new LifeQuery(User, req, res, next)
+                    .inList(achievement_status[key])
+                    .exec();
             });
     });
 
@@ -85,11 +89,10 @@ module.exports = function(app) {
                 var key = isDislikeRoute(req) ? '_non_approvers' : '_approvers';
                 var nokey = !isDislikeRoute(req) ? '_non_approvers' : '_approvers';
 
-                if (achievement_status[key].indexOf(req.user.id) !== -1) {
-                    return next(LifeErrors.UserLogicError);
+                if (achievement_status[key].indexOf(req.user.id) === -1) {
+                    achievement_status[key].push(req.user.id);
                 }
 
-                achievement_status[key].push(req.user.id);
                 achievement_status[nokey].remove(req.user.id);
 
                 return new LifeData(AchievementStatus, req, res, next)
@@ -109,11 +112,10 @@ module.exports = function(app) {
             .execOne(false, function(achievement_status) {
                 var key = isDislikeRoute(req) ? '_non_approvers' : '_approvers';
 
-                if (achievement_status[key].indexOf(req.user.id) === -1) {
-                    return next(LifeErrors.UserLogicError);
+                if (achievement_status[key].indexOf(req.user.id) !== -1) {
+                    achievement_status[key].remove(req.user.id);
                 }
 
-                achievement_status[key].remove(req.user.id);
                 return new LifeData(AchievementStatus, req, res, next)
                     .save(achievement_status);
             });
