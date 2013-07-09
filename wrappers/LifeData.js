@@ -401,6 +401,11 @@ LifeData.isObjectId = function(item) {
         (item && typeof item == "string" && (item.length == 24)));
 };
 
+
+LifeData.regexpEscape = function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
 LifeData.regexps = {
   'login': /^[a-zA-Z0-9-_]{3,20}$/,
   'email': /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/,

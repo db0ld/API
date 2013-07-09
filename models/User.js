@@ -148,13 +148,15 @@ UserSchema.statics.findFriends = function(user_id, req, res, next) {
 
 UserSchema.statics.term = function(query, term) {
     if (typeof term != "undefined" && term !== null) {
-        var re = new RegExp(term, 'i');
-        query.and({$or: [
-            { 'firstname': { $regex: re }},
-            { 'lastname': { $regex: re }},
-            { 'email': term },
-            { 'login': { $regex: re }}
-        ]});
+        term.split(/\s/).forEach(function(term) {
+            var re = new RegExp(LifeData.regexpEscape(term), 'i');
+            query.and({$or: [
+                { 'firstname': { $regex: re }},
+                { 'lastname': { $regex: re }},
+                { 'email': term },
+                { 'login': { $regex: re }}
+            ]});
+        });
     }
 
     return query;
