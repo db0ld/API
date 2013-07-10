@@ -27,7 +27,7 @@ AchievementSchema.options.toJSON = {
           virtuals: true
         });
 
-        var lang = 'en_US';
+        var lang = 'en-US';
 
         if (doc._req !== null && typeof doc._req == 'object' && doc._req.lang) {
             lang = doc._req.lang;
@@ -49,6 +49,23 @@ AchievementSchema.statics.queryDefaults = function() {
         'limit': 10,
         'offset': 0
     };
+};
+
+AchievementSchema.statics.term = function(query, term) {
+    if (typeof term != "undefined" && term !== null) {
+        term.split(/\s/).forEach(function(term) {
+            var locale = 'fr-FR';
+
+            // HAS TO BE CHANGED, SEVERE PERFORMANCE ISSUES WILL COME
+
+            query.and({$where:
+                "(this.name && this.name['" + locale + "'] && this.name['" + locale + "'] || '')" +
+                ".indexOf('" + LifeData.regexpEscape(term) + "') !== -1;"
+            });
+        });
+    }
+
+    return query;
 };
 
 AchievementSchema.statics.creationValidation = {

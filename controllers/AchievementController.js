@@ -71,7 +71,9 @@ module.exports = function(app) {
 
     // get all achievements
     app.get(routeBase, function (req, res, next) {
-        return new LifeQuery(Achievement, req, res, next).exec();
+        return new LifeQuery(Achievement, req, res, next)
+            .modelStatic('term', req.query.term)
+            .exec();
     });
 
     // add a child achievement to an achievement
