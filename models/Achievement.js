@@ -59,8 +59,11 @@ AchievementSchema.statics.term = function(query, term) {
             // HAS TO BE CHANGED, SEVERE PERFORMANCE ISSUES WILL COME
 
             query.and({$where:
-                "(this.name && this.name['" + locale + "'] && this.name['" + locale + "'] || '')" +
-                ".indexOf('" + LifeData.regexpEscape(term) + "') !== -1;"
+                "(" +
+                "(this.name && this.name['" + locale + "'] && this.name['" + locale + "'] || '') + " +
+                "(this.description && this.description['" + locale + "'] && this.description['" + locale + "'] || '')" +
+                ")" +
+                ".toLowerCase().indexOf('" + term.toLowerCase() + "') !== -1;"
             });
         });
     }
