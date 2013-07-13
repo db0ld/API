@@ -32,7 +32,8 @@ LifeRouter.prototype.init = function() {
     // Handle 404
     /*
     this.app.use(function(req, res) {
-        return LifeResponse.send(req, res, null, LifeErrors.MethodNotFound);
+        return new LifeResponse(req, res)
+            .single(null, LifeErrors.MethodNotFound);
     });
     */
 };
@@ -76,7 +77,8 @@ LifeRouter.makePath = function(res) {
                     return new LifeSecurity(req, res, auth,
                         function(err) {
                            err = err ? err : LifeErrors.AuthenticationError;
-                           return LifeResponse.send(req, res, null, err);
+                           return new LifeResponse(req, res)
+                                .single(null, err);
                         }, function(req, res, next) {
                             if (typeof req.query.lang !== 'undefined') {
                                 req.lang = req.query.lang;
@@ -89,7 +91,8 @@ LifeRouter.makePath = function(res) {
                             req.body.lang = req.lang;
 
                             return cb(req, res, function(err) {
-                                return LifeResponse.send(req, res, null, err);
+                                return new LifeResponse(req, res)
+                                    .single(null, err);
                             });
                         }
                     );

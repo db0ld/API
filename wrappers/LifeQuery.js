@@ -63,8 +63,8 @@ LifeQuery.prototype.exec = function(cb) {
                 return cb(data, count);
             }
 
-            return LifeResponse.sendList(that.req, that.res,
-                data, count, null, that);
+            return new LifeResponse(that.req, that.res)
+                .list(data, count, null, that);
         });
     });
 };
@@ -104,7 +104,7 @@ LifeQuery.prototype.execOne = function(allow_empty, cb) {
             return cb(data[0]);
         }
 
-        return LifeResponse.send(that.req, that.res, data[0]);
+        return new LifeResponse(that.req, that.res).single(data[0]);
     });
 };
 
@@ -130,7 +130,7 @@ LifeQuery.prototype.remove = function(cb) {
             return cb(data);
         }
 
-        return LifeResponse.send(that.req, that.res, data);
+        return new LifeResponse.send(that.req, that.res).single(data);
     });
 };
 

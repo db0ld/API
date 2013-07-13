@@ -16,9 +16,4 @@ module.exports = function (schema, options) {
 
         return this._filepath;
     });
-
-    schema.options.toJSON = {
-        getters: true,
-        virtuals: true
-    };
 };

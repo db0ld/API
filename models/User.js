@@ -6,7 +6,6 @@ var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeData = require('../wrappers/LifeData.js'),
     regexps = LifeData.regexps;
 var LifeUpload = require('../wrappers/LifeUpload.js');
-var LifeResponse = require('../wrappers/LifeResponse.js');
 var element = require('./Element.js');
 var bcrypt = require('bcryptjs');
 
@@ -61,43 +60,29 @@ UserSchema.virtual('url').get(function () {
   return LifeConfig.website_url + 'user/' + this.login.toLowerCase();
 });
 
-UserSchema.options.toJSON = {
-    getters: true,
-    virtuals: true,
-    transform: function(doc, ret, options) {
-        obj = doc.toObject({
-          virtuals: true
-        });
-
-        delete obj.password;
-
-        if (obj.birthday) {
-                obj.birthday = LifeResponse.dateToString(doc.birthday);
-        }
-
-        if (doc._req === null || typeof doc._req !== 'object' ||
-            !doc._req.token || !doc._req.user) {
-            delete obj.email;
-            return obj;
-        }
-
-        var isFriend = false;
-
-        doc._friends.forEach(function(friend) {
-          if ((doc._req.user.id || doc._req.user) ==
-            (friend.id || friend)) {
-            isFriend = true;
-          }
-        });
-
-        if (doc._req.user.id !== doc.id) {
-          delete obj.email;
-        }
-
-        obj.is_friend = isFriend;
-
-        return obj;
+UserSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
+    if (this.birthday) {
+        doc.birthday = LifeData.dateToString(this.birthday);
     }
+
+    if (req.user) {
+        doc.is_friend = this._friends.reduce(function(prev, curr) {
+            if (prev === true) {
+                return prev;
+            }
+
+            return curr === req.user.id ||
+                curr.id === req.user.id;
+        }, false);
+    }
+
+    if (!req.user || req.user.id !== this.id) {
+        delete doc.email;
+    }
+
+    delete doc.password;
+
+    return cb(doc);
 };
 
 UserSchema.statics.queryDefaults = function() {

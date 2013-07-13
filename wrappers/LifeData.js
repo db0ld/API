@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 var LifeErrors = require('./LifeErrors.js');
-var LifeResponse = require('./LifeResponse.js');
 var LifeQuery = require('./LifeQuery.js');
 var LifeUpload = require('../wrappers/LifeUpload.js');
 
@@ -61,6 +60,8 @@ LifeData.prototype.remove = function(item, cb) {
     var that = this;
 
     item.remove(function (err) {
+        var LifeResponse = require('./LifeResponse.js');
+
         if (err) {
             var ret_err = LifeErrors.IOErrorDB;
             ret_err.message = err;
@@ -71,7 +72,7 @@ LifeData.prototype.remove = function(item, cb) {
             return cb(item);
         }
 
-        return LifeResponse.send(that.req, that.res, item);
+        return new LifeResponse(that.req, that.res).single(item);
     });
 };
 
@@ -91,11 +92,13 @@ LifeData.prototype.saveFromRequest = function(item, validation, cb) {
         }
 
         return that.save(item, function(item) {
+            var LifeResponse = require('./LifeResponse.js');
+
             if (typeof cb !== 'undefined') {
                 return cb(item, that.req, that.res, that.next);
             }
 
-            return LifeResponse.send(that.req, that.res, item);
+            return new LifeResponse.send(that.req, that.res).single(item);
         }, that.next);
     };
 
@@ -405,6 +408,52 @@ LifeData.isObjectId = function(item) {
 LifeData.regexpEscape = function(s) {
     return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
+
+/**
+ * Number padding
+ *
+ * @param {Number} num
+ * @param {Number} numZeros
+ * @static
+ */
+LifeData.zeroPad = function(num, numZeros) {
+    var n = Math.abs(num);
+    var zeros = Math.max(0, numZeros - Math.floor(n).toString().length );
+    var zeroString = Math.pow(10,zeros).toString().substr(1);
+    if( num < 0 ) {
+        zeroString = '-' + zeroString;
+    }
+
+    return zeroString+n;
+};
+
+/**
+ * Convert Date object to ISO date
+ *
+ * @param {Date} d
+ * @returns String
+ * @static
+ */
+LifeData.dateToString = function(d) {
+    return LifeData.zeroPad(d.getUTCFullYear(), 4) + '-' +
+      LifeData.zeroPad(d.getUTCMonth() + 1, 2) + '-' +
+      LifeData.zeroPad(d.getUTCDate(), 2);
+};
+
+/**
+ * Convert Date object to ISO time
+ *
+ * @param {Date} d
+ * @returns String
+ * @static
+ */
+LifeData.dateTimeToString = function(d) {
+    return LifeData.dateToString(d) + 'T' +
+      LifeData.zeroPad(d.getUTCHours(), 2) + ':' +
+      LifeData.zeroPad(d.getUTCMinutes(), 2) + ':' +
+      LifeData.zeroPad(d.getUTCSeconds(), 2) + 'Z';
+};
+
 
 LifeData.regexps = {
   'login': /^[a-zA-Z0-9-_]{3,20}$/,

@@ -2,195 +2,99 @@ var mongoose = require('mongoose');
 var LifeConfig = require('./LifeConfig.js');
 
  /**
- * Response management and serialization utility class
+ * Response management class
  *
  * @class LifeResponse
+ * @param {Object} req Express request
+ * @param {Object} res Express response
  * @constructor
  */
-var LifeResponse = function() {
-
+var LifeResponse = function(req, res) {
+  this.req = req;
+  this.res = res;
 };
 
-/**
- * Number padding
- *
- * @param {Number} num
- * @param {Number} numZeros
- * @static
- */
-LifeResponse.zeroPad = function(num, numZeros) {
-    var n = Math.abs(num);
-    var zeros = Math.max(0, numZeros - Math.floor(n).toString().length );
-    var zeroString = Math.pow(10,zeros).toString().substr(1);
-    if( num < 0 ) {
-        zeroString = '-' + zeroString;
+LifeResponse.prototype.json = function(item, cb, level) {
+  var that = this;
+  var doc = {};
+
+  if (typeof level !== 'Number') {
+    level = 0;
+  }
+
+  if (item instanceof mongoose.Document &&
+    typeof item.fullJson == 'function') {
+      return item.fullJson(that.req, that.res, level, cb);
+  } else {
+      return cb(item);
+  }
+};
+
+LifeResponse.prototype.paginate = function(in_data, out_data, size, query, cb) {
+  var that = this;
+  in_data = (typeof in_data === 'undefined') ? [] : in_data;
+  out_data = (typeof out_data === 'undefined') ? [] : out_data;
+
+  if (in_data.length === 0) {
+    size = (typeof size === 'undefined') ? out_data.length : size;
+
+    var resp = {
+      server_size: parseInt(size, 10),
+      index: (query && typeof query.offset === 'function') ? query.offset() : 0,
+      limit: (query && typeof query.limit === 'function') ? query.limit() :
+        out_data.length,
+      items: out_data
+    };
+
+    if (typeof cb == 'function') {
+      return cb(resp);
+    } else {
+      return that.single(resp);
     }
+  }
 
-    return zeroString+n;
+  return that.json(in_data.shift(), function(item) {
+    out_data.push(item);
+
+    return that.paginate(in_data, out_data, size, query, cb);
+  });
 };
 
-/**
- * Convert Date object to ISO date
- *
- * @param {Date} d
- * @returns String
- * @static
- */
-LifeResponse.dateToString = function(d) {
-    return LifeResponse.zeroPad(d.getUTCFullYear(), 4) + '-' +
-      LifeResponse.zeroPad(d.getUTCMonth() + 1, 2) + '-' +
-      LifeResponse.zeroPad(d.getUTCDate(), 2);
-};
+LifeResponse.prototype.single = function(data, err) {
+    var that = this;
 
-/**
- * Convert Date object to ISO time
- *
- * @param {Date} d
- * @returns String
- * @static
- */
-LifeResponse.dateTimeToString = function(d) {
-    return LifeResponse.dateToString(d) + 'T' +
-      LifeResponse.zeroPad(d.getUTCHours(), 2) + ':' +
-      LifeResponse.zeroPad(d.getUTCMinutes(), 2) + ':' +
-      LifeResponse.zeroPad(d.getUTCSeconds(), 2) + 'Z';
-};
-
-/**
- * Create a JSON proof representation of a document
- *
- * @param {Object} req
- * @param {Object} res
- * @param {*} item
- * @param {Number} level
- * @returns Object
- * @static
- */
-LifeResponse.toJSON = function(req, res, item, level) {
-    if (typeof level != 'Number') {
-      level = 0;
-    }
-
-    if (item instanceof mongoose.Document) {
-      item._req = req;
-
-      var doc = item.toJSON();
-
-      for (var i in doc) {
-          if (typeof doc['-' + i] !== 'undefined') {
-            delete doc['-' + i];
-
-            if (item[i] instanceof Array) {
-              doc[i] = item[i].map(function(array_item) {
-                return LifeResponse.toJSON(req, res, array_item, level + 1);
-              });
-            }
-          } else if (i.substring(0, 1) == '_') {
-            delete doc[i];
-          } else if (doc[i] instanceof Date) {
-              doc[i] = LifeResponse.dateTimeToString(doc[i]);
-          } else if (doc[i] instanceof Array) {
-              var length = item[i].length;
-              doc[i] = LifeResponse.paginatedList(req, res, item[i], length);
-          } else if (item[i] && item[i] instanceof mongoose.Document) {
-              if (level == 3) {
-                doc[i] = item[i]._id;
-              } else {
-                doc[i] = LifeResponse.toJSON(req, res, item[i], level + 1);
-              }
-          }
-      }
-
-      return doc;
-    }
-
-    return item;
-};
-
-/**
- * Create a paginated list response
- *
- * @param {Object} req
- * @param {Object} res
- * @param {Object} in_data
- * @param {Number} serverSize
- * @param {Object} [query]
- * @return Object
- * @static
- */
-LifeResponse.paginatedList = function(req, res, in_data, serverSize, query) {
-  data = (typeof in_data === 'undefined') ?
-    [] : in_data;
-
-    data = data.map(function(item) {
-      return LifeResponse.toJSON(req, res, item);
-    });
-
-  serverSize = (typeof serverSize === 'undefined') ?
-    data.length : serverSize;
-
-  return {
-    server_size: parseInt(serverSize, 10),
-    index: (query && typeof query.offset === 'function') ? query.offset()
-      : 0,
-    limit: (query && typeof query.limit === 'function') ? query.limit()
-      : in_data.length,
-    items: data
-  };
-};
-
-/**
- * Send response
- *
- * @param {Object} req
- * @param {Object} res
- * @param {*} data
- * @param {Object} [error]
- * @static
- */
-LifeResponse.send = function(req, res, data, error) {
     // handling empty parameters
     data = (typeof data === 'undefined') ?
       null : data;
 
-    data = LifeResponse.toJSON(req, res, data);
+    return that.json(data, function(data) {
+      data = {
+        'error': typeof err === 'undefined' ? null : err,
+        'element': data
+      };
 
-    var returnData = {
-      'error': typeof error === 'undefined' ? null : error,
-      'element': data
-    };
+      if (LifeConfig.dev && err !== null && typeof err !== 'undefined') {
+        console.error(err);
+      }
 
-    if (LifeConfig.dev && error !== null && typeof error !== 'undefined') {
-      console.error(error);
-    }
+      var http_code = 200;
+      if (err && err.http) {
+        http_code = err.http;
+        delete err.http;
+      }
 
-    if (req && req.query.callback) {
-        return res.jsonp(returnData);
-    }
+      if (that.req && that.req.query.callback) {
+          return that.res.jsonp(http_code, data);
+      }
 
-    var http_code = 200;
-    if (error && error.http) {
-      http_code = error.http;
-      delete error.http;
-    }
-
-    return res.send(http_code, returnData);
+      return that.res.json(http_code, data);
+    });
 };
 
-/**
- * Send list response
- *
- * @param {Object} req
- * @param {Object} res
- * @param {Array} data
- * @param {Number} serverSize
- * @param {Object} [error]
- * @param {Object} [query]
- * @static
- */
-LifeResponse.sendList = function(req, res, data, serverSize, error, query) {
-  data = LifeResponse.paginatedList(req, res, data, serverSize, query);
-  return LifeResponse.send(req, res, data, error);
+LifeResponse.prototype.list = function(data, size, err, query) {
+  var that = this;
+
+  return that.paginate(data, [], size, query);
 };
 
 module.exports = LifeResponse;

@@ -59,9 +59,13 @@ module.exports = function(app) {
                 }
 
                 Message.findByConversation(messagesQuery = new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
-                    conversation = LifeResponse.toJSON(req, res, conversation);
-                    conversation.messages = LifeResponse.paginatedList(req, res, messages, count, messagesQuery);
-                    return LifeResponse.send(req, res, conversation);
+                    var resp = new LifeResponse(req, res);
+                    return resp.json(conversation, function(conversation) {
+                        return resp.paginate(messages, count, messagesQuery, null, function (messages) {
+                            conversation.messages = messages;
+                            return resp.single(req, res, conversation);
+                        });
+                    });
                 });
             });
         });
@@ -187,7 +191,7 @@ module.exports = function(app) {
                     return next(LifeErrors.NotFound);
                 }
 
-                return LifeResponse.send(req, res, user.avatar);
+                return new LifeResponse(req, res).single(user.avatar);
             });
     });
 

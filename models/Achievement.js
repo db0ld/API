@@ -19,28 +19,14 @@ AchievementSchema.virtual('url').get(function () {
 
 AchievementSchema.plugin(element);
 
-AchievementSchema.options.toJSON = {
-    getters: true,
-    virtuals: true,
-    transform: function(doc, ret, options) {
-        obj = doc.toObject({
-          virtuals: true
-        });
-
-        var lang = 'en-US';
-
-        if (doc._req !== null && typeof doc._req == 'object' && doc._req.lang) {
-            lang = doc._req.lang;
-        }
-
-        if (obj.description !== null && typeof obj.description == 'object') {
-            obj.description = LifeData.i18nPicker(obj.description, lang);
-        }
-
-        obj.name = LifeData.i18nPicker(obj.name, lang);
-
-        return obj;
+AchievementSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
+    if (doc.description !== null && typeof doc.description == 'object') {
+        doc.description = LifeData.i18nPicker(doc.description, req.lang);
     }
+
+    doc.name = LifeData.i18nPicker(doc.name, req.lang);
+
+    return cb(doc);
 };
 
 AchievementSchema.statics.queryDefaults = function() {
