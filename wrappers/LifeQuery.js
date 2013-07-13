@@ -130,7 +130,7 @@ LifeQuery.prototype.remove = function(cb) {
             return cb(data);
         }
 
-        return new LifeResponse.send(that.req, that.res).single(data);
+        return new LifeResponse(that.req, that.res).single(data);
     });
 };
 

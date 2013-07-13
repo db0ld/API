@@ -58,15 +58,7 @@ module.exports = function(app) {
                     return createConversation(new LifeData(Conversation, req, res, next), user, req.user);
                 }
 
-                Message.findByConversation(messagesQuery = new LifeQuery(Message, req, res, next), conversation).exec(function (messages, count) {
-                    var resp = new LifeResponse(req, res);
-                    return resp.json(conversation, function(conversation) {
-                        return resp.paginate(messages, count, messagesQuery, null, function (messages) {
-                            conversation.messages = messages;
-                            return resp.single(req, res, conversation);
-                        });
-                    });
-                });
+                return new LifeResponse(req, res).single(conversation);
             });
         });
     }, true);

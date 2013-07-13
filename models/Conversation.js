@@ -1,5 +1,8 @@
 var mongoose = require('mongoose');
 var element = require('./Element.js');
+var Message = require('mongoose').model('Message');
+var LifeResponse = require('../wrappers/LifeResponse.js');
+var LifeQuery = require('../wrappers/LifeQuery.js');
 
 var ConversationSchema = new mongoose.Schema({
     referenced_users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
@@ -26,6 +29,22 @@ ConversationSchema.virtual('messages').get(function() {
     return [];
 });
 
+ConversationSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
+    doc.referenced_users = doc.referenced_users.items;
+
+    var messagesQuery = new LifeQuery(Message, req, res);
+    return messagesQuery.modelStatic('findByConversation', this)
+        .exec(function (messages, size) {
+
+            return new LifeResponse(req, res)
+                .paginate(messages, [], size, messagesQuery, function(mess) {
+                    doc.messages = mess;
+                    return cb(doc);
+                });
+
+    });
+};
+
 ConversationSchema.statics.findByUser = function(query, user) {
     var user_ids = [];
 
@@ -37,22 +56,7 @@ ConversationSchema.statics.findByUser = function(query, user) {
         }
     });
 
-    return query
-        .in('referenced_users', users);
-};
-
-ConversationSchema.options.toJSON = {
-    getters: true,
-    virtuals: true,
-    transform: function(doc, ret, options) {
-        obj = doc.toObject({
-          virtuals: true
-        });
-
-        obj['-referenced_users'] = true;
-
-        return obj;
-    }
+    return query.in('referenced_users', users);
 };
 
 ConversationSchema.statics.queryDefaults = function() {

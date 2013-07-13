@@ -19,15 +19,15 @@ var AchievementStatusSchema = new mongoose.Schema({
 AchievementStatusSchema.plugin(element);
 
 AchievementStatusSchema.virtual('score').get(function() {
-    return this._approvers - this._non_approvers;
+    return 0;
 });
 
 AchievementStatusSchema.virtual('approvers_count').get(function() {
-    return this._approvers.length;
+    return (this._approvers && this._approvers.length) || 0;
 });
 
 AchievementStatusSchema.virtual('non_approvers_count').get(function() {
-    return this._non_approvers.length;
+    return (this._non_approvers || this._non_approvers.length) || 0;
 });
 
 AchievementStatusSchema.virtual('state_code').get(function() {
