@@ -98,7 +98,8 @@ LifeData.prototype.saveFromRequest = function(item, validation, cb) {
                 return cb(item, that.req, that.res, that.next);
             }
 
-            return new LifeResponse.send(that.req, that.res).single(item);
+            return new LifeQuery(that.model, that.req, that.res)
+                .findById(item._id);
         }, that.next);
     };
 
