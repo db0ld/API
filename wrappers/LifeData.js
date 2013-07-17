@@ -402,7 +402,7 @@ LifeData.i18nPicker = function(strings, lang) {
  */
 LifeData.isObjectId = function(item) {
     return (item instanceof ObjectId ||
-        (item && typeof item == "string" && (item.length == 24)));
+        (item && item.toString && item.toString().match(/[0-9a-fA-F]{24}/)));
 };
 
 

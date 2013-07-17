@@ -33,6 +33,7 @@ var LifeQuery = function(model, req, res, next, query) {
     this._limit = parseInt(this._limit, 10);
     this._offset = parseInt(this._offset, 10);
     this._populate = this.model.queryDefaults().populate;
+    this._sort = this.model.queryDefaults().sort || 'creation';
 
     return this;
 };
@@ -50,6 +51,7 @@ LifeQuery.prototype.exec = function(cb) {
         that._query.limit(that._limit);
         that._query.skip(that._offset);
         that._query.populate(that._populate);
+        that._query.sort(that._sort);
 
         that._query.find();
 
@@ -83,6 +85,7 @@ LifeQuery.prototype.execOne = function(allow_empty, cb) {
     allow_empty = typeof allow_empty === 'undefined' ? false : allow_empty;
 
     that._query.populate(that._populate);
+    that._query.sort(that._sort);
 
     that._query.find(function(err, data) {
         if (err) {
@@ -119,6 +122,7 @@ LifeQuery.prototype.remove = function(cb) {
     var that = this;
 
     that._query.populate(that._populate);
+    that._query.sort(that._sort);
 
     that._query.remove(function(err, data) {
         if (err) {
@@ -262,7 +266,7 @@ LifeQuery.prototype.inList = function(ids) {
 };
 
 
-['query', 'limit', 'offset', 'populate'].forEach(function (property) {
+['query', 'limit', 'offset', 'populate', 'sort'].forEach(function (property) {
     LifeQuery.prototype[property] = function(val) {
         if (typeof val === 'undefined') {
             return this['_' + property];
