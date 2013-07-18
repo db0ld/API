@@ -42,6 +42,15 @@ module.exports = function(app) {
             });
     });
 
+    app.get('feed', function(req, res, next) {
+        var query = new LifeQuery(AchievementStatus, req, res, next);
+
+        return query.exec(function(achievementStatuses, count) {
+                return new LifeResponse(req, res)
+                    .list(achievementStatuses.map(wrapAchievementStatus), count, null, query);
+            });
+    });
+
     //app.delete('users/:user_id/' + routeBase + '/:id', function(req, res, next) {
 
     //});
