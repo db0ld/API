@@ -19,7 +19,8 @@ var AchievementStatusSchema = new mongoose.Schema({
 AchievementStatusSchema.plugin(element);
 
 AchievementStatusSchema.virtual('score').get(function() {
-    return 0;
+    return ((this._approvers && this._approvers.length) || 0) -
+        ((this._non_approvers && this._non_approvers.length) || 0);
 });
 
 AchievementStatusSchema.virtual('approvers_count').get(function() {
