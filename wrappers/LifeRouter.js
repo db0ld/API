@@ -29,6 +29,10 @@ LifeRouter.prototype.init = function() {
         }
     });
 
+    this.app.options('*', function(req, res, next) {
+        return new LifeResponse(req, res).single();
+    });
+
     // Handle 404
     /*
     this.app.use(function(req, res) {

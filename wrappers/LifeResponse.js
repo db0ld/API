@@ -88,6 +88,10 @@ LifeResponse.prototype.single = function(data, err) {
         delete err.http;
       }
 
+      that.res.header('Access-Control-Allow-Origin', '*');
+      that.res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      that.res.header('Access-Control-Allow-Headers', 'Content-Type');
+
       if (that.req && that.req.query.callback) {
           return that.res.jsonp(http_code, data);
       }
