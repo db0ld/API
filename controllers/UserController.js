@@ -86,7 +86,7 @@ module.exports = function(app) {
                     var message = new Message({
                         sender_ref: sender_ref,
                         content: req.body.message,
-                        conversation: conversation._id
+                        _conversation: conversation._id
                     });
 
                     return new LifeData(Message, req, res, next).save(message);

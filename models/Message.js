@@ -3,7 +3,7 @@ var mongoose = require('mongoose'),
 var element = require('./Element.js');
 
 var MessageSchema = new mongoose.Schema({
-    conversation: {type : ObjectId, ref: 'Conversation', required: true },
+    _conversation: {type : ObjectId, ref: 'Conversation', required: true },
     sender_ref: { type: Number, required: true },
     content: {type: String, required: true }
 });
@@ -20,14 +20,14 @@ MessageSchema.statics.queryDefaults = function() {
 
 MessageSchema.statics.findByConversation = function(query, conversation) {
     return query.and({
-        conversation: conversation
+        _conversation: conversation
     });
 };
 
 MessageSchema.statics.findByConversationAndId = function(query, conversation,
     id) {
     return query.and({
-        conversation: conversation,
+        _conversation: conversation,
         _id: id
     });
 };

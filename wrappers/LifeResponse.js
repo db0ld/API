@@ -30,8 +30,13 @@ LifeResponse.prototype.json = function(item, cb, level) {
   }
 };
 
-LifeResponse.prototype.paginate = function(in_data, out_data, size, query, cb) {
+LifeResponse.prototype.paginate = function(in_data, out_data, size, query, cb, level) {
   var that = this;
+
+  if (typeof level !== 'Number') {
+    level = 0;
+  }
+
   in_data = (typeof in_data === 'undefined') ? [] : in_data;
   out_data = (typeof out_data === 'undefined') ? [] : out_data;
 
@@ -56,8 +61,8 @@ LifeResponse.prototype.paginate = function(in_data, out_data, size, query, cb) {
   return that.json(in_data.shift(), function(item) {
     out_data.push(item);
 
-    return that.paginate(in_data, out_data, size, query, cb);
-  });
+    return that.paginate(in_data, out_data, size, query, cb, level);
+  }, level);
 };
 
 LifeResponse.prototype.single = function(data, err) {
