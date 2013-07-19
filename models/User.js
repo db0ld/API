@@ -8,6 +8,7 @@ var LifeData = require('../wrappers/LifeData.js'),
 var LifeUpload = require('../wrappers/LifeUpload.js');
 var element = require('./Element.js');
 var bcrypt = require('bcryptjs');
+var crypto = require('crypto');
 
 var UserSchema = new mongoose.Schema({
     login: { type : String, match: regexps.login, required: true, unique: true},
@@ -81,6 +82,26 @@ UserSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
     }
 
     delete doc.password;
+
+    // Gravatar to be deleted someday
+    if (!this.avatar) {
+        var gravatar_url = require('crypto')
+            .createHash('md5')
+            .update(this.email.trim().toLowerCase())
+            .digest('hex');
+
+        gravatar_url = 'http://www.gravatar.com/avatar/' + gravatar_url;
+
+        doc.avatar = {
+            modification: LifeData.dateTimeToString(new Date()),
+            title: "untitled",
+            creation: LifeData.dateTimeToString(new Date()),
+            url_big: gravatar_url,
+            url_small: gravatar_url,
+            url: gravatar_url,
+            id: "000000000000000000000000"
+        };
+    }
 
     return cb(doc);
 };
