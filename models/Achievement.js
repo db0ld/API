@@ -33,7 +33,7 @@ AchievementSchema.statics.queryDefaults = function() {
     return {
         'populate': 'child_achievements badge',
         'limit': 10,
-        'offset': 0
+        'index': 0
     };
 };
 

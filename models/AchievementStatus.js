@@ -54,7 +54,7 @@ AchievementStatusSchema.statics.queryDefaults = function() {
     return {
         'populate': 'achievement attached_picture owner',
         'limit': 10,
-        'offset': 0,
+        'index': 0,
         'sort': '-creation'
     };
 };

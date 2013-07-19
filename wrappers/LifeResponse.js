@@ -45,7 +45,7 @@ LifeResponse.prototype.paginate = function(in_data, out_data, size, query, cb, l
 
     var resp = {
       server_size: parseInt(size, 10),
-      index: (query && typeof query.offset === 'function') ? query.offset() : 0,
+      index: (query && typeof query.index === 'function') ? query.index() : 0,
       limit: (query && typeof query.limit === 'function') ? query.limit() :
         out_data.length,
       items: out_data

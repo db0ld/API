@@ -89,7 +89,7 @@ UserSchema.statics.queryDefaults = function() {
     return {
         'populate': '_achievements _friends avatar',
         'limit': 10,
-        'offset': 0
+        'index': 0
     };
 };
 

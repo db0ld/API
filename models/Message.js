@@ -14,7 +14,7 @@ MessageSchema.statics.queryDefaults = function() {
     return {
         'populate': '',
         'limit': 10,
-        'offset': 0
+        'index': 0
     };
 };
 

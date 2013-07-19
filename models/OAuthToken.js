@@ -17,7 +17,7 @@ OAuthTokenSchema.statics.queryDefaults = function() {
     return {
         'populate': 'user',
         'limit': 10,
-        'offset': 0
+        'index': 0
     };
 };
 

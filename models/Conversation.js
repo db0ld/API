@@ -63,7 +63,7 @@ ConversationSchema.statics.queryDefaults = function() {
     return {
         'populate': 'referenced_users',
         'limit': 10,
-        'offset': 0
+        'index': 0
     };
 };
 

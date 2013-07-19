@@ -27,11 +27,11 @@ var LifeQuery = function(model, req, res, next, query) {
             : model.find();
     this._limit = this.req && this.req.query.limit ? this.req.query.limit
         : this.model.queryDefaults().limit;
-    this._offset = this.req && this.req.query.offset ? this.req.query.offset
-        : this.model.queryDefaults().offset;
+    this._index = this.req && this.req.query.index ? this.req.query.index
+        : this.model.queryDefaults().index;
 
     this._limit = parseInt(this._limit, 10);
-    this._offset = parseInt(this._offset, 10);
+    this._index = parseInt(this._index, 10);
     this._populate = this.model.queryDefaults().populate;
     this._sort = this.model.queryDefaults().sort || 'creation';
 
@@ -49,7 +49,7 @@ LifeQuery.prototype.exec = function(cb) {
 
     return that._query.count(function (err, count) {
         that._query.limit(that._limit);
-        that._query.skip(that._offset);
+        that._query.skip(that._index);
         that._query.populate(that._populate);
         that._query.sort(that._sort);
 
@@ -266,7 +266,7 @@ LifeQuery.prototype.inList = function(ids) {
 };
 
 
-['query', 'limit', 'offset', 'populate', 'sort'].forEach(function (property) {
+['query', 'limit', 'index', 'populate', 'sort'].forEach(function (property) {
     LifeQuery.prototype[property] = function(val) {
         if (typeof val === 'undefined') {
             return this['_' + property];

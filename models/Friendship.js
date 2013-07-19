@@ -19,7 +19,7 @@ FriendshipSchema.statics.queryDefaults = function() {
     return {
         'populate': 'sender receiver',
         'limit': 10,
-        'offset': 0
+        'index': 0
     };
 };
 
