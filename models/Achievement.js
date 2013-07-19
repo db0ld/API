@@ -63,6 +63,12 @@ AchievementSchema.statics.creationValidation = {
     'badge': { type: LifeUpload.Avatar, required: false }
 };
 
+AchievementSchema.statics.modificationValidation = {
+    'name': {type: String, required: false},
+    'description': {type: String, required: false},
+    'badge': { type: LifeUpload.Avatar, required: false }
+};
+
 var Achievement = mongoose.model('Achievement', AchievementSchema);
 
 module.exports = Achievement;

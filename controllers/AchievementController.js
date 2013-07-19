@@ -8,8 +8,10 @@ var LifeResponse = require('../wrappers/LifeResponse.js');
 module.exports = function(app) {
     var routeBase = 'achievements';
 
-    var bindRequestToAchievement = function(req, res, next, achievement, cb) {
-        new LifeData(Achievement, req, res, next).whitelist(Achievement.creationValidation, null, function(params) {
+    var bindRequestToAchievement = function(req, res, next, achievement, cb, create) {
+        new LifeData(Achievement, req, res, next).whitelist(
+                create ? Achievement.creationValidation
+                    : Achievement.modificationValidation, null, function(params) {
             if (achievement.name === null || typeof achievement.name !== 'object') {
                 achievement.name = {};
             }
@@ -43,7 +45,7 @@ module.exports = function(app) {
 
         return bindRequestToAchievement(req, res, next, achievement, function(achievement) {
             return new LifeData(Achievement, req, res, next).save(achievement);
-        });
+        }, true);
     }, [LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT]);
 
     // get a single achievement
