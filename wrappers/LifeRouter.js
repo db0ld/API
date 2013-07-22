@@ -3,6 +3,7 @@ var LifeSecurity = require('./LifeSecurity.js');
 var LifeResponse = require('./LifeResponse.js');
 var LifeConfig = require('./LifeConfig.js');
 var LifeErrors = require('./LifeErrors.js');
+var LifeData = require('./LifeData.js');
 
 /**
  * An utility class that routes requests on top of ExpressJS.
@@ -12,6 +13,8 @@ var LifeErrors = require('./LifeErrors.js');
  */
 var LifeRouter = function(app) {
     this.app = app;
+
+    this.documentation = [];
 };
 
 /**
@@ -32,14 +35,138 @@ LifeRouter.prototype.init = function() {
     this.app.options('*', function(req, res, next) {
         return new LifeResponse(req, res).single();
     });
+};
 
-    // Handle 404
-    /*
-    this.app.use(function(req, res) {
-        return new LifeResponse(req, res)
-            .single(null, LifeErrors.MethodNotFound);
+LifeRouter.Method = function(router, method, route, priv) {
+    priv = typeof priv === 'undefined' ? true : priv;
+
+    this._router = router;
+    this._method = method;
+
+    this._routes = [{
+        route: route,
+        priv: priv
+    }];
+
+    this._doc = 'Undocumented';
+    this._input = {};
+    this._output = {};
+    this._errors = [];
+    this._auth = false;
+    this._list = false;
+};
+
+LifeRouter.Method.prototype.route = function(route, priv) {
+    priv = typeof priv === 'undefined' ? true : priv;
+
+    this._routes.push({
+        route: route,
+        priv: priv
     });
-    */
+
+    return this;
+};
+
+LifeRouter.Method.prototype.doc = function(doc) {
+    this._doc = doc;
+
+    return this;
+};
+
+LifeRouter.Method.prototype.list = function() {
+    this._list = true;
+
+    return this;
+};
+
+LifeRouter.Method.prototype.auth = function(auth) {
+    this._auth = auth;
+
+    return this;
+};
+
+LifeRouter.Method.prototype.input = function(input) {
+    this._input = input;
+
+    return this;
+};
+
+LifeRouter.Method.prototype.error = function(error) {
+    this._errors.push(error);
+
+    return this;
+};
+
+LifeRouter.Method.prototype.output = function(output) {
+    this._output = output;
+
+    return this;
+};
+
+LifeRouter.Method.prototype.add = function(cb) {
+    var that = this;
+
+    // Input sanitization
+    var cb1 = function(req, res, next) {
+        new LifeData(null, req, res, next).whitelist(that._input, null,
+            function(input) {
+                return cb(req, res, next, input);
+            }
+        );
+    };
+
+    // Language detection
+    var cb2 = function(req, res, next) {
+        if (typeof req.query.lang !== 'undefined') {
+            req.lang = req.query.lang;
+        } else if (typeof req.body.lang !== 'undefined') {
+            req.lang = req.body.lang;
+        }
+
+        req.query.lang = req.lang;
+        req.body.lang = req.lang;
+
+        return cb1(req, res, next);
+    };
+
+    // Auth
+    var cb3 = function(req, res) {
+        return new LifeSecurity(req, res, that._auth, cb2);
+    };
+
+    // Debug
+    var cb4 = function(req, res) {
+        if (LifeConfig.dev) {
+            console.log(new Array(80).join('-').toString());
+            console.log(new Date().toISOString());
+            console.log(that._method + ': ' + req.url);
+            if (req.body && Object.keys(req.body).length) {
+                console.log('PARAMS POST: ' +
+                    JSON.stringify(req.body, null, 4));
+            }
+        }
+
+        return cb3(req, res);
+    };
+
+    that._routes.forEach(function(route) {
+        route = LifeRouter.makePath(route.route);
+        that._router.app[that._method](route, cb4);
+
+        that._router.documentation.push({
+            doc: that._doc,
+            route: route,
+            priv: that._priv,
+            auth: that._auth,
+            input: that._input,
+            output: that._output,
+            errors: that._errors,
+            method: that._method,
+            list: that._list
+        });
+    });
+
+    return that._router;
 };
 
 /**
@@ -52,57 +179,33 @@ LifeRouter.makePath = function(res) {
   return LifeConfig['api_path'] + 'v' + LifeConfig['version'] + '/' + res;
 };
 
-['get', 'post', 'put', 'delete', 'patch', 'head']
-    .forEach(function(method) {
-        LifeRouter.prototype[method] = function(endpoint, cb, auth) {
-            var that = this;
 
-            if (typeof endpoint === 'string') {
-                endpoint = [endpoint];
-            }
+LifeRouter.prototype.Get = function(route, priv) {
+    return new LifeRouter.Method(this, 'get', route, priv);
+};
 
-            endpoint = endpoint.map(function(item) {
-                return LifeRouter.makePath(item);
-            });
+LifeRouter.prototype.Post = function(route, priv) {
+    return new LifeRouter.Method(this, 'post', route, priv);
+};
 
-            endpoint.forEach(function(route) {
-                that.app[method](route, function(req, res, next) {
+LifeRouter.prototype.Put = function(route, priv) {
+    return new LifeRouter.Method(this, 'put', route, priv);
+};
 
-                    if (LifeConfig.dev) {
-                        console.log(new Array(80).join('-').toString());
-                        console.log(new Date().toISOString());
-                        console.log(method + ': ' + req.url);
-                        if (req.body && Object.keys(req.body).length) {
-                            console.log('PARAMS POST: ' +
-                                JSON.stringify(req.body, null, 4));
-                        }
-                    }
+LifeRouter.prototype.Delete = function(route, priv) {
+    return new LifeRouter.Method(this, 'delete', route, priv);
+};
 
-                    return new LifeSecurity(req, res, auth,
-                        function(err) {
-                           err = err ? err : LifeErrors.AuthenticationError;
-                           return new LifeResponse(req, res)
-                                .single(null, err);
-                        }, function(req, res, next) {
-                            if (typeof req.query.lang !== 'undefined') {
-                                req.lang = req.query.lang;
-                            } else if (typeof req.body.lang !== 'undefined') {
-                                req.lang = req.body.lang;
-                            }
+LifeRouter.prototype.Patch = function(route, priv) {
+    return new LifeRouter.Method(this, 'patch', route, priv);
+};
 
-                            // Overwrite missing parameters
-                            req.query.lang = req.lang;
-                            req.body.lang = req.lang;
+LifeRouter.prototype.Head = function(route, priv) {
+    return new LifeRouter.Method(this, 'head', route, priv);
+};
 
-                            return cb(req, res, function(err) {
-                                return new LifeResponse(req, res)
-                                    .single(null, err);
-                            });
-                        }
-                    );
-                });
-            });
-        };
-    });
+LifeRouter.prototype.Options = function(route, priv) {
+    return new LifeRouter.Method(this, 'options', route, priv);
+};
 
 module.exports = LifeRouter;

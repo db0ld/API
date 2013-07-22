@@ -3,6 +3,7 @@ var OAuthToken = require('mongoose').model('OAuthToken');
 var LifeQuery = require('../wrappers/LifeQuery.js');
 var LifeErrors = require('../wrappers/LifeErrors.js');
 var LifeConfig = require('./LifeConfig.js');
+var LifeResponse = require('./LifeResponse.js');
 
 /**
  * An utility class that performs security checks.
@@ -12,15 +13,20 @@ var LifeConfig = require('./LifeConfig.js');
  * @param {Object} req
  * @param {Object} res
  * @param {*} auth
- * @param {Function} next
  * @param {Function} cb
  * @class LifeSecurity
  * @constructor
  */
-var LifeSecurity = function(req, res, auth, next, cb) {
+var LifeSecurity = function(req, res, auth, cb) {
     this.req = req;
     this.res = res;
-    this.next = next;
+
+    var next = function(err) {
+        err = err ? err : LifeErrors.AuthenticationError;
+
+       return new LifeResponse(req, res).single(null, err);
+    };
+
     req.security = this;
 
     var src_user_id = req.body.src_user_id || req.query.src_user_id;
@@ -65,7 +71,7 @@ var LifeSecurity = function(req, res, auth, next, cb) {
             return callback(req, res, next);
         });
     } else {
-        if (typeof auth !== 'undefined') {
+        if (typeof auth !== 'undefined' && auth !== false) {
             return next(LifeErrors.AuthenticationRequired);
         }
 
