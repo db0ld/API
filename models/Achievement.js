@@ -1,10 +1,10 @@
-var mongoose = require('mongoose');
-var ObjectId = mongoose.Schema.Types.ObjectId;
-var LifeConfig = require('../wrappers/LifeConfig.js');
-var LifeData = require('../wrappers/LifeData.js');
-var Picture = mongoose.model('Picture');
-var LifeUpload = require('../wrappers/LifeUpload.js');
-var element = require('./Element.js');
+var mongoose = require('mongoose'),
+    ObjectId = mongoose.Schema.Types.ObjectId,
+    LifeConfig = require('../wrappers/LifeConfig.js'),
+    LifeData = require('../wrappers/LifeData.js'),
+    Picture = mongoose.model('Picture'),
+    LifeUpload = require('../wrappers/LifeUpload.js'),
+    element = require('./Element.js');
 
 var AchievementSchema = new mongoose.Schema({
     name: mongoose.Schema.Types.Mixed,
@@ -18,6 +18,8 @@ AchievementSchema.virtual('url').get(function () {
 });
 
 AchievementSchema.plugin(element);
+
+
 
 AchievementSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
     if (doc.description !== null && typeof doc.description == 'object') {

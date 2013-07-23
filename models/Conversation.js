@@ -1,8 +1,8 @@
-var mongoose = require('mongoose');
-var element = require('./Element.js');
-var Message = require('mongoose').model('Message');
-var LifeResponse = require('../wrappers/LifeResponse.js');
-var LifeQuery = require('../wrappers/LifeQuery.js');
+var mongoose = require('mongoose'),
+    element = require('./Element.js'),
+    Message = require('mongoose').model('Message'),
+    LifeResponse = require('../wrappers/LifeResponse.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js');
 
 var ConversationSchema = new mongoose.Schema({
     referenced_users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]

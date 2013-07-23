@@ -1,5 +1,5 @@
-var LifeData = require('../wrappers/LifeData.js');
-var element = require('./Element.js');
+var LifeData = require('../wrappers/LifeData.js'),
+    element = require('./Element.js');
 
 module.exports = function (schema, options) {
     schema.plugin(element);

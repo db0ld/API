@@ -1,10 +1,10 @@
-var Achievement = require('mongoose').model('Achievement');
-var LifeErrors = require('../wrappers/LifeErrors.js');
-var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeData = require('../wrappers/LifeData.js');
-var LifeSecurity = require('../wrappers/LifeSecurity.js');
+var Achievement = require('mongoose').model('Achievement'),
+    LifeErrors = require('../wrappers/LifeErrors.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeData = require('../wrappers/LifeData.js'),
+    LifeSecurity = require('../wrappers/LifeSecurity.js'),
+    routeBase = 'achievements';
 
-var routeBase = 'achievements';
 
 var bindRequestToAchievement = function(req, res, next, achievement, cb, create) {
     new LifeData(Achievement, req, res, next).whitelist(
@@ -44,6 +44,7 @@ module.exports = function(router) {
 
     .Post(routeBase)
         .doc('Create an achievement')
+        .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next) {
             var achievement = new Achievement();
@@ -56,6 +57,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:achievement_id')
         .doc('Get achievement')
+        .output(Achievement)
         .add(function (req, res, next) {
             return new LifeQuery(Achievement, req, res, next).findById(req.params.achievement_id);
         })
@@ -63,6 +65,7 @@ module.exports = function(router) {
 
     .Put(routeBase + '/:id')
         .doc('Modify an achievement')
+        .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next) {
             return new LifeQuery(Achievement, req, res, next).findById(req.params.id, function(achievement) {
@@ -79,6 +82,7 @@ module.exports = function(router) {
 
     .Delete(routeBase + '/:id')
         .doc('Delete an achievement')
+        .output(Number)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function(req, res, next) {
             return new LifeQuery(Achievement, req, res, next, {_id: req.params.id})
@@ -88,7 +92,7 @@ module.exports = function(router) {
 
     .Get(routeBase)
         .doc('Get achievements')
-        .list()
+        .list(Achievement)
         .add(function (req, res, next) {
             return new LifeQuery(Achievement, req, res, next)
                 .modelStatic('term', req.query.term)
@@ -98,6 +102,7 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:id/children')
         .doc('Add a child achievement to parent')
+        .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next) {
             new LifeData(Achievement, req, res, next).whitelist({achievement_id: {type: String}}, null, function(params) {
@@ -120,6 +125,7 @@ module.exports = function(router) {
 
     .Delete(routeBase + '/:id/children/:child_id')
         .doc('Remove a child achievement from parent')
+        .output(Number)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next) {
             return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
@@ -141,7 +147,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:id/children')
         .doc('Get child achievements')
-        .list()
+        .list(Achievement)
         .add(function(req, res, next) {
             return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
                 if (achievement === null) {
@@ -155,7 +161,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:id/parents')
         .doc('Get parent achievements')
-        .list()
+        .list(Achievement)
         .add(function(req, res, next) {
             return new LifeQuery(Achievement, req, res, next, {child_achievements: req.params.id}).exec();
         });

@@ -1,6 +1,6 @@
 var mongoose = require('mongoose'),
-    ObjectId = mongoose.Schema.Types.ObjectId;
-var element = require('./Element.js');
+    ObjectId = mongoose.Schema.Types.ObjectId,
+    element = require('./Element.js');
 
 var MessageSchema = new mongoose.Schema({
     _conversation: {type : ObjectId, ref: 'Conversation', required: true },

@@ -3,36 +3,132 @@
 <head>
     <title>Life API - Documentation</title>
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script>
+    $(function() {
+        $(document).on('click', 'h3, .method-summary', function(evt) {
+            $(this).closest('div').children('div').toggleClass('hide');
+        });
+    });
+    </script>
     <style>
         .method-label {
             width: 50px;
             text-align: center;
         }
+
+        h3, .method-summary {
+            cursor: pointer;
+        }
     </style>
+    <% var typeDisplayer = function(obj) { %>
+        <% if (typeof obj == 'function' && new obj() instanceof mongoose.Document) { %>
+            <%= obj.modelName %>
+        <% } else if (obj == Number) { %>
+            Number
+        <% } else if (obj == String || obj instanceof RegExp) { %>
+            String
+        <% } else if (obj == Boolean) { %>
+            Boolean
+        <% } else if (obj == Date) { %>
+            Date
+        <% } else if (obj instanceof LifeUpload) { %>
+            File
+        <% } %>
+    <% } %>
 </head>
 <body>
     <div class="container">
     <h1>Life API - Documentation</h1>
-        <% for (var i = 0; i < doc.length; i++) { %>
-            <div class="alert
-                <% if (doc[i]['method'] == 'get') {%>alert-info<% }%>
-                <% if (doc[i]['method'] == 'post') {%>alert-success<% }%>
-                <% if (doc[i]['method'] == 'put') {%>alert-warning<% }%>
-                <% if (doc[i]['method'] == 'delete') {%>alert-error<% }%>
-            ">
-                <span class="label method-label
-                    <% if (doc[i]['method'] == 'get') {%>label-info<% }%>
-                    <% if (doc[i]['method'] == 'post') {%>label-success<% }%>
-                    <% if (doc[i]['method'] == 'put') {%>label-warning<% }%>
-                    <% if (doc[i]['method'] == 'delete') {%>label-important<% }%>
-                "><%= doc[i]['method'].toUpperCase() %></span>
-                <%= doc[i]['route'] %>
-                <span class="pull-right">
-                    <%= doc[i]['doc'] %>
-                    <span class="label <% if(doc[i]['private']) { %>label-inverse<% } %>">Private</span>
-                    <span class="label <% if(doc[i]['auth']) { %>label-inverse<% } %>">Auth</span>
-                </span>
-             </div>
+    <h2>Models</h2>
+    <h2>Methods</h2>
+        <% for (var module in doc) { %>
+        <div>
+            <h3><%= module %></h3>
+            <div>
+            <% for (var i = 0; i < doc[module].length; i++) { %>
+            <% var route = doc[module][i] %>
+                <div>
+                    <p class="alert <% if (route['method'] == 'get') {%>alert-info<% }
+                           else if (route['method'] == 'post') {%>alert-success<% }
+                           else if (route['method'] == 'delete') {%>alert-error<% } %> method-summary">
+                        <span class="label method-label <% if (route['method'] == 'get') {%>label-info<% }
+                               else if (route['method'] == 'post') {%>label-success<% }
+                               else if (route['method'] == 'put') {%>label-warning<% }
+                               else if (route['method'] == 'delete') {%>label-important<% } %>"><%= route['method'].toUpperCase() %></span>
+                        <strong><%= '/' + route['route'].split('/').splice(4).join('/') %></strong>
+                        <span class="pull-right">
+                            <%= route['doc'] %>
+                            <span class="label <% if(route['private']) { %>label-success<% } %>" title="Private method"><i class="icon-eye-close icon-white"></i></span>
+                            <span class="label <% if(route['auth']) { %>label-success<% } %>" title="Require auth"><i class="icon-user icon-white"></i></span>
+                        </span>
+                    </p>
+                    <div class="method_details well hide">
+                        <div class="input-prepend">
+                                <strong class="add-on"><%= route['method'].toUpperCase() %></strong>
+                                <input type="text" value="<%= route['route'] %>" disabled="disabled" class="span5">
+                        </div>
+                        <ul>
+                            <% if (route['auth']) { %>
+                                <li>Require authentification</li>
+                            <% } %>
+                            <% if (route['auth'] instanceof Array) { %>
+                                <li>Require permissions <%= route['auth'].join(', ') %></li>
+                            <% } %>
+
+                            <% if(route['private']) { %>
+                                <li>Private method</li>
+                            <% } %>
+                        </ul>
+
+
+                        <% if (route['input']) { %>
+                            <h3>Input</h3>
+                            <table class="table table-striped">
+                                <% for (var i in route['input']) { %>
+                                <tr>
+                                    <th><%= i %></th>
+                                    <td><% typeDisplayer(route['input'][i].type) %></td>
+                                    <td><% if (route['input'][i].required == 'undefined' || route['input'][i].required) { %><span class="muted">Required</span><% } %></td>
+                                    <td>
+                                        <% if (route['input'][i].type instanceof RegExp) { %>
+                                            <code><%= route['input'][i].type.toString() %></code>
+                                        <% } else if (route['input'][i].type instanceof LifeUpload) { %>
+                                            multipart/form-data is required to send files
+                                        <% } %>
+                                    </td>
+                                </tr>
+                                <% } %>
+                            </table>
+                        <% } %>
+
+                        <% if (route['output']) { %>
+                            <h3>Output</h3>
+                            <ul>
+                                <li>
+                                <% if (route['list']) { %>
+                                    <strong>List of</strong>
+                                <% } %>
+
+                                <% typeDisplayer(route['output']) %>
+                                </li>
+                            </ul>
+
+                        <% } %>
+                        <% if(route['errors'].length) { %>
+                            <h3>Errors</h3>
+                            <ul>
+                            <% for (var i in route['errors']) { %>
+                                <% var error = route['errors'][i] %>
+                                <li><%= error.type %> <span class="muted"><%= error.http %></span></li>
+                            <% } %>
+                            </ul>
+                        <% } %>
+                    </div>
+                </div>
+            <% } %>
+            </div>
+        </div>
         <% } %>
     </div>
 </body>

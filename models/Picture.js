@@ -1,5 +1,5 @@
-var mongoose = require('mongoose');
-var media = require('./Media.js');
+var mongoose = require('mongoose'),
+    media = require('./Media.js');
 
 var PictureSchema = new mongoose.Schema({});
 PictureSchema.plugin(media);

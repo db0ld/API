@@ -1,6 +1,6 @@
 var mongoose = require('mongoose'),
-    ObjectId = mongoose.Schema.Types.ObjectId;
-var element = require('./Element.js');
+    ObjectId = mongoose.Schema.Types.ObjectId,
+    element = require('./Element.js');
 
 var ActivitySchema = new mongoose.Schema({
     achievement_status: { type: mongoose.Schema.Types.ObjectId, ref: 'AchievementStatus' },
