@@ -19,12 +19,9 @@ You'll need to install:
 npm install
 ```
 
-On older Ubuntu versions you may need to upgrade to a newer node.js release.
+On older Ubuntu versions use the binary distribution from [NodeJS website](http://nodejs.org/download/).
 
-This PPA should be good https://launchpad.net/~chris-lea/+archive/node.js/+packages
-
-**Downside**: No Maverick repo available. That version is not maintained anymore by
-Canonical and is still used by the LabEIP. We can only compile it on that platform.
+This [PPA](https://launchpad.net/~chris-lea/+archive/node.js/+packages) should be good on newer releases.
 
 ### Launch API server
 
@@ -61,5 +58,7 @@ controller folder, using the existing ones as inspiration (`achievement.js` for 
 
 ### Coding Style
 
-We use the following coding style:
+While we do not have a proper coding style, following the best ideas
+from this one may be a good idea:
+
 http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
