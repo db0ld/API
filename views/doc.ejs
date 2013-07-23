@@ -20,6 +20,10 @@
         h3, .method-summary {
             cursor: pointer;
         }
+
+        .methods > .alert {
+            margin-bottom: 3px;
+        }
     </style>
     <% var typeDisplayer = function(obj) { %>
         <% if (typeof obj == 'function' && new obj() instanceof mongoose.Document) { %>
@@ -48,7 +52,7 @@
             <div>
             <% for (var i = 0; i < doc[module].length; i++) { %>
             <% var route = doc[module][i] %>
-                <div>
+                <div class="methods">
                     <p class="alert <% if (route['method'] == 'get') {%>alert-info<% }
                            else if (route['method'] == 'post') {%>alert-success<% }
                            else if (route['method'] == 'delete') {%>alert-error<% } %> method-summary">
