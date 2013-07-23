@@ -39,6 +39,7 @@ module.exports = function(method) {
     .Get('tokens')
         .route('users/:login/tokens')
         .doc('Get tokens')
+        .auth(true)
         .add(function(req, res, next) {
             return User.findByLogin(req.security.getLogin(req.params.login), req, res, next).execOne(false, function(user) {
                 return new LifeQuery(OAuthToken, req, res, next)
@@ -50,6 +51,7 @@ module.exports = function(method) {
 
     .Get('tokens/:token')
         .doc('Get a single token')
+        .auth(true)
         .add(function(req, res, next) {
             return new LifeQuery(OAuthToken, req, res, next)
                 .modelStatic('findByToken', req.params.token)
@@ -60,6 +62,7 @@ module.exports = function(method) {
     .Delete('tokens/:token')
         .route('users/:login/tokens/:token')
         .doc('Remove an access token')
+        .auth(true)
         .add(function(req, res, next) {
             return new LifeQuery(OAuthToken, req, res, next)
                 .modelStatic('findByToken', req.params.token)

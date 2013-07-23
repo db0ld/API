@@ -35,6 +35,11 @@ LifeRouter.prototype.init = function() {
     this.app.options('*', function(req, res, next) {
         return new LifeResponse(req, res).single();
     });
+
+    this.app.get('/doc/v1', function(req, res) {
+        //res.json({cool: "plop"});
+        res.render('doc.ejs', {doc: that.documentation});
+    });
 };
 
 LifeRouter.Method = function(router, method, route, priv) {
@@ -150,19 +155,20 @@ LifeRouter.Method.prototype.add = function(cb) {
     };
 
     that._routes.forEach(function(route) {
+        var priv = route.priv;
         route = LifeRouter.makePath(route.route);
         that._router.app[that._method](route, cb4);
 
         that._router.documentation.push({
-            doc: that._doc,
-            route: route,
-            priv: that._priv,
-            auth: that._auth,
-            input: that._input,
-            output: that._output,
-            errors: that._errors,
-            method: that._method,
-            list: that._list
+            'doc': that._doc,
+            'route': route,
+            'private': priv,
+            'auth': that._auth,
+            'input': that._input,
+            'output': that._output,
+            'errors': that._errors,
+            'method': that._method,
+            'list': that._list
         });
     });
 

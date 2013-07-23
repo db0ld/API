@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Life API - Documentation</title>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <style>
+        .method-label {
+            width: 50px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <h1>Life API - Documentation</h1>
+        <% for (var i = 0; i < doc.length; i++) { %>
+            <div class="alert
+                <% if (doc[i]['method'] == 'get') {%>alert-info<% }%>
+                <% if (doc[i]['method'] == 'post') {%>alert-success<% }%>
+                <% if (doc[i]['method'] == 'put') {%>alert-warning<% }%>
+                <% if (doc[i]['method'] == 'delete') {%>alert-error<% }%>
+            ">
+                <span class="label method-label
+                    <% if (doc[i]['method'] == 'get') {%>label-info<% }%>
+                    <% if (doc[i]['method'] == 'post') {%>label-success<% }%>
+                    <% if (doc[i]['method'] == 'put') {%>label-warning<% }%>
+                    <% if (doc[i]['method'] == 'delete') {%>label-important<% }%>
+                "><%= doc[i]['method'].toUpperCase() %></span>
+                <%= doc[i]['route'] %>
+                <span class="pull-right">
+                    <%= doc[i]['doc'] %>
+                    <span class="label <% if(doc[i]['private']) { %>label-inverse<% } %>">Private</span>
+                    <span class="label <% if(doc[i]['auth']) { %>label-inverse<% } %>">Auth</span>
+                </span>
+             </div>
+        <% } %>
+    </div>
+</body>
+</html>

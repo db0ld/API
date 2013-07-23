@@ -11,6 +11,7 @@ mongoose.connect(LifeConfig['db_path']);
 var app = express();
 
 app.configure(function () {
+  app.engine('html', require('ejs').renderFile);
   app.use(express.bodyParser({'uploadDir': LifeConfig.tmp_uploaded}));
   app.use(express.methodOverride());
   app.use(express.static(path.join(application_root, LifeConfig.public_path)));

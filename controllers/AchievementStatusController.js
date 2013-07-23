@@ -112,6 +112,7 @@ module.exports = function(router) {
 
     .Put(routeBase + '/:id')
         .doc('Edit an achievement status')
+        .auth(true)
         .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
                 .modelStatic('findByUser', req.user.id)
