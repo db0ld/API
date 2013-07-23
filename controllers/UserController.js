@@ -1,14 +1,15 @@
-var User = require('mongoose').model('User');
-var Friendship = require('mongoose').model('Friendship');
-var Conversation = require('mongoose').model('Conversation');
-var Message = require('mongoose').model('Message');
-var LifeErrors = require('../wrappers/LifeErrors.js');
-var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeData = require('../wrappers/LifeData.js');
-var LifeUpload = require('../wrappers/LifeUpload.js');
-var LifeResponse = require('../wrappers/LifeResponse.js');
+var User = require('mongoose').model('User'),
+    Friendship = require('mongoose').model('Friendship'),
+    Conversation = require('mongoose').model('Conversation'),
+    Message = require('mongoose').model('Message'),
+    Picture = require('mongoose').model('Picture'),
+    LifeErrors = require('../wrappers/LifeErrors.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeData = require('../wrappers/LifeData.js'),
+    LifeUpload = require('../wrappers/LifeUpload.js'),
+    LifeResponse = require('../wrappers/LifeResponse.js'),
+    routeBase = 'users';
 
-var routeBase = 'users';
 
 var createConversation = function(lifedata, usera, userb, callback) {
     var conversation = new Conversation({
@@ -26,6 +27,7 @@ module.exports = function(router) {
     .Post(routeBase)
         .doc('Create a user')
         .input(User.creationValidation)
+        .output(User)
         .add(function(req, res, next) {
             return new LifeData(User, req, res, next)
                 .saveFromRequest(null, User.creationValidation);
@@ -33,7 +35,8 @@ module.exports = function(router) {
 
 
     .Get(routeBase)
-        .doc('Get a user')
+        .doc('Get users')
+        .list(User)
         .add(function (req, res, next) {
             return new LifeQuery(User, req, res, next)
                 .modelStatic('term', req.query.term)
@@ -43,6 +46,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:login')
         .doc('Get a user')
+        .output(User)
         .add(function (req, res, next) {
             return User.findByLogin(req.params.login, req, res, next).execOne();
         })
@@ -50,6 +54,7 @@ module.exports = function(router) {
 
     .Delete(routeBase + '/:login')
         .doc('Delete a user')
+        .output(Number)
         .auth(true)
         .add(function (req, res, next) {
             return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)
@@ -59,6 +64,7 @@ module.exports = function(router) {
 
     .Put(routeBase + '/:login')
         .doc('Edit a user')
+        .output(User)
         .auth(true)
         .input(User.modificationValidation)
         .add(function (req, res, next) {
@@ -70,6 +76,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:login/conversation')
         .doc('Get a conversation')
+        .output(Conversation)
         .auth(true)
         .add(function (req, res, next) {
             var messagesQuery;
@@ -88,6 +95,7 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:login/conversation')
         .doc('Post message in conversation')
+        .output(Conversation)
         .auth(true)
         .add(function (req, res, next) {
             return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
@@ -130,6 +138,7 @@ module.exports = function(router) {
 
     .Delete(routeBase + '/:login/conversation/:message_id')
         .doc('Remove message from conversation')
+        .output(Number)
         .auth(true)
         .add(function (req, res, next) {
             return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
@@ -142,6 +151,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:login/friends')
         .doc('Get friends for users')
+        .list(User)
         .auth(true)
         .add(function(req, res, next) {
             return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
@@ -153,6 +163,7 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:login/friends')
         .doc('Make a friend request/approve a friend request')
+        .output(Friendship)
         .auth(true)
         .add(function(req, res, next) {
             return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
@@ -187,6 +198,7 @@ module.exports = function(router) {
     .Delete(routeBase + '/:login/friends')
         .route(routeBase + '/:login/friends/:remover_login')
         .doc('Remove friend')
+        .output(Number)
         .auth(true)
         .add(function(req, res, next) {
             var remover_user_id = req.security.getUsername(req.params.remover_login);
@@ -202,6 +214,7 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:login/avatar')
         .doc('Add an avatar to user')
+        .output(Picture)
         .auth(true)
         .add(function (req, res, next) {
             return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)
@@ -221,6 +234,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:login/avatar')
         .doc('Get a user avatar')
+        .output(Picture)
         .add(function (req, res, next) {
             return User.findByLogin(req.params.login, req, res, next)
                 .execOne(false, function(user) {
@@ -235,6 +249,7 @@ module.exports = function(router) {
 
     .Delete(routeBase + '/:login/avatar')
         .doc('Delete a user avatar')
+        .output(Number)
         .auth(true)
         .add(function (req, res, next) {
             return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)

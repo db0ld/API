@@ -23,7 +23,8 @@ app.configure(function () {
 });
 
 app.get(['/', '/api'], function (req, res) {
-  res.send('Life API is alive! <a href="/apitest.html">API Console</a>');
+  res.send('Life API is alive! <a href="/apitest.html">API Console</a> ' +
+        '<a href="/doc/v1">Documentation</a>');
 });
 
 var router = new LifeRouter(app);

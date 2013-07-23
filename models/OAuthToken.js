@@ -1,5 +1,5 @@
-var mongoose = require('mongoose');
-var element = require('./Element.js');
+var mongoose = require('mongoose'),
+    element = require('./Element.js');
 
 var OAuthTokenSchema = new mongoose.Schema({
     token: {type: String, unique: true},

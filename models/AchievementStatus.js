@@ -1,9 +1,9 @@
-var mongoose = require('mongoose');
-var Achievement = mongoose.model('Achievement');
-var ObjectId = mongoose.Schema.Types.ObjectId;
-var LifeUpload = require('../wrappers/LifeUpload.js');
-var element = require('./Element.js');
-var LifeData = require('../wrappers/LifeData.js'),
+var mongoose = require('mongoose'),
+    Achievement = mongoose.model('Achievement'),
+    ObjectId = mongoose.Schema.Types.ObjectId,
+    LifeUpload = require('../wrappers/LifeUpload.js'),
+    element = require('./Element.js'),
+    LifeData = require('../wrappers/LifeData.js'),
     regexps = LifeData.regexps;
 
 var AchievementStatusSchema = new mongoose.Schema({

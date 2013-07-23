@@ -1,7 +1,7 @@
-var mongoose = require('mongoose');
-var LifeData = require('../wrappers/LifeData.js');
-var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeResponse = require('../wrappers/LifeResponse.js');
+var mongoose = require('mongoose'),
+    LifeData = require('../wrappers/LifeData.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeResponse = require('../wrappers/LifeResponse.js');
 
 module.exports = function (schema, options) {
     schema.add({

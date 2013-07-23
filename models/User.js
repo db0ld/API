@@ -1,14 +1,14 @@
-var mongoose = require('mongoose');
-var ObjectId = mongoose.Schema.Types.ObjectId;
-var Picture = mongoose.model('Picture');
-var LifeConfig = require('../wrappers/LifeConfig.js');
-var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeData = require('../wrappers/LifeData.js'),
-    regexps = LifeData.regexps;
-var LifeUpload = require('../wrappers/LifeUpload.js');
-var element = require('./Element.js');
-var bcrypt = require('bcryptjs');
-var crypto = require('crypto');
+var mongoose = require('mongoose'),
+    ObjectId = mongoose.Schema.Types.ObjectId,
+    Picture = mongoose.model('Picture'),
+    LifeConfig = require('../wrappers/LifeConfig.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeData = require('../wrappers/LifeData.js'),
+    regexps = LifeData.regexps,
+    LifeUpload = require('../wrappers/LifeUpload.js'),
+    element = require('./Element.js'),
+    bcrypt = require('bcryptjs'),
+    crypto = require('crypto');
 
 var UserSchema = new mongoose.Schema({
     login: { type : String, match: regexps.login, required: true, unique: true},

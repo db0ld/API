@@ -1,9 +1,9 @@
-var User = require('mongoose').model('User');
-var mongoose = require('mongoose');
-var ObjectId = mongoose.Schema.Types.ObjectId;
-var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeData = require('../wrappers/LifeData.js');
-var element = require('./Element.js');
+var User = require('mongoose').model('User'),
+    mongoose = require('mongoose'),
+    ObjectId = mongoose.Schema.Types.ObjectId,
+    LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeData = require('../wrappers/LifeData.js'),
+    element = require('./Element.js');
 
 var FriendshipSchema = new mongoose.Schema({
     sender: {type: ObjectId, required: true, ref: 'User'},

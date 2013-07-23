@@ -1,7 +1,8 @@
-var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeData = require('../wrappers/LifeData.js');
-var AchievementStatus = require('mongoose').model('AchievementStatus');
-var User = require('mongoose').model('User');
+var LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeData = require('../wrappers/LifeData.js'),
+    AchievementStatus = require('mongoose').model('AchievementStatus'),
+    User = require('mongoose').model('User'),
+    routeBase = 'achievement_statuses';
 
 
 var isDislikeRoute = function(req) {
@@ -56,8 +57,6 @@ var approversDisapproversDelete = function (req, res, next) {
         });
 };
 
-var routeBase = 'achievement_statuses';
-
 module.exports = function(router) {
 
     (router)
@@ -65,7 +64,7 @@ module.exports = function(router) {
 
     .Get('users/:user_id/achievement_statuses')
         .doc('Get user achievement statuses')
-        .list()
+        .list(AchievementStatus)
         .add(function(req, res, next) {
             User.findByLogin(req.params.user_id, req, res, next)
                 .execOne(false, function(user) {
@@ -78,6 +77,7 @@ module.exports = function(router) {
 
     .Post('users/:src_user_id/achievement_statuses')
         .doc('Post an achievement status')
+        .output(AchievementStatus)
         .auth(true)
         .add(function(req, res, next) {
             var ac = new AchievementStatus();
@@ -91,6 +91,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:id')
         .doc('Get an achievement status')
+        .output(AchievementStatus)
         .auth(true)
         .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
@@ -101,6 +102,7 @@ module.exports = function(router) {
     .Delete(routeBase + '/:id')
         .route('users/:src_user_id/achievement_statuses/:id')
         .doc('Remove an achievement status')
+        .output(Number)
         .auth(true)
         .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
@@ -112,6 +114,7 @@ module.exports = function(router) {
 
     .Put(routeBase + '/:id')
         .doc('Edit an achievement status')
+        .output(AchievementStatus)
         .auth(true)
         .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
@@ -126,24 +129,26 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:id/approvers')
         .doc('Get an achievement status approvers')
-        .list()
+        .list(User)
         .add(approversDisapproversList)
 
 
     .Get(routeBase + '/:id/disapprovers')
         .doc('Get an achievement status disapprovers')
-        .list()
+        .list(User)
         .add(approversDisapproversList)
 
 
     .Post(routeBase + '/:id/approvers')
         .doc('Approve an achievement')
+        .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)
 
 
     .Post(routeBase + '/:id/disapprovers')
         .doc('Disapprove an achievement')
+        .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)
 
@@ -151,12 +156,14 @@ module.exports = function(router) {
     .Delete(routeBase + '/:id/approvers')
         .route(routeBase + '/:id/disapprovers')
         .doc('Remove an achievement approval')
+        .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversDelete)
 
     .Delete(routeBase + '/:id/approvers/:src_user_id')
         .route(routeBase + '/:id/disapprovers/:src_user_id')
         .doc('Remove an achievement disapproval')
+        .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversDelete);
 

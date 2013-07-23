@@ -4,6 +4,7 @@ var LifeResponse = require('./LifeResponse.js');
 var LifeConfig = require('./LifeConfig.js');
 var LifeErrors = require('./LifeErrors.js');
 var LifeData = require('./LifeData.js');
+var LifeUpload = require('./LifeUpload.js');
 
 /**
  * An utility class that routes requests on top of ExpressJS.
@@ -37,8 +38,11 @@ LifeRouter.prototype.init = function() {
     });
 
     this.app.get('/doc/v1', function(req, res) {
-        //res.json({cool: "plop"});
-        res.render('doc.ejs', {doc: that.documentation});
+        return res.render('doc.ejs', {
+            doc: that.documentation,
+            mongoose: require('mongoose'),
+            LifeUpload: LifeUpload
+        });
     });
 };
 
@@ -54,8 +58,8 @@ LifeRouter.Method = function(router, method, route, priv) {
     }];
 
     this._doc = 'Undocumented';
-    this._input = {};
-    this._output = {};
+    this._input = null;
+    this._output = null;
     this._errors = [];
     this._auth = false;
     this._list = false;
@@ -78,13 +82,21 @@ LifeRouter.Method.prototype.doc = function(doc) {
     return this;
 };
 
-LifeRouter.Method.prototype.list = function() {
+LifeRouter.Method.prototype.list = function(output) {
     this._list = true;
+
+    if (typeof output !== 'undefined') {
+        this._output = output;
+    }
 
     return this;
 };
 
 LifeRouter.Method.prototype.auth = function(auth) {
+    if (typeof auth != 'boolean') {
+        auth = [auth];
+    }
+
     this._auth = auth;
 
     return this;
@@ -157,9 +169,15 @@ LifeRouter.Method.prototype.add = function(cb) {
     that._routes.forEach(function(route) {
         var priv = route.priv;
         route = LifeRouter.makePath(route.route);
+
+        var module = route.split('/').splice(0,4).join('/');
         that._router.app[that._method](route, cb4);
 
-        that._router.documentation.push({
+        if (typeof that._router.documentation[module] == 'undefined') {
+            that._router.documentation[module] = [];
+        }
+
+        that._router.documentation[module].push({
             'doc': that._doc,
             'route': route,
             'private': priv,

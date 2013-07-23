@@ -1,11 +1,10 @@
-var User = require('mongoose').model('User');
-var AchievementStatus = require('mongoose').model('AchievementStatus');
-var LifeErrors = require('../wrappers/LifeErrors.js');
-var LifeQuery = require('../wrappers/LifeQuery.js');
-var LifeResponse = require('../wrappers/LifeResponse.js');
-var Activity = require('mongoose').model('Activity');
-
-var routeBase = 'activities';
+var User = require('mongoose').model('User'),
+    AchievementStatus = require('mongoose').model('AchievementStatus'),
+    LifeErrors = require('../wrappers/LifeErrors.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeResponse = require('../wrappers/LifeResponse.js'),
+    Activity = require('mongoose').model('Activity'),
+    routeBase = 'activities';
 
 var wrapAchievementStatus = function(achievementStatus) {
     return new Activity({
@@ -26,6 +25,7 @@ module.exports = function(router) {
 
     .Get(routeBase + '/:id')
         .doc('Get an activity')
+        .output(Activity)
         .add(function(req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
                 .findById(req.params.id, function(achievementStatus) {
@@ -39,7 +39,7 @@ module.exports = function(router) {
 
     .Get('users/:user_id/' + routeBase)
         .doc('Get activity for an user')
-        .list()
+        .list(Activity)
         .add(function(req, res, next) {
             return User.findByLogin(req.params.user_id, req, res, next)
                 .execOne(false, function(user) {
@@ -56,7 +56,7 @@ module.exports = function(router) {
 
     .Get('feed')
         .doc('Get all users activity feed')
-        .list()
+        .list(Activity)
         .add(function(req, res, next) {
             var query = new LifeQuery(AchievementStatus, req, res, next);
 
