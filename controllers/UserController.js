@@ -44,44 +44,44 @@ module.exports = function(router) {
         })
 
 
-    .Get(routeBase + '/:login')
+    .Get(routeBase + '/:user_id')
         .doc('Get a user')
         .output(User)
         .add(function (req, res, next) {
-            return User.findByLogin(req.params.login, req, res, next).execOne();
+            return User.findByLogin(req.params.user_id, req, res, next).execOne();
         })
 
 
-    .Delete(routeBase + '/:login')
+    .Delete(routeBase + '/:user_id')
         .doc('Delete a user')
         .output(Number)
         .auth(true)
         .add(function (req, res, next) {
-            return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)
+            return User.findByLogin(req.security.getUsername(req.params.user_id), req, res, next)
                 .remove();
         })
 
 
-    .Put(routeBase + '/:login')
+    .Put(routeBase + '/:user_id')
         .doc('Edit a user')
         .output(User)
         .auth(true)
         .input(User.modificationValidation)
         .add(function (req, res, next) {
-            return User.findByLogin(req.security.getUsername(req.params.login), req, res, next).execOne(false, function(user) {
+            return User.findByLogin(req.security.getUsername(req.params.user_id), req, res, next).execOne(false, function(user) {
                 return new LifeData(User, req, res, next).saveFromRequest(user, User.modificationValidation);
             });
         })
 
 
-    .Get(routeBase + '/:login/conversation')
+    .Get(routeBase + '/:user_id/conversation')
         .doc('Get a conversation')
         .output(Conversation)
         .auth(true)
         .add(function (req, res, next) {
             var messagesQuery;
 
-            return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            return User.findByLogin(req.params.user_id, req, res, next).execOne(false, function(user) {
                 new LifeQuery(Conversation, req, res, next).modelStatic('findByUsers', [user, req.user]).execOne(true, function(conversation) {
                     if (conversation === null) {
                         return createConversation(new LifeData(Conversation, req, res, next), user, req.user);
@@ -93,12 +93,12 @@ module.exports = function(router) {
         })
 
 
-    .Post(routeBase + '/:login/conversation')
+    .Post(routeBase + '/:user_id/conversation')
         .doc('Post message in conversation')
         .output(Conversation)
         .auth(true)
         .add(function (req, res, next) {
-            return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            return User.findByLogin(req.params.user_id, req, res, next).execOne(false, function(user) {
                 Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.user]).execOne(true, function(conversation) {
                     var addMessageToConversation = function(conversation) {
 
@@ -136,12 +136,12 @@ module.exports = function(router) {
         })
 
 
-    .Delete(routeBase + '/:login/conversation/:message_id')
+    .Delete(routeBase + '/:user_id/conversation/:message_id')
         .doc('Remove message from conversation')
         .output(Number)
         .auth(true)
         .add(function (req, res, next) {
-            return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            return User.findByLogin(req.params.user_id, req, res, next).execOne(false, function(user) {
                 Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.user]).execOne(false, function(conversation) {
                     Message.findByConversationAndId(new LifeQuery(Message, req, res, next), conversation, req.params.message_id).remove();
                 });
@@ -149,24 +149,24 @@ module.exports = function(router) {
         })
 
 
-    .Get(routeBase + '/:login/friends')
+    .Get(routeBase + '/:user_id/friends')
         .doc('Get friends for users')
         .list(User)
         .auth(true)
         .add(function(req, res, next) {
-            return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            return User.findByLogin(req.params.user_id, req, res, next).execOne(false, function(user) {
                 return User.findFriends(user.id, req, res, next)
                     .modelStatic('term', req.query.term).exec();
             });
         })
 
 
-    .Post(routeBase + '/:login/friends')
+    .Post(routeBase + '/:user_id/friends')
         .doc('Make a friend request/approve a friend request')
         .output(Friendship)
         .auth(true)
         .add(function(req, res, next) {
-            return User.findByLogin(req.params.login, req, res, next).execOne(false, function(user) {
+            return User.findByLogin(req.params.user_id, req, res, next).execOne(false, function(user) {
                 if (user.id == req.user.id) {
                     return next(LifeErrors.UserLogicError);
                 }
@@ -195,8 +195,8 @@ module.exports = function(router) {
         })
 
 
-    .Delete(routeBase + '/:login/friends')
-        .route(routeBase + '/:login/friends/:remover_login')
+    .Delete(routeBase + '/:user_id/friends')
+        .route(routeBase + '/:user_id/friends/:remover_login')
         .doc('Remove friend')
         .output(Number)
         .auth(true)
@@ -204,7 +204,7 @@ module.exports = function(router) {
             var remover_user_id = req.security.getUsername(req.params.remover_login);
 
             new LifeQuery(Friendship, req, res, next)
-                .modelStatic('findByLogins', remover_user_id, req.params.login)
+                .modelStatic('findByLogins', remover_user_id, req.params.user_id)
                 .execOne(false, function(friendship) {
                     return new LifeData(Friendship, req, res, next)
                         .remove(friendship);
@@ -212,12 +212,12 @@ module.exports = function(router) {
         })
 
 
-    .Post(routeBase + '/:login/avatar')
+    .Post(routeBase + '/:user_id/avatar')
         .doc('Add an avatar to user')
         .output(Picture)
         .auth(true)
         .add(function (req, res, next) {
-            return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)
+            return User.findByLogin(req.security.getUsername(req.params.user_id), req, res, next)
                 .execOne(false, function(user) {
                     new LifeData(User, req, res, next).whitelist({avatar: { type: LifeUpload.Avatar, required: true }}, null, function(params) {
                         if (user.avatar) {
@@ -232,11 +232,11 @@ module.exports = function(router) {
         })
 
 
-    .Get(routeBase + '/:login/avatar')
+    .Get(routeBase + '/:user_id/avatar')
         .doc('Get a user avatar')
         .output(Picture)
         .add(function (req, res, next) {
-            return User.findByLogin(req.params.login, req, res, next)
+            return User.findByLogin(req.params.user_id, req, res, next)
                 .execOne(false, function(user) {
                     if (!user.avatar) {
                         return next(LifeErrors.NotFound);
@@ -247,12 +247,12 @@ module.exports = function(router) {
         })
 
 
-    .Delete(routeBase + '/:login/avatar')
+    .Delete(routeBase + '/:user_id/avatar')
         .doc('Delete a user avatar')
         .output(Number)
         .auth(true)
         .add(function (req, res, next) {
-            return User.findByLogin(req.security.getUsername(req.params.login), req, res, next)
+            return User.findByLogin(req.security.getUsername(req.params.user_id), req, res, next)
                 .execOne(false, function(user) {
                     if (user.avatar) {
                         user.avatar.remove();

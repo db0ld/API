@@ -13,7 +13,7 @@ var approversDisapproversList = function (req, res, next) {
     var key = isDislikeRoute(req) ? '_non_approvers' : '_approvers';
 
     return new LifeQuery(AchievementStatus, req, res, next)
-        .modelStatic('findById', req.params.id)
+        .modelStatic('findById', req.params.achievement_status_id)
         .populate('')
         .execOne(false, function(achievement_status) {
             return new LifeQuery(User, req, res, next)
@@ -24,7 +24,7 @@ var approversDisapproversList = function (req, res, next) {
 
 var approversDisapproversAdd = function (req, res, next) {
     return new LifeQuery(AchievementStatus, req, res, next)
-        .modelStatic('findById', req.params.id)
+        .modelStatic('findById', req.params.achievement_status_id)
         .populate('')
         .execOne(false, function(achievement_status) {
             var key = isDislikeRoute(req) ? '_non_approvers' : '_approvers';
@@ -43,7 +43,7 @@ var approversDisapproversAdd = function (req, res, next) {
 
 var approversDisapproversDelete = function (req, res, next) {
     return new LifeQuery(AchievementStatus, req, res, next)
-        .modelStatic('findById', req.params.id)
+        .modelStatic('findById', req.params.achievement_status_id)
         .populate('')
         .execOne(false, function(achievement_status) {
             var key = isDislikeRoute(req) ? '_non_approvers' : '_approvers';
@@ -89,37 +89,37 @@ module.exports = function(router) {
         })
 
 
-    .Get(routeBase + '/:id')
+    .Get(routeBase + '/:achievement_status_id')
         .doc('Get an achievement status')
         .output(AchievementStatus)
         .auth(true)
         .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
-                .findById(req.params.id);
+                .findById(req.params.achievement_status_id);
         })
 
 
-    .Delete(routeBase + '/:id')
-        .route('users/:src_user_id/achievement_statuses/:id')
+    .Delete(routeBase + '/:achievement_status_id')
+        .route('users/:src_user_id/achievement_statuses/:achievement_status_id')
         .doc('Remove an achievement status')
         .output(Number)
         .auth(true)
         .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
                 .modelStatic('findByUser', req.user.id)
-                .modelStatic('findById', req.params.id)
+                .modelStatic('findById', req.params.achievement_status_id)
                 .remove();
         })
 
 
-    .Put(routeBase + '/:id')
+    .Put(routeBase + '/:achievement_status_id')
         .doc('Edit an achievement status')
         .output(AchievementStatus)
         .auth(true)
         .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
                 .modelStatic('findByUser', req.user.id)
-                .modelStatic('findById', req.params.id)
+                .modelStatic('findById', req.params.achievement_status_id)
                 .execOne(function(achievement_status) {
                     return new LifeData(AchievementStatus, req, res, next)
                         .saveFromRequest(achievement_status,
@@ -127,41 +127,41 @@ module.exports = function(router) {
                 });
         })
 
-    .Get(routeBase + '/:id/approvers')
+    .Get(routeBase + '/:achievement_status_id/approvers')
         .doc('Get an achievement status approvers')
         .list(User)
         .add(approversDisapproversList)
 
 
-    .Get(routeBase + '/:id/disapprovers')
+    .Get(routeBase + '/:achievement_status_id/disapprovers')
         .doc('Get an achievement status disapprovers')
         .list(User)
         .add(approversDisapproversList)
 
 
-    .Post(routeBase + '/:id/approvers')
+    .Post(routeBase + '/:achievement_status_id/approvers')
         .doc('Approve an achievement')
         .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)
 
 
-    .Post(routeBase + '/:id/disapprovers')
+    .Post(routeBase + '/:achievement_status_id/disapprovers')
         .doc('Disapprove an achievement')
         .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)
 
 
-    .Delete(routeBase + '/:id/approvers')
-        .route(routeBase + '/:id/disapprovers')
+    .Delete(routeBase + '/:achievement_status_id/approvers')
+        .route(routeBase + '/:achievement_status_id/disapprovers')
         .doc('Remove an achievement approval')
         .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversDelete)
 
-    .Delete(routeBase + '/:id/approvers/:src_user_id')
-        .route(routeBase + '/:id/disapprovers/:src_user_id')
+    .Delete(routeBase + '/:achievement_status_id/approvers/:src_user_id')
+        .route(routeBase + '/:achievement_status_id/disapprovers/:src_user_id')
         .doc('Remove an achievement disapproval')
         .output(AchievementStatus)
         .auth(true)

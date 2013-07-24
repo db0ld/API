@@ -23,12 +23,12 @@ module.exports = function(router) {
     (router)
 
 
-    .Get(routeBase + '/:id')
+    .Get(routeBase + '/:activity_id')
         .doc('Get an activity')
         .output(Activity)
         .add(function(req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
-                .findById(req.params.id, function(achievementStatus) {
+                .findById(req.params.activity_id, function(achievementStatus) {
                     if (!achievementStatus) {
                         return next(LifeErrors.NotFound);
                     }

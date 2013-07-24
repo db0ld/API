@@ -63,12 +63,12 @@ module.exports = function(router) {
         })
 
 
-    .Put(routeBase + '/:id')
+    .Put(routeBase + '/:achievement_id')
         .doc('Modify an achievement')
         .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next) {
-            return new LifeQuery(Achievement, req, res, next).findById(req.params.id, function(achievement) {
+            return new LifeQuery(Achievement, req, res, next).findById(req.params.achievement_id, function(achievement) {
                 if (!achievement) {
                     return next(LifeErrors.NotFound);
                 }
@@ -80,12 +80,12 @@ module.exports = function(router) {
         })
 
 
-    .Delete(routeBase + '/:id')
+    .Delete(routeBase + '/:achievement_id')
         .doc('Delete an achievement')
         .output(Number)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function(req, res, next) {
-            return new LifeQuery(Achievement, req, res, next, {_id: req.params.id})
+            return new LifeQuery(Achievement, req, res, next, {_id: req.params.achievement_id})
                 .remove();
         })
 
@@ -100,18 +100,18 @@ module.exports = function(router) {
         })
 
 
-    .Post(routeBase + '/:id/children')
+    .Post(routeBase + '/:achievement_id/children')
         .doc('Add a child achievement to parent')
         .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next) {
             new LifeData(Achievement, req, res, next).whitelist({achievement_id: {type: String}}, null, function(params) {
-                return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
+                return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.achievement_id, function(achievement) {
                     if (achievement === null) {
                         return next(LifeErrors.NotFound);
                     }
 
-                    if (achievement.child_achievements.indexOf(req.params.id) === -1) {
+                    if (achievement.child_achievements.indexOf(req.params.achievement_id) === -1) {
                         achievement.child_achievements.push(params.achievement_id);
 
                         return new LifeData(Achievement, req, res, next).save(achievement);
@@ -123,17 +123,17 @@ module.exports = function(router) {
         })
 
 
-    .Delete(routeBase + '/:id/children/:child_id')
+    .Delete(routeBase + '/:achievement_id/children/:child_achievement_id')
         .doc('Remove a child achievement from parent')
         .output(Number)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next) {
-            return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
+            return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.achievement_id, function(achievement) {
                 if (achievement === null) {
                     return next(LifeErrors.NotFound);
                 }
 
-                var pos = achievement.child_achievements.indexOf(req.params.child_id);
+                var pos = achievement.child_achievements.indexOf(req.params.child_achievement_id);
                 if (pos !== -1) {
                     achievement.child_achievements.splice(pos, 1);
 
@@ -145,11 +145,11 @@ module.exports = function(router) {
         })
 
 
-    .Get(routeBase + '/:id/children')
+    .Get(routeBase + '/:achievement_id/children')
         .doc('Get child achievements')
         .list(Achievement)
         .add(function(req, res, next) {
-            return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.id, function(achievement) {
+            return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.achievement_id, function(achievement) {
                 if (achievement === null) {
                     return next(LifeErrors.NotFound);
                 }
@@ -159,10 +159,10 @@ module.exports = function(router) {
         })
 
 
-    .Get(routeBase + '/:id/parents')
+    .Get(routeBase + '/:achievement_id/parents')
         .doc('Get parent achievements')
         .list(Achievement)
         .add(function(req, res, next) {
-            return new LifeQuery(Achievement, req, res, next, {child_achievements: req.params.id}).exec();
+            return new LifeQuery(Achievement, req, res, next, {child_achievements: req.params.achievement_id}).exec();
         });
 };
