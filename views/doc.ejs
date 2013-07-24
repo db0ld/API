@@ -115,15 +115,15 @@
                         <% if (route['input']) { %>
                             <h3>Input</h3>
                             <table class="table table-striped">
-                                <% for (var i in route['input']) { %>
+                                <% for (var j in route['input']) { %>
                                 <tr>
-                                    <th><%= i %></th>
-                                    <td><%= typeDisplayer(route['input'][i].type) %></td>
-                                    <td><% if (route['input'][i].required == 'undefined' || route['input'][i].required) { %><span class="muted">Required</span><% } %></td>
+                                    <th><%= j %></th>
+                                    <td><%= typeDisplayer(route['input'][j].type) %></td>
+                                    <td><% if (route['input'][j].required == 'undefined' || route['input'][j].required) { %><span class="muted">Required</span><% } %></td>
                                     <td>
-                                        <% if (route['input'][i].type instanceof RegExp) { %>
-                                            <code><%= route['input'][i].type.toString() %></code>
-                                        <% } else if (route['input'][i].type instanceof LifeUpload) { %>
+                                        <% if (route['input'][j].type instanceof RegExp) { %>
+                                            <code><%= route['input'][j].type.toString() %></code>
+                                        <% } else if (route['input'][j].type instanceof LifeUpload) { %>
                                             multipart/form-data is required to send files
                                         <% } %>
                                     </td>
@@ -148,8 +148,8 @@
                         <% if(route['errors'].length) { %>
                             <h3>Errors</h3>
                             <ul>
-                            <% for (var i in route['errors']) { %>
-                                <% var error = route['errors'][i] %>
+                            <% for (var k in route['errors']) { %>
+                                <% var error = route['errors'][k] %>
                                 <li><%= error.type %> <span class="muted"><%= error.http %></span></li>
                             <% } %>
                             </ul>

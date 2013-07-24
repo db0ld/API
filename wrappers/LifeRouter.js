@@ -38,6 +38,16 @@ LifeRouter.prototype.init = function() {
     });
 
     this.app.get('/doc/v1', function(req, res) {
+        for (var i in that.documentation) {
+            that.documentation[i].sort(function(a, b) {
+                if (a.route == b.route) {
+                    return a.method < b.method ? -1 : 1;
+                }
+
+                return a.route < b.route ? -1 : 1;
+            });
+        }
+
         return res.render('doc.ejs', {
             doc: that.documentation,
             mongoose: require('mongoose'),
