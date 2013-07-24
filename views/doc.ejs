@@ -25,21 +25,52 @@
             margin-bottom: 3px;
         }
     </style>
-    <% var typeDisplayer = function(obj) { %>
-        <% if (typeof obj == 'function' && new obj() instanceof mongoose.Document) { %>
-            <%= obj.modelName %>
-        <% } else if (obj == Number) { %>
-            Number
-        <% } else if (obj == String || obj instanceof RegExp) { %>
-            String
-        <% } else if (obj == Boolean) { %>
-            Boolean
-        <% } else if (obj == Date) { %>
-            Date
-        <% } else if (obj instanceof LifeUpload) { %>
-            File
-        <% } %>
-    <% } %>
+    <script><%
+    var typeDisplayer = function(obj) {
+        if (obj == Number) {
+            return 'Number';
+        } else if (obj == String || obj instanceof RegExp) {
+            return 'String';
+        } else if (obj == Boolean) {
+            return 'Boolean';
+        } else if (obj == Date) {
+            return 'Date';
+        } else if (obj instanceof LifeUpload) {
+            return 'File';
+        } if (typeof obj == 'function' && new obj() instanceof mongoose.Document) {
+            return obj.modelName;
+        }
+    };
+
+    var methodAlertClass = function(method) {
+        var methodAlert = {
+            'get': 'alert-info',
+            'post': 'alert-success',
+            'delete': 'alert-error',
+        }
+
+        if (methodAlert[method]) {
+            return methodAlert[method];
+        }
+
+        return '';
+    };
+
+    var methodLabelClass = function(method) {
+        var methodLabel = {
+            'get': 'label-info',
+            'post': 'label-success',
+            'delete': 'label-important',
+            'put': 'label-warning'
+        }
+
+        if (methodLabel[method]) {
+            return methodLabel[method];
+        }
+
+        return '';
+    };
+    %></script>
 </head>
 <body>
     <div class="container">
@@ -53,13 +84,8 @@
             <% for (var i = 0; i < doc[module].length; i++) { %>
             <% var route = doc[module][i] %>
                 <div class="methods">
-                    <p class="alert <% if (route['method'] == 'get') {%>alert-info<% }
-                           else if (route['method'] == 'post') {%>alert-success<% }
-                           else if (route['method'] == 'delete') {%>alert-error<% } %> method-summary">
-                        <span class="label method-label <% if (route['method'] == 'get') {%>label-info<% }
-                               else if (route['method'] == 'post') {%>label-success<% }
-                               else if (route['method'] == 'put') {%>label-warning<% }
-                               else if (route['method'] == 'delete') {%>label-important<% } %>"><%= route['method'].toUpperCase() %></span>
+                    <p class="alert method-summary <%= methodAlertClass(route['method']) %>">
+                        <span class="label method-label <%= methodLabelClass(route['method']) %>"><%= route['method'].toUpperCase() %></span>
                         <strong><%= '/' + route['route'].split('/').splice(4).join('/') %></strong>
                         <span class="pull-right">
                             <%= route['doc'] %>
@@ -92,7 +118,7 @@
                                 <% for (var i in route['input']) { %>
                                 <tr>
                                     <th><%= i %></th>
-                                    <td><% typeDisplayer(route['input'][i].type) %></td>
+                                    <td><%= typeDisplayer(route['input'][i].type) %></td>
                                     <td><% if (route['input'][i].required == 'undefined' || route['input'][i].required) { %><span class="muted">Required</span><% } %></td>
                                     <td>
                                         <% if (route['input'][i].type instanceof RegExp) { %>
@@ -114,7 +140,7 @@
                                     <strong>List of</strong>
                                 <% } %>
 
-                                <% typeDisplayer(route['output']) %>
+                                <%= typeDisplayer(route['output']) %>
                                 </li>
                             </ul>
 
