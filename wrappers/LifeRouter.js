@@ -51,7 +51,8 @@ LifeRouter.prototype.init = function() {
         return res.render('doc.ejs', {
             doc: that.documentation,
             mongoose: require('mongoose'),
-            LifeUpload: LifeUpload
+            LifeUpload: LifeUpload,
+            ExtRegExp: LifeData.ExtRegExp
         });
     });
 };

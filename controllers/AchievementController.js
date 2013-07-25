@@ -6,35 +6,31 @@ var Achievement = require('mongoose').model('Achievement'),
     routeBase = 'achievements';
 
 
-var bindRequestToAchievement = function(req, res, next, achievement, cb, create) {
-    new LifeData(Achievement, req, res, next).whitelist(
-            create ? Achievement.creationValidation
-                : Achievement.modificationValidation, null, function(params) {
-        if (achievement.name === null || typeof achievement.name !== 'object') {
-            achievement.name = {};
+var bindRequestToAchievement = function(req, res, params, achievement, cb, create) {
+    if (achievement.name === null || typeof achievement.name !== 'object') {
+        achievement.name = {};
+    }
+
+    if (achievement.name[req.lang] != params.name) {
+        achievement.markModified('name');
+    }
+
+    achievement.name[req.lang] = params.name;
+
+    if (typeof params.description == 'string') {
+        if (achievement.description === null || typeof achievement.description !== 'object') {
+            achievement.description = {};
         }
 
-        if (achievement.name[req.lang] != params.name) {
-            achievement.markModified('name');
-        }
+        achievement.description[req.lang] = params.description;
+        achievement.markModified('description');
+    }
 
-        achievement.name[req.lang] = params.name;
+    if (typeof params.badge !== 'undefined') {
+        achievement.badge = params.badge;
+    }
 
-        if (typeof params.description == 'string') {
-            if (achievement.description === null || typeof achievement.description !== 'object') {
-                achievement.description = {};
-            }
-
-            achievement.description[req.lang] = params.description;
-            achievement.markModified('description');
-        }
-
-        if (typeof params.badge !== 'undefined') {
-            achievement.badge = params.badge;
-        }
-
-        return cb(achievement);
-    });
+    return cb(achievement);
 };
 
 module.exports = function(router) {
@@ -44,12 +40,13 @@ module.exports = function(router) {
 
     .Post(routeBase)
         .doc('Create an achievement')
+        .input(Achievement.creationValidation)
         .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
-        .add(function (req, res, next) {
+        .add(function (req, res, next, params) {
             var achievement = new Achievement();
 
-            return bindRequestToAchievement(req, res, next, achievement, function(achievement) {
+            return bindRequestToAchievement(req, res, params, achievement, function(achievement) {
                 return new LifeData(Achievement, req, res, next).save(achievement);
             }, true);
         })
@@ -65,15 +62,16 @@ module.exports = function(router) {
 
     .Put(routeBase + '/:achievement_id')
         .doc('Modify an achievement')
+        .input(Achievement.modificationValidation)
         .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
-        .add(function (req, res, next) {
+        .add(function (req, res, next, params) {
             return new LifeQuery(Achievement, req, res, next).findById(req.params.achievement_id, function(achievement) {
                 if (!achievement) {
                     return next(LifeErrors.NotFound);
                 }
 
-                return bindRequestToAchievement(req, res, next, achievement, function(achievement) {
+                return bindRequestToAchievement(req, res, params, achievement, function(achievement) {
                     return new LifeData(Achievement, req, res, next).save(achievement);
                 });
             });
@@ -102,23 +100,22 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:achievement_id/children')
         .doc('Add a child achievement to parent')
+        .input({achievement_id: {type: Achievement}})
         .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
-        .add(function (req, res, next) {
-            new LifeData(Achievement, req, res, next).whitelist({achievement_id: {type: String}}, null, function(params) {
-                return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.achievement_id, function(achievement) {
-                    if (achievement === null) {
-                        return next(LifeErrors.NotFound);
-                    }
+        .add(function (req, res, next, params) {
+            return new LifeQuery(Achievement, req, res, next).populate('').findById(req.params.achievement_id, function(achievement) {
+                if (achievement === null) {
+                    return next(LifeErrors.NotFound);
+                }
 
-                    if (achievement.child_achievements.indexOf(req.params.achievement_id) === -1) {
-                        achievement.child_achievements.push(params.achievement_id);
+                if (achievement.child_achievements.indexOf(req.params.achievement_id) === -1) {
+                    achievement.child_achievements.push(params.achievement_id);
 
-                        return new LifeData(Achievement, req, res, next).save(achievement);
-                    }
+                    return new LifeData(Achievement, req, res, next).save(achievement);
+                }
 
-                    return next(LifeErrors.NothingHasChanged);
-                });
+                return next(LifeErrors.NothingHasChanged);
             });
         })
 

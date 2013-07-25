@@ -28,9 +28,9 @@ module.exports = function(router) {
         .doc('Create a user')
         .input(User.creationValidation)
         .output(User)
-        .add(function(req, res, next) {
+        .add(function(req, res, next, params) {
             return new LifeData(User, req, res, next)
-                .saveFromRequest(null, User.creationValidation);
+                .mergeSave(null, params);
         })
 
 
@@ -64,12 +64,12 @@ module.exports = function(router) {
 
     .Put(routeBase + '/:user_id')
         .doc('Edit a user')
+        .input(User.modificationValidation)
         .output(User)
         .auth(true)
-        .input(User.modificationValidation)
-        .add(function (req, res, next) {
+        .add(function (req, res, next, params) {
             return User.findByLogin(req.security.getUsername(req.params.user_id), req, res, next).execOne(false, function(user) {
-                return new LifeData(User, req, res, next).saveFromRequest(user, User.modificationValidation);
+                return new LifeData(User, req, res, next).mergeSave(user, params);
             });
         })
 
@@ -95,9 +95,10 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:user_id/conversation')
         .doc('Post message in conversation')
+        .input({message: {type: String}})
         .output(Conversation)
         .auth(true)
-        .add(function (req, res, next) {
+        .add(function (req, res, next, params) {
             return User.findByLogin(req.params.user_id, req, res, next).execOne(false, function(user) {
                 Conversation.findByUsers(new LifeQuery(Conversation, req, res, next), [user, req.user]).execOne(true, function(conversation) {
                     var addMessageToConversation = function(conversation) {
@@ -118,7 +119,7 @@ module.exports = function(router) {
                         // Creating message
                         var message = new Message({
                             sender_ref: sender_ref,
-                            content: req.body.message,
+                            content: params.message,
                             _conversation: conversation._id
                         });
 
@@ -163,6 +164,7 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:user_id/friends')
         .doc('Make a friend request/approve a friend request')
+        .input({})
         .output(Friendship)
         .auth(true)
         .add(function(req, res, next) {
@@ -214,20 +216,19 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:user_id/avatar')
         .doc('Add an avatar to user')
+        .input({avatar: { type: LifeUpload.Avatar, required: true }})
         .output(Picture)
         .auth(true)
-        .add(function (req, res, next) {
+        .add(function (req, res, next, params) {
             return User.findByLogin(req.security.getUsername(req.params.user_id), req, res, next)
                 .execOne(false, function(user) {
-                    new LifeData(User, req, res, next).whitelist({avatar: { type: LifeUpload.Avatar, required: true }}, null, function(params) {
-                        if (user.avatar) {
-                            return user.avatar.remove();
-                        }
+                    if (user.avatar) {
+                        return user.avatar.remove();
+                    }
 
-                        user.avatar = params.avatar;
+                    user.avatar = params.avatar;
 
-                        return new LifeData(User, req, res, next).save(user);
-                    });
+                    return new LifeData(User, req, res, next).save(user);
                 });
         })
 

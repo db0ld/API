@@ -8,7 +8,7 @@ var mongoose = require('mongoose'),
 
 var AchievementStatusSchema = new mongoose.Schema({
     message: {type: String, required: true, ref: 'User'},
-    state: {type: String, required: true, ref: 'User', match: regexps.achievementState},
+    state: {type: String, required: true, ref: 'User', match: regexps.achievementState.regexp()},
     owner: {type: ObjectId, required: true, ref: 'User'},
     achievement: {type: ObjectId, required: true, ref: 'Achievement'},
     attached_picture: {type: ObjectId, required: false, ref: 'Picture'},

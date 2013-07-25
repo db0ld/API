@@ -121,6 +121,32 @@ LifeData.prototype.saveFromRequest = function(item, validation, cb) {
     return saveItem(that.requestToObject(item));
 };
 
+LifeData.prototype.mergeSave = function(item, data, cb) {
+    var that = this;
+
+    if (item === null || typeof item != 'object') {
+        item = {};
+    }
+
+    for (var i in data) {
+        item[i] = data[i];
+    }
+
+    if (!(item instanceof mongoose.Document)) {
+        item = new that.model(item);
+    }
+
+    return this.save(item, function(item) {
+        var LifeResponse = require('./LifeResponse.js');
+
+        if (typeof cb !== 'undefined') {
+            return cb(item, that.req, that.res, that.next);
+        }
+
+        return new LifeResponse(that.req, that.res).single(item);
+    });
+};
+
 /**
  * Convert request to object
  *
@@ -252,9 +278,11 @@ LifeData.prototype.whitelist = function(validation, input, cb) {
     var checkString = function(i) {
         if (inputVal instanceof String) {
             ret[i] = inputVal;
+            return;
         } else if (typeof inputVal !== 'undefined' &&
                 typeof inputVal.toString === 'function') {
             ret[i] = inputVal.toString();
+            return;
         }
     };
 
@@ -268,6 +296,11 @@ LifeData.prototype.whitelist = function(validation, input, cb) {
 
     for (i in validation) {
         var valueType = validation[i].type;
+
+        if (valueType instanceof LifeData.ExtRegExp) {
+            valueType = valueType.regexp();
+        }
+
         var required = typeof validation[i].required == 'boolean' ?
               validation[i].required
             : true;
@@ -455,14 +488,63 @@ LifeData.dateTimeToString = function(d) {
       LifeData.zeroPad(d.getUTCSeconds(), 2) + 'Z';
 };
 
+LifeData.ExtRegExp = function() {};
+LifeData.ExtRegExp.prototype.doc = function() {
+    return '';
+};
+LifeData.ExtRegExp.prototype.addon = function() {
+    return '';
+};
+
+
+LifeData.Email = function() {
+};
+LifeData.Email.prototype = new LifeData.ExtRegExp();
+LifeData.Email.prototype.constructor = LifeData.ExtRegExp;
+LifeData.Email.prototype.doc = function() {
+    return 'E-Mail address';
+};
+LifeData.Email.prototype.addon = function() {
+    return 'An e-mail address. No IDN allowed.';
+};
+LifeData.Email.prototype.regexp = function() {
+    // TODO: update that shitty regexp
+    return /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/;
+};
+
+LifeData.Enum = function(values) {
+    this.values = values;
+
+    values = values.map(function(value) {
+        return LifeData.regexpEscape(value);
+    }).join('|');
+
+    RegExp.call(this, this.toString());
+};
+LifeData.Enum.prototype = new LifeData.ExtRegExp();
+LifeData.Enum.prototype.constructor = RegExp;
+LifeData.Enum.prototype.addon = function() {
+    return '{"' + this.values.join('", "') + '"}';
+};
+LifeData.Enum.prototype.doc = function() {
+    return 'Enum';
+};
+LifeData.Enum.prototype.regexp = function() {
+    var values = this.values.map(function(value) {
+        return LifeData.regexpEscape(value);
+    }).join('|');
+
+    return new RegExp('^' + values + '$');
+};
 
 LifeData.regexps = {
   'login': /^[a-zA-Z0-9-_]{3,20}$/,
-  'email': /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b/,
   'name': /^[a-zA-Z0-9-._ ]+$/,
-  'gender': /^male|female|other$/,
   'lang': /^[a-z]{2}(-[A-Z]{2})?$/,
-  'achievementState': /^not_planned|planned|in_progress|done$/
+  'email': new LifeData.Email(),
+  'gender': new LifeData.Enum(['male', 'female', 'other', 'undefined']),
+  'achievementState': new LifeData.Enum(['not_planned', 'planned',
+        'in_progress', 'done'])
 };
 
 module.exports = LifeData;

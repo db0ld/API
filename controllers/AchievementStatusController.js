@@ -77,15 +77,16 @@ module.exports = function(router) {
 
     .Post('users/:src_user_id/achievement_statuses')
         .doc('Post an achievement status')
+        .input(AchievementStatus.validation.creation)
         .output(AchievementStatus)
         .auth(true)
-        .add(function(req, res, next) {
+        .add(function(req, res, next, params) {
             var ac = new AchievementStatus();
 
             ac.owner = req.user;
 
             return new LifeData(AchievementStatus, req, res, next)
-                .saveFromRequest(ac, AchievementStatus.validation.creation);
+                .mergeSave(ac, params);
         })
 
 
@@ -114,16 +115,16 @@ module.exports = function(router) {
 
     .Put(routeBase + '/:achievement_status_id')
         .doc('Edit an achievement status')
+        .input(AchievementStatus.validation.edition)
         .output(AchievementStatus)
         .auth(true)
-        .add(function (req, res, next) {
+        .add(function (req, res, next, params) {
             return new LifeQuery(AchievementStatus, req, res, next)
                 .modelStatic('findByUser', req.user.id)
                 .modelStatic('findById', req.params.achievement_status_id)
                 .execOne(function(achievement_status) {
                     return new LifeData(AchievementStatus, req, res, next)
-                        .saveFromRequest(achievement_status,
-                                AchievementStatus.validation.edition);
+                        .mergeSave(achievement_status, params);
                 });
         })
 
@@ -141,6 +142,7 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:achievement_status_id/approvers')
         .doc('Approve an achievement')
+        .input({})
         .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)
@@ -148,6 +150,7 @@ module.exports = function(router) {
 
     .Post(routeBase + '/:achievement_status_id/disapprovers')
         .doc('Disapprove an achievement')
+        .input({})
         .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)

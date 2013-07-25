@@ -29,6 +29,8 @@
     var typeDisplayer = function(obj) {
         if (obj == Number) {
             return 'Number';
+        } else if (obj instanceof ExtRegExp) {
+            return obj.doc();
         } else if (obj == String || obj instanceof RegExp) {
             return 'String';
         } else if (obj == Boolean) {
@@ -114,22 +116,39 @@
 
                         <% if (route['input']) { %>
                             <h3>Input</h3>
-                            <table class="table table-striped">
-                                <% for (var j in route['input']) { %>
-                                <tr>
-                                    <th><%= j %></th>
-                                    <td><%= typeDisplayer(route['input'][j].type) %></td>
-                                    <td><% if (route['input'][j].required == 'undefined' || route['input'][j].required) { %><span class="muted">Required</span><% } %></td>
-                                    <td>
-                                        <% if (route['input'][j].type instanceof RegExp) { %>
-                                            <code><%= route['input'][j].type.toString() %></code>
-                                        <% } else if (route['input'][j].type instanceof LifeUpload) { %>
-                                            multipart/form-data is required to send files
-                                        <% } %>
-                                    </td>
-                                </tr>
-                                <% } %>
-                            </table>
+                            <% if (Object.keys(route['input']).length == 0) { %>
+                                <span class="muted">No arguments</span>
+                            <% } else { %>
+                                <table class="table table-striped">
+                                    <tr>
+                                        <th>Param</th>
+                                        <th>Type</th>
+                                        <th>Required</th>
+                                        <th>Default value</th>
+                                        <th>Notes</th>
+                                    </tr>
+
+                                    <% for (var j in route['input']) { %>
+                                    <tr>
+                                        <th><%= j %></th>
+                                        <td><%= typeDisplayer(route['input'][j].type) %><% if (typeof route['input'][j].type == 'function' && new route['input'][j].type() instanceof mongoose.Document) { %>
+                                                ObjectId
+                                            <% } %></td>
+                                        <td><% if (typeof route['input'][j].required == 'undefined' || route['input'][j].required) { %><span class="muted">Required</span><% } %></td>
+                                        <td><% if (typeof route['input'][j].default !== 'undefined') { %><%= route['input'][j].default %><% } else { %><span class="muted">None</span><% } %></td>
+                                        <td>
+                                            <% if (route['input'][j].type instanceof RegExp) { %>
+                                                <code><%= route['input'][j].type.toString() %></code>
+                                            <% } else if (route['input'][j].type instanceof ExtRegExp) { %>
+                                                <code><%= route['input'][j].type.addon() %></code>
+                                            <% } else if (route['input'][j].type instanceof LifeUpload) { %>
+                                                <code>multipart/form-data is required to send files</code>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                                </table>
+                            <% } %>
                         <% } %>
 
                         <% if (route['output']) { %>
