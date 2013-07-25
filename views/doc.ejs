@@ -121,10 +121,10 @@
                             <% } else { %>
                                 <table class="table table-striped">
                                     <tr>
-                                        <th>Param</th>
-                                        <th>Type</th>
-                                        <th>Required</th>
-                                        <th>Default value</th>
+                                        <th class="span2">Param</th>
+                                        <th class="span3">Type</th>
+                                        <th class="span1">Required</th>
+                                        <th class="span3">Default value</th>
                                         <th>Notes</th>
                                     </tr>
 
@@ -134,8 +134,8 @@
                                         <td><%= typeDisplayer(route['input'][j].type) %><% if (typeof route['input'][j].type == 'function' && new route['input'][j].type() instanceof mongoose.Document) { %>
                                                 ObjectId
                                             <% } %></td>
-                                        <td><% if (typeof route['input'][j].required == 'undefined' || route['input'][j].required) { %><span class="muted">Required</span><% } %></td>
-                                        <td><% if (typeof route['input'][j].default !== 'undefined') { %><%= route['input'][j].default %><% } else { %><span class="muted">None</span><% } %></td>
+                                        <td><% if (typeof route['input'][j].required == 'undefined' || route['input'][j].required) { %><span class="label label-success">Yes</span><% } %></td>
+                                        <td><% if (typeof route['input'][j].default !== 'undefined') { %><code><%= route['input'][j].default %></code><% } %></td>
                                         <td>
                                             <% if (route['input'][j].type instanceof RegExp) { %>
                                                 <code><%= route['input'][j].type.toString() %></code>
