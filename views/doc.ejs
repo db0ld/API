@@ -24,6 +24,16 @@
         .methods > .alert {
             margin-bottom: 3px;
         }
+
+        .method-summary {
+            border-color: #dedede;
+            background-color: #fff;
+            color: #000;
+        }
+
+        .method-summary .pull-right {
+            color: #08c;
+        }
     </style>
     <script><%
     var typeDisplayer = function(obj) {
@@ -88,7 +98,7 @@
                 <div class="methods">
                     <p class="alert method-summary <%= methodAlertClass(route['method']) %>">
                         <span class="label method-label <%= methodLabelClass(route['method']) %>"><%= route['method'].toUpperCase() %></span>
-                        <strong><%= '/' + route['route'].split('/').splice(4).join('/') %></strong>
+                        <%= '/' + route['route'].split('/').splice(4).join('/') %>
                         <span class="pull-right">
                             <%= route['doc'] %>
                             <span class="label <% if(route['private']) { %>label-success<% } %>" title="Private method"><i class="icon-eye-close icon-white"></i></span>
