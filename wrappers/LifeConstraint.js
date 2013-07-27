@@ -1,19 +1,49 @@
 var LifeData = require('./LifeData.js');
 
+/**
+ * A set of common constraints
+ *
+ * @class LifeConstraint
+ * @constructor
+ */
 var LifeConstraint = function () {
 };
 
+/**
+ * A class for managing RegExp with additional information
+ *
+ * @class ExtRegExp
+ * @constructor
+ */
 var ExtRegExp = function () {};
 
+/**
+ * Documentation for current constraint, usually returns type
+ *
+ * @return String
+ * @method
+ */
 ExtRegExp.prototype.doc = function () {
     return '';
 };
 
+/**
+ * Additional advices concerning this constraint
+ *
+ * @return String
+ * @method
+ */
 ExtRegExp.prototype.addon = function () {
     return '';
 };
 
 
+/**
+ * Email constraint
+ *
+ * @class Email
+ * @constructor
+ */
 var Email = function () {
 };
 
@@ -34,6 +64,12 @@ Email.prototype.regexp = function () {
     return (/\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}\b/);
 };
 
+/**
+ * Enum constraint
+ *
+ * @class Enum
+ * @constructor
+ */
 var Enum = function (values) {
     this.values = values;
 

@@ -19,16 +19,14 @@ var LifeData = function () {};
  * @function
  */
 LifeData.i18nPicker = function (strings, lang) {
-    if (!lang) {
-        lang = 'en-US';
-    }
+    lang = lang || 'en-US';
 
-    var i;
-    var user_lang = lang.match(/^[a-z]{2}/)[0];
-    var string_user_lang = null;
-    var string_en_us = null;
-    var string_en = null;
-    var string = null;
+    var i,
+        user_lang = lang.match(/^[a-z]{2}/)[0],
+        string_user_lang = null,
+        string_en_us = null,
+        string_en = null,
+        string = null;
 
     for (i in strings) {
         if (strings.hasOwnProperty(i)) {
