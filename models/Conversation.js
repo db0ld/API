@@ -10,61 +10,59 @@ var ConversationSchema = new mongoose.Schema({
 
 ConversationSchema.plugin(element);
 
-ConversationSchema.statics.findByUsers = function(query, users) {
-    var user_ids = [];
-
-    users.forEach(function(user) {
-        if (user !== null && typeof user === 'object') {
-            user_ids.push(user._id);
-        } else {
-            user_ids.push(user);
-        }
-    });
-
-    return query.size('referenced_users', users.size)
-        .all('referenced_users', users);
-};
-
-ConversationSchema.virtual('messages').get(function() {
+ConversationSchema.virtual('messages').get(function () {
     return [];
 });
 
-ConversationSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
+ConversationSchema.methods.jsonAddon = function (req, res, level, doc, cb) {
     doc.referenced_users = doc.referenced_users.items;
 
     var messagesQuery = new LifeQuery(Message, req, res);
-    return messagesQuery.modelStatic('findByConversation', this)
+    return messagesQuery.findByConversation(this)
         .exec(function (messages, size) {
 
             return new LifeResponse(req, res)
-                .paginate(messages, [], size, messagesQuery, function(mess) {
+                .paginate(messages, [], size, messagesQuery, function (mess) {
                     doc.messages = mess;
                     return cb(doc);
                 });
 
-    });
+        });
 };
 
-ConversationSchema.statics.findByUser = function(query, user) {
-    var user_ids = [];
-
-    users.forEach(function(user) {
-        if (user !== null && typeof user === 'object') {
-            user_ids.push(user._id);
-        } else {
-            user_ids.push(user);
-        }
-    });
-
-    return query.in('referenced_users', users);
-};
-
-ConversationSchema.statics.queryDefaults = function() {
+ConversationSchema.statics.queryDefaults = function () {
     return {
         'populate': 'referenced_users',
         'limit': 10,
         'index': 0
     };
+};
+
+ConversationSchema.statics.queries.findByUsers = function (users) {
+    var user_ids = [];
+
+    users.forEach(function (user) {
+        if (user !== null && typeof user === 'object') {
+            user_ids.push(user._id);
+        } else {
+            user_ids.push(user);
+        }
+    });
+
+    return this.size('referenced_users', users.size)
+        .all('referenced_users', users);
+};
+
+ConversationSchema.statics.queries.findByUser = function (user) {
+    var user_ids = [];
+
+    if (user !== null && typeof user === 'object') {
+        user_ids.push(user._id);
+    } else {
+        user_ids.push(user);
+    }
+
+    return this['in']('referenced_users', user);
 };
 
 var Conversation = mongoose.model('Conversation', ConversationSchema);

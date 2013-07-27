@@ -12,7 +12,7 @@ PictureSchema.virtual('url_big').get(function () {
     return this._filepath;
 });
 
-PictureSchema.statics.queryDefaults = function() {
+PictureSchema.statics.queryDefaults = function () {
     return {
         'populate': '',
         'limit': 10,
@@ -20,7 +20,7 @@ PictureSchema.statics.queryDefaults = function() {
     };
 };
 
-PictureSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
+PictureSchema.methods.jsonAddon = function (req, res, level, doc, cb) {
     doc.url = 'http://' + req.headers.host + '/' + doc.url;
     doc.url_small = 'http://' + req.headers.host + '/' + doc.url_small;
     doc.url_big = 'http://' + req.headers.host + '/' + doc.url_big;

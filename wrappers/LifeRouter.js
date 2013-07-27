@@ -1,10 +1,12 @@
-var fs = require('fs');
-var LifeSecurity = require('./LifeSecurity.js');
-var LifeResponse = require('./LifeResponse.js');
-var LifeConfig = require('./LifeConfig.js');
-var LifeErrors = require('./LifeErrors.js');
-var LifeData = require('./LifeData.js');
-var LifeUpload = require('./LifeUpload.js');
+var fs = require('fs'),
+    mongoose = require('mongoose'),
+    LifeSecurity = require('./LifeSecurity.js'),
+    LifeResponse = require('./LifeResponse.js'),
+    LifeConfig = require('./LifeConfig.js'),
+    LifeErrors = require('./LifeErrors.js'),
+    LifeConstraint = require('./LifeConstraint.js'),
+    LifeValidation = require('./LifeValidation.js'),
+    LifeUpload = require('./LifeUpload.js');
 
 /**
  * An utility class that routes requests on top of ExpressJS.
@@ -12,10 +14,18 @@ var LifeUpload = require('./LifeUpload.js');
  * @class LifeRouter
  * @constructor
  */
-var LifeRouter = function(app) {
+var LifeRouter = function (app) {
     this.app = app;
 
     this.documentation = [];
+};
+
+var routesSort = function (a, b) {
+    if (a.route === b.route) {
+        return a.method < b.method ? -1 : 1;
+    }
+
+    return a.route < b.route ? -1 : 1;
 };
 
 /**
@@ -23,61 +33,53 @@ var LifeRouter = function(app) {
  *
  * @method
  */
-LifeRouter.prototype.init = function() {
+LifeRouter.prototype.init = function () {
     var that = this;
 
     // blocking readdir, never mind, only launched at app initialization
-    fs.readdirSync('./controllers').forEach(function(file) {
+    fs.readdirSync('./controllers').forEach(function (file) {
         if (file.match(/\.js$/)) {
             require('../controllers/' + file)(that);
         }
     });
 
-    this.app.options('*', function(req, res, next) {
+    this.app.options('*', function (req, res, next) {
         return new LifeResponse(req, res).single();
     });
 
-    this.app.get('/doc/v1', function(req, res) {
-        for (var i in that.documentation) {
-            that.documentation[i].sort(function(a, b) {
-                if (a.route == b.route) {
-                    return a.method < b.method ? -1 : 1;
-                }
+    this.app.get('/doc/v1', function (req, res) {
+        var i;
 
-                return a.route < b.route ? -1 : 1;
-            });
+        for (i in that.documentation) {
+            if (that.documentation.hasOwnProperty(i)) {
+                that.documentation[i].sort(routesSort);
+            }
         }
 
         return res.render('doc.ejs', {
             doc: that.documentation,
-            mongoose: require('mongoose'),
+            mongoose: mongoose,
             LifeUpload: LifeUpload,
-            ExtRegExp: LifeData.ExtRegExp
+            ExtRegExp: LifeConstraint.ExtRegExp
         });
     });
 };
 
-LifeRouter.Method = function(router, method, route, priv) {
-    priv = typeof priv === 'undefined' ? true : priv;
-
+LifeRouter.Method = function (router, method, doc) {
     this._router = router;
     this._method = method;
 
-    this._routes = [{
-        route: route,
-        priv: priv
-    }];
-
-    this._doc = 'Undocumented';
+    this._doc = doc;
     this._input = null;
     this._output = null;
     this._errors = [];
+    this._routes = [];
     this._auth = false;
     this._list = false;
 };
 
-LifeRouter.Method.prototype.route = function(route, priv) {
-    priv = typeof priv === 'undefined' ? true : priv;
+LifeRouter.Method.prototype.route = function (route, priv) {
+    priv = priv === undefined ? true : priv;
 
     this._routes.push({
         route: route,
@@ -87,24 +89,18 @@ LifeRouter.Method.prototype.route = function(route, priv) {
     return this;
 };
 
-LifeRouter.Method.prototype.doc = function(doc) {
-    this._doc = doc;
-
-    return this;
-};
-
-LifeRouter.Method.prototype.list = function(output) {
+LifeRouter.Method.prototype.list = function (output) {
     this._list = true;
 
-    if (typeof output !== 'undefined') {
+    if (output !== undefined) {
         this._output = output;
     }
 
     return this;
 };
 
-LifeRouter.Method.prototype.auth = function(auth) {
-    if (typeof auth != 'boolean') {
+LifeRouter.Method.prototype.auth = function (auth) {
+    if (typeof auth !== 'boolean') {
         auth = [auth];
     }
 
@@ -113,41 +109,40 @@ LifeRouter.Method.prototype.auth = function(auth) {
     return this;
 };
 
-LifeRouter.Method.prototype.input = function(input) {
+LifeRouter.Method.prototype.input = function (input) {
     this._input = input;
 
     return this;
 };
 
-LifeRouter.Method.prototype.error = function(error) {
+LifeRouter.Method.prototype.error = function (error) {
     this._errors.push(error);
 
     return this;
 };
 
-LifeRouter.Method.prototype.output = function(output) {
+LifeRouter.Method.prototype.output = function (output) {
     this._output = output;
 
     return this;
 };
 
-LifeRouter.Method.prototype.add = function(cb) {
+LifeRouter.Method.prototype.add = function (cb) {
     var that = this;
 
     // Input sanitization
-    var cb1 = function(req, res, next) {
-        new LifeData(null, req, res, next).whitelist(that._input, null,
-            function(input) {
+    var cb1 = function (req, res, next) {
+        new LifeValidation(null, req, res, next).whitelist(that._input, null,
+            function (input) {
                 return cb(req, res, next, input);
-            }
-        );
+            });
     };
 
     // Language detection
-    var cb2 = function(req, res, next) {
-        if (typeof req.query.lang !== 'undefined') {
+    var cb2 = function (req, res, next) {
+        if (req.query.lang !== undefined) {
             req.lang = req.query.lang;
-        } else if (typeof req.body.lang !== 'undefined') {
+        } else if (req.body.lang !== undefined) {
             req.lang = req.body.lang;
         }
 
@@ -158,12 +153,12 @@ LifeRouter.Method.prototype.add = function(cb) {
     };
 
     // Auth
-    var cb3 = function(req, res) {
+    var cb3 = function (req, res) {
         return new LifeSecurity(req, res, that._auth, cb2);
     };
 
     // Debug
-    var cb4 = function(req, res) {
+    var cb4 = function (req, res) {
         if (LifeConfig.dev) {
             console.log(new Array(80).join('-').toString());
             console.log(new Date().toISOString());
@@ -177,14 +172,14 @@ LifeRouter.Method.prototype.add = function(cb) {
         return cb3(req, res);
     };
 
-    that._routes.forEach(function(route) {
+    that._routes.forEach(function (route) {
         var priv = route.priv;
         route = LifeRouter.makePath(route.route);
 
-        var module = route.split('/').splice(0,4).join('/');
+        var module = route.split('/').splice(0, 4).join('/');
         that._router.app[that._method](route, cb4);
 
-        if (typeof that._router.documentation[module] == 'undefined') {
+        if (that._router.documentation[module] === undefined) {
             that._router.documentation[module] = [];
         }
 
@@ -210,37 +205,37 @@ LifeRouter.Method.prototype.add = function(cb) {
  * @param {String} res
  * @function
  */
-LifeRouter.makePath = function(res) {
-  return LifeConfig['api_path'] + 'v' + LifeConfig['version'] + '/' + res;
+LifeRouter.makePath = function (res) {
+    return LifeConfig.api_path + 'v' + LifeConfig.version + '/' + res;
 };
 
 
-LifeRouter.prototype.Get = function(route, priv) {
-    return new LifeRouter.Method(this, 'get', route, priv);
+LifeRouter.prototype.Get = function (doc) {
+    return new LifeRouter.Method(this, 'get', doc);
 };
 
-LifeRouter.prototype.Post = function(route, priv) {
-    return new LifeRouter.Method(this, 'post', route, priv);
+LifeRouter.prototype.Post = function (doc) {
+    return new LifeRouter.Method(this, 'post', doc);
 };
 
-LifeRouter.prototype.Put = function(route, priv) {
-    return new LifeRouter.Method(this, 'put', route, priv);
+LifeRouter.prototype.Put = function (doc) {
+    return new LifeRouter.Method(this, 'put', doc);
 };
 
-LifeRouter.prototype.Delete = function(route, priv) {
-    return new LifeRouter.Method(this, 'delete', route, priv);
+LifeRouter.prototype.Delete = function (doc) {
+    return new LifeRouter.Method(this, 'delete', doc);
 };
 
-LifeRouter.prototype.Patch = function(route, priv) {
-    return new LifeRouter.Method(this, 'patch', route, priv);
+LifeRouter.prototype.Patch = function (doc) {
+    return new LifeRouter.Method(this, 'patch', doc);
 };
 
-LifeRouter.prototype.Head = function(route, priv) {
-    return new LifeRouter.Method(this, 'head', route, priv);
+LifeRouter.prototype.Head = function (doc) {
+    return new LifeRouter.Method(this, 'head', doc);
 };
 
-LifeRouter.prototype.Options = function(route, priv) {
-    return new LifeRouter.Method(this, 'options', route, priv);
+LifeRouter.prototype.Options = function (doc) {
+    return new LifeRouter.Method(this, 'options', doc);
 };
 
 module.exports = LifeRouter;

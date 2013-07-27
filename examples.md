@@ -34,6 +34,6 @@ Creating an achievement
 
 {
     "token": "TOKEN",
-    "name": "Pastektime",
+    "name": "Born",
     "description": "Descriptime"
 }

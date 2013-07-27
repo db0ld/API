@@ -4,7 +4,7 @@
  * @class LifeErrors
  * @constructor
  */
-var LifeErrors = function() {
+var LifeErrors = function () {
 
 };
 
@@ -13,10 +13,10 @@ var LifeErrors = function() {
  * @inner
  */
 LifeErrors.NotFound = {
-  'code': 404,
-  'type': 'NotFound',
-  'message': 'The requested document was not found',
-  'http': 404
+    'code': 404,
+    'type': 'NotFound',
+    'message': 'The requested document was not found',
+    'http': 404
 };
 
 /**
@@ -24,10 +24,10 @@ LifeErrors.NotFound = {
  * @inner
  */
 LifeErrors.MethodNotFound = {
-  'code': 404,
-  'type': 'MethodNotFound',
-  'message': 'The requested method was not found',
-  'http': 404
+    'code': 404,
+    'type': 'MethodNotFound',
+    'message': 'The requested method was not found',
+    'http': 404
 };
 
 /**
@@ -35,10 +35,10 @@ LifeErrors.MethodNotFound = {
  * @inner
  */
 LifeErrors.NonUniqueResult = {
-  'code': 400,
-  'type': 'NonUniqueResult',
-  'message': 'An unique result was expected, several found',
-  'http': 406
+    'code': 400,
+    'type': 'NonUniqueResult',
+    'message': 'An unique result was expected, several found',
+    'http': 406
 };
 
 /**
@@ -46,10 +46,10 @@ LifeErrors.NonUniqueResult = {
  * @inner
  */
 LifeErrors.UserExtTokenAlreadyRegistered = {
-  'code': 1100,
-  'type': 'UserExtTokenAlreadyRegistered',
-  'message': 'The provided external authentification is already used',
-  'http': 400
+    'code': 1100,
+    'type': 'UserExtTokenAlreadyRegistered',
+    'message': 'The provided external authentification is already used',
+    'http': 400
 };
 
 /**
@@ -57,10 +57,10 @@ LifeErrors.UserExtTokenAlreadyRegistered = {
  * @inner
  */
 LifeErrors.IOErrorDB = {
-  'code': 9000,
-  'type': 'IOErrorDB',
-  'message': 'An error happened while reading from or writing to the database',
-  'http': 400
+    'code': 9000,
+    'type': 'IOErrorDB',
+    'message': 'An error happened while reading from or writing to the database',
+    'http': 400
 };
 
 /**
@@ -68,10 +68,10 @@ LifeErrors.IOErrorDB = {
  * @inner
  */
 LifeErrors.AuthenticationRequired = {
-  'code': 6000,
-  'type': 'AuthenticationRequired',
-  'message': 'Authentication is required for this resource',
-  'http': 401
+    'code': 6000,
+    'type': 'AuthenticationRequired',
+    'message': 'Authentication is required for this resource',
+    'http': 401
 };
 
 /**
@@ -79,10 +79,10 @@ LifeErrors.AuthenticationRequired = {
  * @inner
  */
 LifeErrors.InvalidParameters = {
-  'code': 4000,
-  'type': 'InvalidParameters',
-  'message': 'One or serveral parameters are missing or invalid',
-  'http': 400
+    'code': 4000,
+    'type': 'InvalidParameters',
+    'message': 'One or serveral parameters are missing or invalid',
+    'http': 400
 };
 
 /**
@@ -90,10 +90,10 @@ LifeErrors.InvalidParameters = {
  * @inner
  */
 LifeErrors.AuthenticationError = {
-  'code': 6000,
-  'type': 'AuthenticationError',
-  'message': 'Authentication has failed',
-  'http': 401
+    'code': 6000,
+    'type': 'AuthenticationError',
+    'message': 'Authentication has failed',
+    'http': 401
 };
 
 /**
@@ -101,10 +101,10 @@ LifeErrors.AuthenticationError = {
  * @inner
  */
 LifeErrors.AuthenticationMissingRole = {
-  'code': 6020,
-  'type': 'AuthenticationMissingRole',
-  'message': 'The required role for this method is missing',
-  'http': 401
+    'code': 6020,
+    'type': 'AuthenticationMissingRole',
+    'message': 'The required role for this method is missing',
+    'http': 401
 };
 
 /**
@@ -112,10 +112,10 @@ LifeErrors.AuthenticationMissingRole = {
  * @inner
  */
 LifeErrors.NoLanguageSpecified = {
-  'code': 6500,
-  'type': 'NoLanguageSpecified',
-  'message': 'No language specified',
-  'http': 400
+    'code': 6500,
+    'type': 'NoLanguageSpecified',
+    'message': 'No language specified',
+    'http': 400
 };
 
 /**
@@ -123,10 +123,10 @@ LifeErrors.NoLanguageSpecified = {
  * @inner
  */
 LifeErrors.NothingHasChanged = {
-  'code': 665,
-  'type': 'NothingHasChanged',
-  'message': 'Nothing has been changed',
-  'http': 409
+    'code': 665,
+    'type': 'NothingHasChanged',
+    'message': 'Nothing has been changed',
+    'http': 409
 };
 
 /**
@@ -134,10 +134,10 @@ LifeErrors.NothingHasChanged = {
  * @inner
  */
 LifeErrors.UserLogicError = {
-  'code': 664,
-  'type': 'UserLogicError',
-  'message': 'User logic error',
-  'http': 418
+    'code': 664,
+    'type': 'UserLogicError',
+    'message': 'User logic error',
+    'http': 418
 };
 
 /**
@@ -145,10 +145,10 @@ LifeErrors.UserLogicError = {
  * @inner
  */
 LifeErrors.NotImplemented = {
-  'code': 9999,
-  'type': 'NotImplemented',
-  'message': 'Not Implemented',
-  'http': 501
+    'code': 9999,
+    'type': 'NotImplemented',
+    'message': 'Not Implemented',
+    'http': 501
 };
 
 /**
@@ -156,10 +156,10 @@ LifeErrors.NotImplemented = {
  * @inner
  */
 LifeErrors.UploadError = {
-  'code': 4978,
-  'type': 'UploadError',
-  'message': 'An error occured while uploading some file',
-  'http': 500
+    'code': 4978,
+    'type': 'UploadError',
+    'message': 'An error occured while uploading some file',
+    'http': 500
 };
 
 /**
@@ -167,10 +167,10 @@ LifeErrors.UploadError = {
  * @inner
  */
 LifeErrors.UploadMissingFile = {
-  'code': 4979,
-  'type': 'UploadMissingFile',
-  'message': 'A required file is missing',
-  'http': 500
+    'code': 4979,
+    'type': 'UploadMissingFile',
+    'message': 'A required file is missing',
+    'http': 500
 };
 
 module.exports = LifeErrors;

@@ -6,7 +6,7 @@ var User = require('mongoose').model('User'),
     Activity = require('mongoose').model('Activity'),
     routeBase = 'activities';
 
-var wrapAchievementStatus = function(achievementStatus) {
+var wrapAchievementStatus = function (achievementStatus) {
     return new Activity({
         id: achievementStatus.id,
         creation: achievementStatus.creation,
@@ -17,18 +17,19 @@ var wrapAchievementStatus = function(achievementStatus) {
     });
 };
 
-module.exports = function(router) {
+module.exports = function (router) {
 
 
-    (router)
+    router
 
 
-    .Get(routeBase + '/:activity_id')
-        .doc('Get an activity')
+        .Get('Get an activity')
+        .route(routeBase + '/:activity_id')
         .output(Activity)
-        .add(function(req, res, next) {
+        .add(function (req, res, next) {
             return new LifeQuery(AchievementStatus, req, res, next)
-                .findById(req.params.activity_id, function(achievementStatus) {
+                .findById(req.params.activity_id)
+                .exec(function (achievementStatus) {
                     if (!achievementStatus) {
                         return next(LifeErrors.NotFound);
                     }
@@ -37,32 +38,33 @@ module.exports = function(router) {
         })
 
 
-    .Get('users/:user_id/' + routeBase)
-        .doc('Get activity for an user')
+        .Get('Get activity for an user')
+        .route('users/:user_id/' + routeBase)
         .list(Activity)
-        .add(function(req, res, next) {
-            return User.findByLogin(req.params.user_id, req, res, next)
-                .execOne(false, function(user) {
+        .add(function (req, res, next) {
+            return new LifeQuery(User, req, res, next)
+                .findByLogin(req.params.user_id)
+                .execOne(false, function (user) {
                     var query = new LifeQuery(AchievementStatus, req, res, next)
-                        .modelStatic('findByUser', user.id);
+                        .findByUser(user.id);
 
-                    return query.exec(function(achievementStatuses, count) {
-                            return new LifeResponse(req, res)
-                                .list(achievementStatuses.map(wrapAchievementStatus), count, null, query);
-                        });
+                    return query.exec(function (achievementStatuses, count) {
+                        return new LifeResponse(req, res)
+                            .list(achievementStatuses.map(wrapAchievementStatus), count, null, query);
+                    });
                 });
         })
 
 
-    .Get('feed')
-        .doc('Get all users activity feed')
+        .Get('Get all users activity feed')
+        .route('feed')
         .list(Activity)
-        .add(function(req, res, next) {
+        .add(function (req, res, next) {
             var query = new LifeQuery(AchievementStatus, req, res, next);
 
-            return query.exec(function(achievementStatuses, count) {
-                    return new LifeResponse(req, res)
-                        .list(achievementStatuses.map(wrapAchievementStatus), count, null, query);
-                });
+            return query.exec(function (achievementStatuses, count) {
+                return new LifeResponse(req, res)
+                    .list(achievementStatuses.map(wrapAchievementStatus), count, null, query);
+            });
         });
 };

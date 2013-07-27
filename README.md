@@ -58,7 +58,12 @@ controller folder, using the existing ones as inspiration (`achievement.js` for 
 
 ### Coding Style
 
-While we do not have a proper coding style, following the best ideas
-from this one may be a good idea:
+To check your files use jslint with options
 
-http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
+* --indent 4
+* --node
+* --nomen
+* --vars
+* --stupid
+* --newcap
+* --todo

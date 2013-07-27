@@ -13,7 +13,7 @@ OAuthTokenSchema.virtual('id').get(function () {
     return this.token;
 });
 
-OAuthTokenSchema.statics.queryDefaults = function() {
+OAuthTokenSchema.statics.queryDefaults = function () {
     return {
         'populate': 'user',
         'limit': 10,
@@ -21,8 +21,8 @@ OAuthTokenSchema.statics.queryDefaults = function() {
     };
 };
 
-OAuthTokenSchema.statics.findByToken = function(query, token, activeOnly) {
-    activeOnly = (typeof activeOnly !== 'undefined') ? activeOnly : true;
+OAuthTokenSchema.statics.queries.findByToken = function (token, activeOnly) {
+    activeOnly = (activeOnly !== undefined) ? activeOnly : true;
 
     var conditions = [{'token': token}];
 
@@ -30,12 +30,12 @@ OAuthTokenSchema.statics.findByToken = function(query, token, activeOnly) {
         conditions.push({'expiration': {$gt: new Date()}});
     }
 
-    return query
+    return this
         .and(conditions);
 };
 
-OAuthTokenSchema.statics.findByUserId = function(query, userId, activeOnly) {
-    activeOnly = (typeof activeOnly !== 'undefined') ? activeOnly : true;
+OAuthTokenSchema.statics.queries.findByUserId = function (userId, activeOnly) {
+    activeOnly = (activeOnly !== undefined) ? activeOnly : true;
 
     var conditions = [];
 
@@ -45,7 +45,7 @@ OAuthTokenSchema.statics.findByUserId = function(query, userId, activeOnly) {
         conditions.push({'expiration': {$gt: new Date()}});
     }
 
-    return query.and(conditions);
+    return this.and(conditions);
 };
 
 OAuthTokenSchema.statics.creationValidation = {

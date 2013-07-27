@@ -1,5 +1,4 @@
-var LifeData = require('../wrappers/LifeData.js'),
-    element = require('./Element.js');
+var element = require('./Element.js');
 
 module.exports = function (schema, options) {
     schema.plugin(element);
@@ -11,7 +10,7 @@ module.exports = function (schema, options) {
 
     schema.virtual('url').get(function () {
         if (!this._filepath.match(/\:\/\//) &&
-            this._req && this._req.headers && this._req.headers.host) {
+                this._req && this._req.headers && this._req.headers.host) {
             return 'http://' + this._req.headers.host + '/' + this._filepath;
         }
 

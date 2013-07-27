@@ -5,67 +5,70 @@ var User = require('mongoose').model('User'),
     LifeData = require('../wrappers/LifeData.js'),
     bcrypt = require('bcryptjs');
 
-module.exports = function(method) {
+module.exports = function (method) {
 
-    (method)
+    method
 
 
-    .Post('tokens')
-        .doc('Create a token for a user')
+        .Post('Create a token for a user')
+        .route('tokens')
         .input(OAuthToken.creationValidation)
         .output(OAuthToken)
         .error(LifeErrors.AuthenticationError)
-        .add(function(req, res, next, params) {
+        .add(function (req, res, next, params) {
             if (LifeData.isObjectId(params.login)) {
                 return next(LifeErrors.AuthenticationError);
             }
 
-            User.findByLogin(params.login, req, res, next).execOne(true, function(user) {
-                if (!user || !bcrypt.compareSync(params.password, user.password)) {
-                    return next(LifeErrors.AuthenticationError);
-                }
+            return new LifeQuery(User, req, res, next)
+                .findByLogin(params.login).execOne(true, function (user) {
+                    if (!user || !bcrypt.compareSync(params.password, user.password)) {
+                        return next(LifeErrors.AuthenticationError);
+                    }
 
-                var token = new OAuthToken();
-                token.expiration = new Date();
-                token.expiration.setDate(token.expiration.getDate() + 7);
-                token.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + token.expiration.getTime();
-                token.user = user;
+                    var token = new OAuthToken();
+                    token.expiration = new Date();
+                    token.expiration.setDate(token.expiration.getDate() + 7);
+                    token.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + token.expiration.getTime();
+                    token.user = user;
 
-                return new LifeData(OAuthToken, req, res, next).save(token);
-            });
+                    return new LifeQuery(OAuthToken, req, res, next).save(token);
+                });
         })
 
 
-    .Get('tokens')
+        .Get('Get tokens')
+        .route('tokens')
         .route('users/:user_id/tokens')
-        .doc('Get tokens')
         .list(OAuthToken)
         .auth(true)
-        .add(function(req, res, next) {
-            return User.findByLogin(req.security.getLogin(req.params.user_id), req, res, next).execOne(false, function(user) {
-                return new LifeQuery(OAuthToken, req, res, next)
-                    .modelStatic('findByUserId', user.id)
-                    .exec();
-            });
+        .add(function (req, res, next) {
+            return new LifeQuery(User, req, res, next)
+                .findByLogin(req.security.getLogin(req.params.user_id))
+                .execOne(false, function (user) {
+                    return new LifeQuery(OAuthToken, req, res, next)
+                        .findByUserId(user.id)
+                        .exec();
+                });
         })
 
 
-    .Get('tokens/:token')
-        .doc('Get a single token')
+        .Get('Get a single token')
+        .route('tokens/:token')
         .list(OAuthToken)
-        .add(function(req, res, next) {
+        .add(function (req, res, next) {
             return new LifeQuery(OAuthToken, req, res, next)
-                .modelStatic('findByToken', req.params.token)
+                .findByToken(req.params.token)
                 .execOne();
         })
 
 
-    .Delete('tokens/:token')
-        .doc('Remove an access token')
+        .Delete('Remove an access token')
+        .route('tokens/:token')
         .output(Number)
-        .add(function(req, res, next) {
+        .add(function (req, res, next) {
             return new LifeQuery(OAuthToken, req, res, next)
-                .modelStatic('findByToken', req.params.token)
+                .findByToken(req.params.token)
                 .remove();
         });
 };

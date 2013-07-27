@@ -10,7 +10,7 @@ var ActivitySchema = new mongoose.Schema({
 
 ActivitySchema.plugin(element);
 
-ActivitySchema.statics.queryDefaults = function() {
+ActivitySchema.statics.queryDefaults = function () {
     return {
         'populate': '',
         'limit': 10,
@@ -18,7 +18,7 @@ ActivitySchema.statics.queryDefaults = function() {
     };
 };
 
-ActivitySchema.methods.jsonAddon = function(req, res, level, doc, cb) {
+ActivitySchema.methods.jsonAddon = function (req, res, level, doc, cb) {
     if (doc.achievement_status && doc.achievement_status.id) {
         doc.id = doc.achievement_status.id;
     }

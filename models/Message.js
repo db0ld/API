@@ -10,7 +10,7 @@ var MessageSchema = new mongoose.Schema({
 
 MessageSchema.plugin(element);
 
-MessageSchema.statics.queryDefaults = function() {
+MessageSchema.statics.queryDefaults = function () {
     return {
         'populate': '',
         'limit': 10,
@@ -18,17 +18,9 @@ MessageSchema.statics.queryDefaults = function() {
     };
 };
 
-MessageSchema.statics.findByConversation = function(query, conversation) {
-    return query.and({
+MessageSchema.statics.queries.findByConversation = function (conversation) {
+    return this.and({
         _conversation: conversation
-    });
-};
-
-MessageSchema.statics.findByConversationAndId = function(query, conversation,
-    id) {
-    return query.and({
-        _conversation: conversation,
-        _id: id
     });
 };
 

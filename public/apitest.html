@@ -1,57 +1,54 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-	<title>Life API Playground</title>
-	<meta charset="UTF-8"/>
+    <title>Life API Playground</title>
+    <meta charset="UTF-8"/>
 
-	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-	<script src="http://code.jquery.com/jquery-migrate-1.1.1.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.1.1.min.js"></script>
 
-	<script src="api.js"></script>
+    <script src="api.js"></script>
 
-    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
-    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="http://twitter.github.com/bootstrap/assets/css/docs.css" rel="stylesheet">
-    <link href="http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
     <style>
-	    label input {
-	    	display: block;
-	    	clear: both;
-	    }
+        label input {
+            display: block;
+            clear: both;
+        }
     </style>
 </head>
 <body>
-	<div class="container">
-		<div class="input-prepend">
-			<span class="add-on" id="urlbase">&nbsp;</span>
-			<input type="text" name="endpoint" id="endpoint" value="achievement" class="span9">
-		</div>
-		<button class="btn btn-primary pull-right" id="send">Send</button>
-		<div class="row">
-			<form>
-				<div class="span3" id="http-params">
-					<ul class="nav nav-tabs" id="http-method-tabs">
-						<li id="get-tab" class="active"><a href="#">GET</a></li>
-						<li id="post-tab"><a href="#">POST</a></li>
-						<li id="put-tab"><a href="#">PUT</a></li>
-						<li id="delete-tab"><a href="#">DELETE</a></li>
-					</ul>
-					<div id="get-tab-content">
-						<p class="alert alert-info">No body for GET requests</p>
-					</div>
-					<div id="delete-tab-content" class="hidden">
-						<p class="alert alert-info">No body for DELETE requests</p>
-					</div>
-					<div id="post-tab-content" class="hidden">
-						<textarea id="textarea-POST" class="span3" style="height:500px"></textarea>
-					</div>
-					<div id="put-tab-content" class="hidden">
-						<textarea id="textarea-PUT" class="span3" style="height:500px"></textarea>
-					</div>
-				</div>
-				<pre class="span8" id="result">... Function result ...</pre>
-			</form>
-		</div>
-	</div>
+    <div class="container">
+        <div class="input-prepend">
+            <span class="add-on" id="urlbase">&nbsp;</span>
+            <input type="text" name="endpoint" id="endpoint" value="achievement" class="span9">
+        </div>
+        <button class="btn btn-primary pull-right" id="send">Send</button>
+        <div class="row">
+            <form>
+                <div class="span3" id="http-params">
+                    <ul class="nav nav-tabs" id="http-method-tabs">
+                        <li id="get-tab" class="active"><a href="#">GET</a></li>
+                        <li id="post-tab"><a href="#">POST</a></li>
+                        <li id="put-tab"><a href="#">PUT</a></li>
+                        <li id="delete-tab"><a href="#">DELETE</a></li>
+                    </ul>
+                    <div id="get-tab-content">
+                        <p class="alert alert-info">No body for GET requests</p>
+                    </div>
+                    <div id="delete-tab-content" class="hidden">
+                        <p class="alert alert-info">No body for DELETE requests</p>
+                    </div>
+                    <div id="post-tab-content" class="hidden">
+                        <textarea id="textarea-POST" class="span3" style="height:500px"></textarea>
+                    </div>
+                    <div id="put-tab-content" class="hidden">
+                        <textarea id="textarea-PUT" class="span3" style="height:500px"></textarea>
+                    </div>
+                </div>
+                <pre class="span8" id="result">... Function result ...</pre>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

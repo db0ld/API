@@ -14,15 +14,15 @@ var AchievementSchema = new mongoose.Schema({
 });
 
 AchievementSchema.virtual('url').get(function () {
-  return LifeConfig.website_url + 'achievements/' + this._id;
+    return LifeConfig.website_url + 'achievements/' + this._id;
 });
 
 AchievementSchema.plugin(element);
 
 
 
-AchievementSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
-    if (doc.description !== null && typeof doc.description == 'object') {
+AchievementSchema.methods.jsonAddon = function (req, res, level, doc, cb) {
+    if (doc.description !== null && typeof doc.description === 'object') {
         doc.description = LifeData.i18nPicker(doc.description, req.lang);
     }
 
@@ -31,7 +31,7 @@ AchievementSchema.methods.jsonAddon = function(req, res, level, doc, cb) {
     return cb(doc);
 };
 
-AchievementSchema.statics.queryDefaults = function() {
+AchievementSchema.statics.queryDefaults = function () {
     return {
         'populate': 'child_achievements badge',
         'limit': 10,
@@ -39,24 +39,32 @@ AchievementSchema.statics.queryDefaults = function() {
     };
 };
 
-AchievementSchema.statics.term = function(query, term) {
-    if (typeof term != "undefined" && term !== null) {
-        term.split(/\s/).forEach(function(term) {
+AchievementSchema.statics.queries.term = function (term) {
+    var query = this;
+
+    if (term !== undefined && term !== null) {
+        term.split(/\s/).forEach(function (term) {
             var locale = 'fr-FR';
 
             // HAS TO BE CHANGED, SEVERE PERFORMANCE ISSUES WILL COME
 
             query.and({$where:
-                "(" +
-                "(this.name && this.name['" + locale + "'] && this.name['" + locale + "'] || '') + " +
-                "(this.description && this.description['" + locale + "'] && this.description['" + locale + "'] || '')" +
-                ")" +
-                ".toLowerCase().indexOf('" + term.toLowerCase() + "') !== -1;"
-            });
+                    "(" +
+                    "(this.name && this.name['" + locale + "'] && this.name['" + locale + "'] || '') + " +
+                    "(this.description && this.description['" + locale + "'] && this.description['" + locale + "'] || '')" +
+                    ")" +
+                    ".toLowerCase().indexOf('" + term.toLowerCase() + "') !== -1;"
+                });
         });
     }
 
     return query;
+};
+
+AchievementSchema.statics.queries.parents = function (id) {
+    var query = this;
+
+    return query.and({child_achievements: id});
 };
 
 AchievementSchema.statics.creationValidation = {
