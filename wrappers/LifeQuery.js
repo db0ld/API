@@ -84,7 +84,7 @@ LifeQuery.prototype.exec = function (cb) {
 
 /**
  * Execute query, if no callback is provided data is returned to the client.
- * Expects a single result.
+ * Expects a single result, but can be overridden
  *
  * @param {boolean} [allow_empty=false] Is empty a suitable result
  * @param {Function} [cb=null] Callback function to be executed on success
@@ -127,7 +127,8 @@ LifeQuery.prototype.execOne = function (allow_empty, cb) {
 
 /**
  * Execute query, remove results from database. Returns number of removed
- * documents. If no callback is provided data is returned to the client.
+ * documents. If no callback is provided removed count is returned to the
+ * client.
  *
  * @param {Function} [cb=null] Callback function to be executed on success
  * @method
@@ -219,10 +220,11 @@ LifeQuery.prototype.save = function (item, data, cb) {
 };
 
 /**
- * Execute query, remove results from database. Returns number of removed
- * documents. If no callback is provided data is returned to the client.
+ * Get the value from request if missing from filter calls
  *
- * @param {Function} [cb=null] Callback function to be executed on success
+ * @param {String} field Field name
+ * @param {*} value
+ * @return String
  * @method
  */
 LifeQuery.prototype.value = function (field, value) {
@@ -234,48 +236,309 @@ LifeQuery.prototype.value = function (field, value) {
     return value;
 };
 
-
-['equals', 'in', 'gt', 'lt', 'gte', 'lte',
-    'slice', 'ne', 'nin', 'size', 'all'].forEach(function (operation) {
-    LifeQuery.prototype[operation] = function (field, value) {
-        value = this.value(field, value);
-
-        if (value !== undefined) {
-            this._query.where(field)[operation](value);
-        }
-
-        return this;
-    };
-});
-
-['and', 'or', 'nor', 'sort'].forEach(function (operation) {
-    LifeQuery.prototype[operation] = function (value) {
-        this._query[operation](value);
-
-        return this;
-    };
-});
-
 /**
- * Change a private property value.
+ * Add an equals clause to query.
  *
- * @param {string} property Property name.
- * @param {*} val The new value
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
  * @method
  */
-LifeQuery.prototype.changeValue = function (property, val) {
-    this['_' + property] = val;
+LifeQuery.prototype.equals = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).equals(value);
+    }
+
+    return this;
 };
 
-['query', 'limit', 'index', 'populate', 'sort'].forEach(function (property) {
-    LifeQuery.prototype[property] = function (val) {
-        if (val === undefined) {
-            return this['_' + property];
-        }
+/**
+ * Add an in clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype['in'] = function (field, value) {
+    value = this.value(field, value);
 
-        this.changeValue(property, val);
-        return this;
-    };
-});
+    if (value !== undefined) {
+        this._query.where(field)['in'](value);
+    }
+
+    return this;
+};
+
+/**
+ * Add a greater than clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.gt = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).gt(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add a lesser than clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.lt = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).lt(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add a greater or equals clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.gte = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).gte(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add a lesser or equals clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.lte = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).lte(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add an slice clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.slice = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).slice(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add a not equals clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.ne = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).ne(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add a not in clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.nin = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).nin(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add a slice clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.size = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).size(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add an all clause to query.
+ *
+ * @param {string} field Field on which the clause will be added.
+ * @param {*} [value] The clause value
+ * @method
+ */
+LifeQuery.prototype.all = function (field, value) {
+    value = this.value(field, value);
+
+    if (value !== undefined) {
+        this._query.where(field).all(value);
+    }
+
+    return this;
+};
+
+/**
+ * Add an and clause to query.
+ *
+ * @param {*} value The clause value
+ * @method
+ */
+LifeQuery.prototype.and = function (value) {
+    this._query.and(value);
+
+    return this;
+};
+
+/**
+ * Add an or clause to query.
+ *
+ * @param {*} value The clause value
+ * @method
+ */
+LifeQuery.prototype.or = function (value) {
+    this._query.or(value);
+
+    return this;
+};
+
+/**
+ * Add a not or clause to query.
+ *
+ * @param {*} value The clause value
+ * @method
+ */
+LifeQuery.prototype.nor = function (value) {
+    this._query.nor(value);
+
+    return this;
+};
+
+/**
+ * Add a sort clause to query.
+ *
+ * @param {*} value The clause value
+ * @method
+ */
+LifeQuery.prototype.sort = function (value) {
+    this._query.sort(value);
+
+    return this;
+};
+
+/**
+ * Get or set current query value for current instance
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.query = function (val) {
+    if (val === undefined) {
+        return this._query;
+    }
+
+    this._query = val;
+    return this;
+};
+
+/**
+ * Get or set current limit value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.limit = function (val) {
+    if (val === undefined) {
+        return this._limit;
+    }
+
+    this._limit = val;
+    return this;
+};
+
+/**
+ * Get or set current index value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.index = function (val) {
+    if (val === undefined) {
+        return this._index;
+    }
+
+    this._index = val;
+    return this;
+};
+
+/**
+ * Get or set current populate value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.populate = function (val) {
+    if (val === undefined) {
+        return this._populate;
+    }
+
+    this._populate = val;
+    return this;
+};
+
+/**
+ * Get or set current sort value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.sort = function (val) {
+    if (val === undefined) {
+        return this._sort;
+    }
+
+    this._sort = val;
+    return this;
+};
 
 module.exports = LifeQuery;

@@ -15,6 +15,14 @@ var LifeResponse = function (req, res) {
     this.res = res;
 };
 
+/**
+ * Create a simple Json proof version of given object.
+ *
+ * @param {*} item Item to be serialized
+ * @param {Function} cb Callback function to be executed on success
+ * @param {Number} [level=0] Current depth
+ * @method
+ */
 LifeResponse.prototype.json = function (item, cb, level) {
     var that = this;
     var doc = {};
@@ -31,7 +39,21 @@ LifeResponse.prototype.json = function (item, cb, level) {
     return cb(item);
 };
 
-LifeResponse.prototype.paginate = function (in_data, out_data, size, query, cb, level) {
+/**
+ * Paginate a list.
+ *
+ * If no callback is given an HTTP response is sent
+ *
+ * @param {Array} in_data Unserialized output
+ * @param {Array} out_data Serialized output
+ * @param {Number} size List size
+ * @param {LifeQuery} Query to determine current offset and limit
+ * @param {Function} cb Callback function to be executed on success
+ * @param {Number} [level=0]
+ * @method
+ */
+LifeResponse.prototype.paginate = function (in_data, out_data, size, query,
+    cb, level) {
     var that = this;
 
     if (typeof level !== 'Number') {
@@ -66,6 +88,13 @@ LifeResponse.prototype.paginate = function (in_data, out_data, size, query, cb, 
     }, level);
 };
 
+/**
+ * Return a HTTP response for a single item
+ *
+ * @param {Object} data Data to be returned
+ * @param {Function} err Error to be returned
+ * @method
+ */
 LifeResponse.prototype.single = function (data, err) {
     var that = this;
 
@@ -99,6 +128,13 @@ LifeResponse.prototype.single = function (data, err) {
     });
 };
 
+/**
+ * Return a HTTP response for a list
+ *
+ * @param {Object} data Data to be returned
+ * @param {Function} err Error to be returned
+ * @method
+ */
 LifeResponse.prototype.list = function (data, size, err, query) {
     var that = this;
 

@@ -24,57 +24,58 @@ var LifeValidation = function (model, req, res, next) {
     return this;
 };
 
-LifeValidation.prototype.objectIdsRec = function (whitelisted, parameters, validation, cb) {
-    if (parameters.length === 0) {
-        return this.uploads(whitelisted, validation, cb);
+LifeValidation.prototype.objIdsRec = function (whitelisted, params, valid, cb) {
+    if (params.length === 0) {
+        return this.uploads(whitelisted, valid, cb);
     }
 
 
     var that = this,
-        parameter = parameters.pop(),
-        type = validation[parameter].type,
-        required = typeof validation[parameter].required === 'boolean' ?
-                  validation[parameter].required
+        param = params.pop(),
+        type = valid[param].type,
+        required = typeof valid[param].required === 'boolean' ?
+                  valid[param].required
                 : true;
 
     if (that.req.body === undefined ||
-            (that.req.body[parameter] === undefined &&
-             that.req.body[parameter + '_id'] === undefined)) {
+            (that.req.body[param] === undefined &&
+             that.req.body[param + '_id'] === undefined)) {
         if (required) {
             return that.next(LifeErrors.InvalidParameters);
         }
 
-        return that.objectIdsRec(whitelisted, parameters, validation, cb);
+        return that.objIdsRec(whitelisted, params, valid, cb);
     }
 
     return new LifeQuery(type, this.req, this.res, this.next)
-        .findById(that.req.body[parameter] || that.req.body[parameter + '_id'], function (item) {
-            if (!item) {
-                return that.next(LifeErrors.InvalidParameters);
-            }
+        .findById(that.req.body[param] ||
+            that.req.body[param + '_id'], function (item) {
+                if (!item) {
+                    return that.next(LifeErrors.InvalidParameters);
+                }
 
-            whitelisted[parameter] = item;
+                whitelisted[param] = item;
 
-            return that.objectIdsRec(whitelisted, parameters, validation, cb);
-        });
+                return that.objIdsRec(whitelisted, params, valid, cb);
+            });
 };
 
-LifeValidation.prototype.objectIds = function (whitelisted, validation, cb) {
+LifeValidation.prototype.objectIds = function (whitelisted, valid, cb) {
     var parameters = [],
         i;
 
-    for (i in validation) {
-        if (validation.hasOwnProperty(i) &&
-                typeof validation[i].type === 'function' &&
-                new validation[i].type() instanceof mongoose.Document) {
+    for (i in valid) {
+        if (valid.hasOwnProperty(i) &&
+                typeof valid[i].type === 'function' &&
+                new valid[i].type() instanceof mongoose.Document) {
             parameters.push(i);
         }
     }
 
-    return this.objectIdsRec(whitelisted, parameters, validation, cb);
+    return this.objIdsRec(whitelisted, parameters, valid, cb);
 };
 
-LifeValidation.prototype.uploadsRec = function (whitelisted, files, validation, cb) {
+LifeValidation.prototype.uploadsRec = function (whitelisted, files, valid, cb) {
     if (files.length === 0) {
         return cb(whitelisted);
     }
@@ -83,8 +84,8 @@ LifeValidation.prototype.uploadsRec = function (whitelisted, files, validation, 
         file = files.pop(),
         path = (that.req.user ? that.req.user.id + '-' : '') +
             Date.now(),
-        required = typeof validation[file].required === 'boolean' ?
-                      validation[file].required
+        required = typeof valid[file].required === 'boolean' ?
+                      valid[file].required
                     : true;
 
     if (that.req.files === undefined ||
@@ -93,14 +94,15 @@ LifeValidation.prototype.uploadsRec = function (whitelisted, files, validation, 
             return that.next(LifeErrors.UploadMissingFile);
         }
 
-        return that.uploadsRec(whitelisted, files, validation, cb);
+        return that.uploadsRec(whitelisted, files, valid, cb);
     }
 
-    return validation[file].type.upload(that.req, that.res, that.next, file, path, function (uploaded) {
-        whitelisted[file] = uploaded;
+    return valid[file].type.upload(that.req, that.res, that.next, file,
+        path, function (uploaded) {
+            whitelisted[file] = uploaded;
 
-        return that.uploadsRec(whitelisted, files, validation, cb);
-    });
+            return that.uploadsRec(whitelisted, files, valid, cb);
+        });
 };
 
 /**
@@ -108,19 +110,19 @@ LifeValidation.prototype.uploadsRec = function (whitelisted, files, validation, 
  *
  * @callback
  */
-LifeValidation.prototype.uploads = function (whitelisted, validation, cb) {
+LifeValidation.prototype.uploads = function (whitelisted, valid, cb) {
     var files = [],
         i;
 
-    for (i in validation) {
-        if (validation.hasOwnProperty(i) &&
-                validation[i].type instanceof LifeUpload) {
+    for (i in valid) {
+        if (valid.hasOwnProperty(i) &&
+                valid[i].type instanceof LifeUpload) {
             files.push(i);
         }
     }
 
     if (files.length > 0) {
-        return this.uploadsRec(whitelisted, files, validation, cb);
+        return this.uploadsRec(whitelisted, files, valid, cb);
     }
 
     return cb(whitelisted);
@@ -132,7 +134,7 @@ LifeValidation.prototype.uploads = function (whitelisted, validation, cb) {
  * @param {Object} [item=null] Existing item to update
  * @method
  */
-LifeValidation.prototype.whitelist = function (validation, input, cb) {
+LifeValidation.prototype.whitelist = function (valid, input, cb) {
     var ret = {},
         errors = [],
         i;
@@ -159,16 +161,16 @@ LifeValidation.prototype.whitelist = function (validation, input, cb) {
         }
     }
 
-    for (i in validation) {
-        if (validation.hasOwnProperty(i)) {
-            var valueType = validation[i].type;
+    for (i in valid) {
+        if (valid.hasOwnProperty(i)) {
+            var valueType = valid[i].type;
 
             if (valueType instanceof LifeConstraint.ExtRegExp) {
                 valueType = valueType.regexp();
             }
 
-            var required = typeof validation[i].required === 'boolean' ?
-                    validation[i].required : true;
+            var required = typeof valid[i].required === 'boolean' ?
+                    valid[i].required : true;
             var inputVal = input[i];
             var error = false;
 
@@ -204,7 +206,8 @@ LifeValidation.prototype.whitelist = function (validation, input, cb) {
                     error = true;
                 }
 
-            } else if (!(typeof valueType === 'function' && new valueType() instanceof mongoose.Document) &&
+            } else if (!(typeof valueType === 'function' &&
+                new valueType() instanceof mongoose.Document) &&
                     !(valueType instanceof LifeUpload)) {
                 ret[i] = inputVal;
             } else {
@@ -230,7 +233,7 @@ LifeValidation.prototype.whitelist = function (validation, input, cb) {
         return this.next(ret_error);
     }
 
-    return this.objectIds(ret, validation, cb);
+    return this.objectIds(ret, valid, cb);
 };
 
 module.exports = LifeValidation;

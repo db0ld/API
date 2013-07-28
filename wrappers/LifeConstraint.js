@@ -106,7 +106,8 @@ LifeConstraint.regexps = {
     'lang': /^[a-z]{2}(-[A-Z]{2})?$/,
     'email': new Email(),
     'gender': new Enum(['male', 'female', 'other', 'undefined']),
-    'achievementState': new Enum(['not_planned', 'planned', 'in_progress', 'done'])
+    'achievementState': new Enum(['not_planned', 'planned', 'in_progress',
+        'done'])
 };
 
 LifeConstraint.ExtRegExp = ExtRegExp;

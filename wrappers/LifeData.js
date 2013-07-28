@@ -55,7 +55,6 @@ LifeData.i18nPicker = function (strings, lang) {
 /**
  * Check whenever something can be converted to an ObjectId
  *
- * @todo hexa check
  * @param {Object|String} item
  * @return boolean
  * @function
@@ -65,7 +64,13 @@ LifeData.isObjectId = function (item) {
         (item && item.toString && item.toString().match(/[0-9a-fA-F]{24}/)));
 };
 
-
+/**
+ * Escape a string to be included in RegExp
+ *
+ * @param {String} s
+ * @return String
+ * @function
+ */
 LifeData.regexpEscape = function (s) {
     return s.replace(/[\-\/\\\^$*+?.()|\[\]{}]/g, '\\$&');
 };
