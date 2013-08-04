@@ -152,7 +152,7 @@ LifeErrors.NotImplemented = {
 };
 
 /**
- * Not Implemented
+ * Upload error
  * @inner
  */
 LifeErrors.UploadError = {
@@ -163,13 +163,24 @@ LifeErrors.UploadError = {
 };
 
 /**
- * Not Implemented
+ * Upload Missing File
  * @inner
  */
 LifeErrors.UploadMissingFile = {
     'code': 4979,
     'type': 'UploadMissingFile',
     'message': 'A required file is missing',
+    'http': 500
+};
+
+/**
+ * Validation failed
+ * @inner
+ */
+LifeErrors.ValidationFailed = {
+    'code': 4980,
+    'type': 'ValidationFailed',
+    'message': 'Validation failed for submitted data',
     'http': 500
 };
 

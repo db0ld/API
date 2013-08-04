@@ -1,5 +1,6 @@
 var mongoose = require('mongoose'),
-    element = require('./Element.js');
+    element = require('./Element.js'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js');
 
 var OAuthTokenSchema = new mongoose.Schema({
     token: {type: String, unique: true},
@@ -30,8 +31,7 @@ OAuthTokenSchema.statics.queries.findByToken = function (token, activeOnly) {
         conditions.push({'expiration': {$gt: new Date()}});
     }
 
-    return this
-        .and(conditions);
+    return this.and(conditions);
 };
 
 OAuthTokenSchema.statics.queries.findByUserId = function (userId, activeOnly) {
@@ -48,10 +48,16 @@ OAuthTokenSchema.statics.queries.findByUserId = function (userId, activeOnly) {
     return this.and(conditions);
 };
 
-OAuthTokenSchema.statics.creationValidation = {
+OAuthTokenSchema.statics.creationValidation = [
+    new LifeConstraints.String('login'),
+    new LifeConstraints.String('password')
+];
+
+
+/*OAuthTokenSchema.statics.creationValidation = {
     'login': {type: String, required: true},
     'password': {type: String, required: true}
-};
+};*/
 
 var OAuthToken = mongoose.model('OAuthToken', OAuthTokenSchema);
 

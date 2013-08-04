@@ -73,7 +73,7 @@ LifeQuery.prototype.exec = function (cb) {
             }
 
             if (typeof cb === 'function') {
-                return cb(data, count);
+                return cb.call(that, data, count);
             }
 
             return new LifeResponse(that.req, that.res)
@@ -118,7 +118,7 @@ LifeQuery.prototype.execOne = function (allow_empty, cb) {
         }
 
         if (typeof cb === 'function') {
-            return cb(data[0]);
+            return cb.call(that, data[0]);
         }
 
         return new LifeResponse(that.req, that.res).single(data[0]);
@@ -146,7 +146,7 @@ LifeQuery.prototype.remove = function (cb) {
         }
 
         if (typeof cb === 'function') {
-            return cb(data);
+            return cb.call(that, data);
         }
 
         return new LifeResponse(that.req, that.res).single(data);
@@ -171,7 +171,7 @@ LifeQuery.prototype.purge = function (item, cb) {
         }
 
         if (typeof cb === 'function') {
-            return cb(item);
+            return cb.call(that, item);
         }
 
         return new LifeResponse(that.req, that.res).single(item);
@@ -212,7 +212,7 @@ LifeQuery.prototype.save = function (item, data, cb) {
         }
 
         if (typeof cb === 'function') {
-            return cb(item);
+            return cb.call(that, item);
         }
 
         return new LifeResponse(that.req, that.res).single(item);

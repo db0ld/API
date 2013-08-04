@@ -2,6 +2,7 @@ var Achievement = require('mongoose').model('Achievement'),
     LifeErrors = require('../wrappers/LifeErrors.js'),
     LifeQuery = require('../wrappers/LifeQuery.js'),
     LifeSecurity = require('../wrappers/LifeSecurity.js'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js'),
     routeBase = 'achievements';
 
 
@@ -103,7 +104,9 @@ module.exports = function (router) {
 
         .Post('Add a child achievement to parent')
         .route(routeBase + '/:achievement_id/children')
-        .input({achievement_id: {type: Achievement}})
+        .input([
+            new LifeConstraints.MongooseObject(Achievement, 'achievement_id', true)
+        ])
         .output(Achievement)
         .auth([LifeSecurity.roles.ACHIEVEMENT_MANAGEMENT])
         .add(function (req, res, next, params) {

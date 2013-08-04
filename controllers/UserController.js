@@ -5,8 +5,8 @@ var User = require('mongoose').model('User'),
     Picture = require('mongoose').model('Picture'),
     LifeErrors = require('../wrappers/LifeErrors.js'),
     LifeQuery = require('../wrappers/LifeQuery.js'),
-    LifeUpload = require('../wrappers/LifeUpload.js'),
     LifeResponse = require('../wrappers/LifeResponse.js'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js'),
     routeBase = 'users';
 
 
@@ -106,7 +106,9 @@ module.exports = function (router) {
 
         .Post('Post message in conversation')
         .route(routeBase + '/:user_id/conversation')
-        .input({message: {type: String}})
+        .input([
+            new LifeConstraints.MinLength(1, 'message')
+        ])
         .output(Conversation)
         .auth(true)
         .add(function (req, res, next, params) {
@@ -191,7 +193,7 @@ module.exports = function (router) {
 
         .Post('Make a friend request/approve a friend request')
         .route(routeBase + '/:user_id/friends')
-        .input({})
+        .input([])
         .output(Friendship)
         .auth(true)
         .add(function (req, res, next) {
@@ -246,7 +248,9 @@ module.exports = function (router) {
 
         .Post('Add an avatar to user')
         .route(routeBase + '/:user_id/avatar')
-        .input({avatar: { type: LifeUpload.Avatar, required: true }})
+        .input([
+            new LifeConstraints.Image('avatar')
+        ])
         .output(Picture)
         .auth(true)
         .add(function (req, res, next, params) {

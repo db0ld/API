@@ -4,9 +4,7 @@ var fs = require('fs'),
     LifeResponse = require('./LifeResponse.js'),
     LifeConfig = require('./LifeConfig.js'),
     LifeErrors = require('./LifeErrors.js'),
-    LifeConstraint = require('./LifeConstraint.js'),
-    LifeValidation = require('./LifeValidation.js'),
-    LifeUpload = require('./LifeUpload.js');
+    LifeValidator = require('./LifeValidator.js');
 
 /**
  * An utility class that routes requests on top of ExpressJS.
@@ -69,9 +67,7 @@ LifeRouter.prototype.init = function () {
 
         return res.render('doc.ejs', {
             doc: that.documentation,
-            mongoose: mongoose,
-            LifeUpload: LifeUpload,
-            ExtRegExp: LifeConstraint.ExtRegExp
+            mongoose: mongoose
         });
     });
 };
@@ -90,7 +86,7 @@ LifeRouter.Method = function (router, method, doc) {
     this._method = method.toLowerCase();
 
     this._doc = doc;
-    this._input = null;
+    this._input = [];
     this._output = null;
     this._errors = [];
     this._routes = [];
@@ -206,11 +202,12 @@ LifeRouter.Method.prototype.add = function (cb) {
     var that = this;
 
     // Input sanitization
-    var cb1 = function (req, res, next) {
-        new LifeValidation(null, req, res, next).whitelist(that._input, null,
-            function (input) {
+    var cbSanitize = function (req, res, next) {
+        return new LifeValidator(that._input, req, next).validate(function () {
+            return this.sanitize(function (input) {
                 return cb(req, res, next, input);
             });
+        });
     };
 
     // Language detection
@@ -224,7 +221,7 @@ LifeRouter.Method.prototype.add = function (cb) {
         req.query.lang = req.lang;
         req.body.lang = req.lang;
 
-        return cb1(req, res, next);
+        return cbSanitize(req, res, next);
     };
 
     // Auth

@@ -1,13 +1,12 @@
 var mongoose = require('mongoose'),
     Achievement = mongoose.model('Achievement'),
     ObjectId = mongoose.Schema.Types.ObjectId,
-    LifeUpload = require('../wrappers/LifeUpload.js'),
     element = require('./Element.js'),
-    regexps = require('../wrappers/LifeConstraint.js').regexps;
+    LifeConstraints = require('../wrappers/LifeConstraints.js');
 
 var AchievementStatusSchema = new mongoose.Schema({
     message: {type: String, required: true, ref: 'User'},
-    state: {type: String, required: true, ref: 'User', match: regexps.achievementState.regexp()},
+    state: {type: String, required: true, ref: 'User', match: new LifeConstraints.AchivementStateEnum().regexp()},
     owner: {type: ObjectId, required: true, ref: 'User'},
     achievement: {type: ObjectId, required: true, ref: 'Achievement'},
     attached_picture: {type: ObjectId, required: false, ref: 'Picture'},
@@ -53,18 +52,18 @@ AchievementStatusSchema.statics.queries.findById = function (id) {
 
 AchievementStatusSchema.statics.validation = {};
 
-AchievementStatusSchema.statics.validation.creation = {
-    message: {type: String},
-    state: {type: regexps.achievementState},
-    achievement: {type: Achievement},
-    attached_picture: {type: LifeUpload.Avatar, required: false}
-};
+AchievementStatusSchema.statics.validation.creation = [
+    new LifeConstraints.MinLength(1, 'message'),
+    new LifeConstraints.AchivementStateEnum('state'),
+    new LifeConstraints.MongooseObject(Achievement, 'achievement'),
+    new LifeConstraints.Image('attached_picture', false)
+];
 
-AchievementStatusSchema.statics.validation.edition = {
-    message: {type: String, required: false},
-    state: {type: regexps.achievementState, required: false},
-    attached_picture: {type: LifeUpload.Avatar, required: false}
-};
+AchievementStatusSchema.statics.validation.edition = [
+    new LifeConstraints.MinLength(1, 'message', false),
+    new LifeConstraints.AchivementStateEnum('state', false),
+    new LifeConstraints.Image('attached_picture', false)
+];
 
 var AchievementStatus = mongoose.model('AchievementStatus', AchievementStatusSchema);
 

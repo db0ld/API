@@ -4,20 +4,19 @@ var mongoose = require('mongoose'),
     LifeConfig = require('../wrappers/LifeConfig.js'),
     LifeQuery = require('../wrappers/LifeQuery.js'),
     LifeData = require('../wrappers/LifeData.js'),
-    regexps = require('../wrappers/LifeConstraint.js').regexps,
-    LifeUpload = require('../wrappers/LifeUpload.js'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js'),
     element = require('./Element.js'),
     bcrypt = require('bcryptjs'),
     crypto = require('crypto');
 
 var UserSchema = new mongoose.Schema({
-    login: { type : String, match: regexps.login, required: true, unique: true},
-    email: { type : String, match: regexps.email.regexp(), required: true, unique: true},
-    firstname: { type : String, match: regexps.name, required: false},
-    lastname: { type : String, match: regexps.name, required: false},
-    gender: { type : String, match: regexps.gender.regexp(), required: true,
+    login: { type : String, match: new LifeConstraints.LoginRegexp().regexp(), required: true, unique: true},
+    email: { type : String, match: new LifeConstraints.Email().regexp(), required: true, unique: true},
+    firstname: { type : String, required: false},
+    lastname: { type : String, required: false},
+    gender: { type : String, match: new LifeConstraints.GenderEnum().regexp(), required: true,
         'default': 'undefined'},
-    lang: { type : String, match: regexps.lang, required: true},
+    lang: { type : String, match: new LifeConstraints.Locale().regexp(), required: true},
     birthday: { type: Date, required: false },
     avatar: {type: ObjectId, required: false, ref: 'Picture'},
     _password: { type : String, required: true },
@@ -28,7 +27,7 @@ var UserSchema = new mongoose.Schema({
 UserSchema.plugin(element);
 
 UserSchema.virtual('password').set(function (value) {
-    this._password = bcrypt.hashSync(value, 8);
+    this._password = value;
 });
 
 UserSchema.virtual('password').get(function (value) {
@@ -161,27 +160,28 @@ UserSchema.statics.queries.term = function (term) {
     return query;
 };
 
-UserSchema.statics.creationValidation = {
-    login: { type : regexps.login, required: true },
-    email: { type : regexps.email, required: true },
-    firstname: { type : regexps.name, required: false },
-    lastname: { type : regexps.name, required: false },
-    gender: { type : regexps.gender, required: false, 'default': 'undefined' },
-    lang: { type : regexps.lang, required: true },
-    password: { type : String, required: true },
-    birthday: { type: Date, required: false },
-    avatar: { type: LifeUpload.Avatar, required: false }
-};
+UserSchema.statics.creationValidation = [
+    new LifeConstraints.LoginRegexp('login'),
+    new LifeConstraints.Email('email'),
+    new LifeConstraints.String('firstname', false),
+    new LifeConstraints.String('lastname', false),
+    new LifeConstraints.GenderEnum('gender', false).fallback('undefined'), // default 'undefined'
+    new LifeConstraints.Locale('lang'),
+    new LifeConstraints.Password(8, 'password'),
+    new LifeConstraints.Date('birthday', false),
+    new LifeConstraints.Image('avatar', false)
+];
 
-UserSchema.statics.modificationValidation = {
-    email: { type : regexps.email, required: false },
-    firstname: { type : regexps.name, required: false },
-    lastname: { type : regexps.name, required: false },
-    gender: { type : regexps.gender, required: false },
-    password: { type : String, required: false },
-    birthday: { type: Date, required: false },
-    avatar: { type: LifeUpload.Avatar, required: false }
-};
+UserSchema.statics.modificationValidation = [
+    new LifeConstraints.Email('email'),
+    new LifeConstraints.String('firstname', false),
+    new LifeConstraints.String('lastname', false),
+    new LifeConstraints.GenderEnum('gender', false).fallback('undefined'), // default 'undefined'
+    new LifeConstraints.Locale('lang'),
+    new LifeConstraints.Password(8, 'password'),
+    new LifeConstraints.Date('birthday', false),
+    new LifeConstraints.Image('avatar', false)
+];
 
 var User = mongoose.model('User', UserSchema);
 

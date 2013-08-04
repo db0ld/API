@@ -2,8 +2,8 @@ var mongoose = require('mongoose'),
     ObjectId = mongoose.Schema.Types.ObjectId,
     LifeConfig = require('../wrappers/LifeConfig.js'),
     LifeData = require('../wrappers/LifeData.js'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js'),
     Picture = mongoose.model('Picture'),
-    LifeUpload = require('../wrappers/LifeUpload.js'),
     element = require('./Element.js');
 
 var AchievementSchema = new mongoose.Schema({
@@ -67,17 +67,17 @@ AchievementSchema.statics.queries.parents = function (id) {
     return query.and({child_achievements: id});
 };
 
-AchievementSchema.statics.creationValidation = {
-    'name': {type: String, required: true},
-    'description': {type: String, required: false},
-    'badge': { type: LifeUpload.Avatar, required: false }
-};
+AchievementSchema.statics.creationValidation = [
+    new LifeConstraints.MinLength(1, 'name'),
+    new LifeConstraints.String('description', false),
+    new LifeConstraints.Image('badge', false)
+];
 
-AchievementSchema.statics.modificationValidation = {
-    'name': {type: String, required: false},
-    'description': {type: String, required: false},
-    'badge': { type: LifeUpload.Avatar, required: false }
-};
+AchievementSchema.statics.modificationValidation = [
+    new LifeConstraints.MinLength(1, 'name', false),
+    new LifeConstraints.String('description', false),
+    new LifeConstraints.Image('badge', false)
+];
 
 var Achievement = mongoose.model('Achievement', AchievementSchema);
 

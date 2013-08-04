@@ -143,7 +143,7 @@ module.exports = function (router) {
 
         .Post('Approve an achievement')
         .route(routeBase + '/:achievement_status_id/approvers')
-        .input({})
+        .input([])
         .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)
@@ -151,7 +151,7 @@ module.exports = function (router) {
 
         .Post('Disapprove an achievement')
         .route(routeBase + '/:achievement_status_id/disapprovers')
-        .input({})
+        .input([])
         .output(AchievementStatus)
         .auth(true)
         .add(approversDisapproversAdd)
