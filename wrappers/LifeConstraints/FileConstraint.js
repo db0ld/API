@@ -27,7 +27,8 @@ FileConstraint.prototype.addon = function () {
 };
 
 FileConstraint.prototype.present = function (validator, cb) {
-    return cb(validator.files[this.key] !== undefined);
+    return cb(validator.files[this.key] !== undefined &&
+        validator.files[this.key].size > 0);
 };
 
 FileConstraint.prototype.test = function (value, req, cb) {

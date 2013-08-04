@@ -21,9 +21,7 @@ var LifeQuery = function (model, req, res, next, query) {
 
     this.req = req !== undefined ? req : null;
     this.res = res !== undefined ? res : null;
-    this.next = (next !== undefined && next !== null) ?
-              next
-            : function () {};
+    this.next = (next !== undefined && next !== null) ? next : function () {};
     this._query =
               typeof query === 'function' ? query
             : (query !== null && typeof query === 'object') ? model.find(query)
