@@ -1,7 +1,9 @@
 API Web service
 ===============
 
-The Life API Web service, used by web client, mobile clients and other public developers.
+The interactions between the database and our services is strictly deﬁned by [this API](http://life.db0.fr/api/).
+
+This web service is based on this API.
 
 Install, launch, test!
 ----------------------
@@ -10,7 +12,7 @@ Install, launch, test!
 
 You'll need to install:
 * [MongoDB](http://www.mongodb.org/)
-* [node.js](http://nodejs.org/)
+* [Node.js](http://nodejs.org/)
 * [A well designed brain](http://llau.me/31)
 
 ### Install
@@ -42,7 +44,7 @@ Developer corner
 ### First things first
 
 As a developer, you are required to read and take into account the information
-in [the general developer documentation](http://goo.gl/rDjPH).
+in [the general documentation](http://glife.fr/F.A.Q.).
 
 You will also need to know and use the [official API documentation](http://life.db0.fr/api).
 
