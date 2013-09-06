@@ -1,13 +1,12 @@
-var mongoose = require('mongoose'),
-    LifeErrors = require('./LifeErrors.js'),
+var LifeErrors = require('./LifeErrors.js'),
     LifeResponse = require('./LifeResponse.js');
 
 /**
- * An utility class that performs queries on MongoDB
- * and handles errors returned by mongoosejs.
+ * An utility class that performs queries on through ORM
+ * and handles errors returned by it.
  *
  * @class LifeQuery
- * @param {Object} model Mongoose model to be used
+ * @param {Object} model ORM model to be used
  * @param {Object} req Express request
  * @param {Object} res Express response
  * @param {Function} next Error handling function
@@ -198,9 +197,12 @@ LifeQuery.prototype.save = function (item, data, cb) {
         }
     }
 
+    /*
+    Todo: change dependency
     if (!(item instanceof mongoose.Document)) {
         item = new that.model(item);
     }
+    */
 
     return item.save(function (err) {
         if (err) {

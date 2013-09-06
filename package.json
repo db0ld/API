@@ -3,8 +3,9 @@
 	"version": "0.1.0",
 	"dependencies": {
 	  "express": "3.1.0",
-	  "mongoose": "3.6.13",
 	  "path":   "0.4.9",
-	  "ejs": "0.8.4"
+	  "ejs": "0.8.4",
+      "mysql": "~2.0",
+      "sequelize": "~2.0"
 	}
 }

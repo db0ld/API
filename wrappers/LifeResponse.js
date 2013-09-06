@@ -1,5 +1,4 @@
-var mongoose = require('mongoose'),
-    LifeConfig = require('./LifeConfig.js'),
+var LifeConfig = require('./LifeConfig.js'),
     LifeQuery = require('./LifeQuery.js');
 
  /**
@@ -31,8 +30,7 @@ LifeResponse.prototype.json = function (item, cb, level) {
         level = 0;
     }
 
-    if (item instanceof mongoose.Document &&
-            typeof item.fullJson === 'function') {
+    if (typeof item === 'object' && typeof item.fullJson === 'function') {
         return item.fullJson(that.req, that.res, level, cb);
     }
 

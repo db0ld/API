@@ -49,8 +49,6 @@
             return 'Date';
         } else if (obj instanceof LifeUpload) {
             return 'File';
-        } if (typeof obj == 'function' && new obj() instanceof mongoose.Document) {
-            return obj.modelName;
         }
     };
 
@@ -141,9 +139,7 @@
                                     <% for (var j in route['input']) { %>
                                     <tr>
                                         <th><%= j %></th>
-                                        <td><%= typeDisplayer(route['input'][j].type) %><% if (typeof route['input'][j].type == 'function' && new route['input'][j].type() instanceof mongoose.Document) { %>
-                                                ObjectId
-                                            <% } %></td>
+                                        <td><%= typeDisplayer(route['input'][j].type) %></td>
                                         <td><% if (typeof route['input'][j].required == 'undefined' || route['input'][j].required) { %><span class="label label-success">Yes</span><% } %></td>
                                         <td><% if (typeof route['input'][j].default !== 'undefined') { %><code><%= route['input'][j].default %></code><% } %></td>
                                         <td>

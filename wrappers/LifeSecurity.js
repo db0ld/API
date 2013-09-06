@@ -1,6 +1,4 @@
-var User = require('mongoose').model('User'),
-    OAuthToken = require('mongoose').model('OAuthToken'),
-    LifeQuery = require('./LifeQuery.js'),
+var LifeQuery = require('./LifeQuery.js'),
     LifeErrors = require('./LifeErrors.js'),
     LifeConfig = require('./LifeConfig.js'),
     LifeResponse = require('./LifeResponse.js');

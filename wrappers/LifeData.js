@@ -1,6 +1,3 @@
-var mongoose = require('mongoose'),
-    ObjectId = mongoose.Schema.Types.ObjectId;
-
 /**
  * An utility class that performs simple data related operations.
  *

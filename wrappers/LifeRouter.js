@@ -1,5 +1,4 @@
 var fs = require('fs'),
-    mongoose = require('mongoose'),
     LifeSecurity = require('./LifeSecurity.js'),
     LifeResponse = require('./LifeResponse.js'),
     LifeConfig = require('./LifeConfig.js'),
@@ -66,8 +65,7 @@ LifeRouter.prototype.init = function () {
         }
 
         return res.render('doc.ejs', {
-            doc: that.documentation,
-            mongoose: mongoose
+            doc: that.documentation
         });
     });
 };

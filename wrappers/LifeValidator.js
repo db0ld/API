@@ -1,9 +1,9 @@
-var LifeValidator = function (rules, req, next) {
+var LifeValidator = function (rules, req, next, data) {
     var i;
 
     this.req = req;
     this.files = req.files || {};
-    this.data = req.body || {};
+    this.data = data || req.body || {};
     this.output = {};
     this.rules = rules;
     this.next = next;
