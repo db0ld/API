@@ -22,13 +22,7 @@ MinLength.prototype.addon = function () {
 
 MinLength.prototype.validate = function (validator, cb) {
     if (validator.data[this.key].length < this.minlength) {
-        validator.errors.push({
-            key: this.key,
-            value: validator.data[this.key],
-            error: Errors.TooShort
-        });
-    } else if (this.nextConstraint) {
-        return this.nextConstraint.validate(validator, cb);
+        validator.errors.push(new Errors.TooShort(this.key, validator.data[this.key]));
     }
 
     return StringConstraint.prototype.validate.call(this, validator, cb);

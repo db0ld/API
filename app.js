@@ -2,8 +2,14 @@ var application_root = __dirname,
     express = require('express'),
     path = require('path'),
     LifeRouter = require('./wrappers/LifeRouter.js'),
-    LifeSequelize = require('./wrappers/LifeSequelize.js'),
-    LifeConfig = require('./wrappers/LifeConfig.js');
+    LifeConfig = require('./wrappers/LifeConfig.js'),
+    mongoose = require('mongoose');
+
+mongoose.connect(LifeConfig.db_path);
+
+require('./models/User.js');
+require('./models/Application.js');
+require('./models/Client.js');
 
 var app = express();
 
@@ -23,8 +29,6 @@ app.get(['/', '/api'], function (req, res) {
     res.send('Life API is alive! <a href="/apitest.html">API Console</a> ' +
         '<a href="/doc/v1">Documentation</a>');
 });
-
-new LifeSequelize.setup(__dirname + '/models');
 
 var router = new LifeRouter(app);
 router.init();

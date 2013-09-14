@@ -1,9 +1,12 @@
 var fs = require('fs'),
-    LifeSecurity = require('./LifeSecurity.js'),
-    LifeResponse = require('./LifeResponse.js'),
     LifeConfig = require('./LifeConfig.js'),
     LifeErrors = require('./LifeErrors.js'),
+    LifeContext = require('./LifeContext.js'),
     LifeValidator = require('./LifeValidator.js');
+
+var dumpContext = function (context, cb) {
+    return cb(true);
+};
 
 /**
  * An utility class that routes requests on top of ExpressJS.
@@ -15,21 +18,52 @@ var LifeRouter = function (app) {
     this.app = app;
 
     this.documentation = [];
-};
+    this.precontroller = [
+        {
+            fun: function (context, cb) {
+                return dumpContext(context, cb);
+            },
+            priority: 100
+        },
+        {
+            fun: function (context, cb) {
+                context.security.authenticate(cb);
+            },
+            priority: 90
+        },
+        {
+            fun: function (context, cb) {
+                context.security.sudo(cb);
+            },
+            priority: 85
+        },
+        {
+            fun: function (context, cb) {
+                context.hasRolesForRoute(cb);
+            },
+            priority: 80
+        },
+        {
+            fun: function (context, cb) {
+                context.detectLanguage(cb);
+            },
+            priority: 75
+        },
+        {
+            fun: function (context, cb) {
+                return new LifeValidator(context).validate(function (ok) {
+                    return this.sanitize(function (input) {
+                        context.input = input;
 
-/**
- * Route sorting function (path + http method)
- *
- * @param {Object} a
- * @param {Object} b
- * @function
- */
-var routesSort = function (a, b) {
-    if (a.route === b.route) {
-        return a.method < b.method ? -1 : 1;
-    }
+                        return cb(true);
+                    });
+                });
+            },
+            priority: 75
+        },
 
-    return a.route < b.route ? -1 : 1;
+
+    ];
 };
 
 /**
@@ -50,36 +84,18 @@ LifeRouter.prototype.init = function () {
             require('../controllers/' + file)(that);
         }
     });
-
-    this.app.options('*', function (req, res, next) {
-        return new LifeResponse(req, res).single();
-    });
-
-    this.app.get('/doc/v1', function (req, res) {
-        var i;
-
-        for (i in that.documentation) {
-            if (that.documentation.hasOwnProperty(i)) {
-                that.documentation[i].sort(routesSort);
-            }
-        }
-
-        return res.render('doc.ejs', {
-            doc: that.documentation
-        });
-    });
 };
 
 /**
- * Create a new API Method listener
+ * Create a new API Route listener
  *
  * @param {LifeRouter} router
- * @param {String} method HTTP Method
+ * @param {String} method HTTP Route
  * @param {String} doc Documentation for current API method
- * @class LifeRouter.Method
+ * @class LifeRouter.Route
  * @constructor
  */
-LifeRouter.Method = function (router, method, doc) {
+LifeRouter.Route = function (router, method, doc) {
     this._router = router;
     this._method = method.toLowerCase();
 
@@ -90,16 +106,17 @@ LifeRouter.Method = function (router, method, doc) {
     this._routes = [];
     this._auth = false;
     this._list = false;
+    this._precontroller = router.precontroller.slice();
 };
 
 /**
- * Register a new route for current API Method
+ * Register a new route for current API Route
  *
  * @param {String} route
  * @param {Boolean} [priv=true] Is current route private?
  * @method
  */
-LifeRouter.Method.prototype.route = function (route, priv) {
+LifeRouter.Route.prototype.route = function (route, priv) {
     priv = priv === undefined ? true : priv;
 
     this._routes.push({
@@ -116,7 +133,7 @@ LifeRouter.Method.prototype.route = function (route, priv) {
  * @param {*} output Output type
  * @method
  */
-LifeRouter.Method.prototype.list = function (output) {
+LifeRouter.Route.prototype.list = function (output) {
     this._list = true;
 
     if (output !== undefined) {
@@ -135,7 +152,7 @@ LifeRouter.Method.prototype.list = function (output) {
  * @param {*} auth Requirements
  * @method
  */
-LifeRouter.Method.prototype.auth = function (auth) {
+LifeRouter.Route.prototype.auth = function (auth) {
     if (typeof auth !== 'boolean') {
         auth = [auth];
     }
@@ -153,7 +170,7 @@ LifeRouter.Method.prototype.auth = function (auth) {
  * @param {object} input
  * @method
  */
-LifeRouter.Method.prototype.input = function (input) {
+LifeRouter.Route.prototype.input = function (input) {
     this._input = input;
 
     return this;
@@ -165,7 +182,7 @@ LifeRouter.Method.prototype.input = function (input) {
  * @param {LifeError} error
  * @method
  */
-LifeRouter.Method.prototype.error = function (error) {
+LifeRouter.Route.prototype.error = function (error) {
     this._errors.push(error);
 
     return this;
@@ -177,10 +194,26 @@ LifeRouter.Method.prototype.error = function (error) {
  * @param {*} output
  * @method
  */
-LifeRouter.Method.prototype.output = function (output) {
+LifeRouter.Route.prototype.output = function (output) {
     this._output = output;
 
     return this;
+};
+
+var expressToLife = function (context, precontroller, cb) {
+    if (precontroller.length === 0) {
+        return cb(context);
+    }
+
+    var currMethod = precontroller.shift();
+
+    return currMethod.fun(context, function (ret) {
+        if (ret instanceof LifeErrors) {
+            return context.error(ret);
+        }
+
+        return expressToLife(context, precontroller, cb);
+    });
 };
 
 /**
@@ -196,50 +229,13 @@ LifeRouter.Method.prototype.output = function (output) {
  * @param {Function} cb
  * @method
  */
-LifeRouter.Method.prototype.add = function (cb) {
+LifeRouter.Route.prototype.add = function (cb) {
     var that = this;
 
-    // Input sanitization
-    var cbSanitize = function (req, res, next) {
-        return new LifeValidator(that._input, req, next).validate(function () {
-            return this.sanitize(function (input) {
-                return cb(req, res, next, input);
-            });
-        });
-    };
+    var cbExpressToLife = function (req, res) {
+        var context = new LifeContext(req, res, that);
 
-    // Language detection
-    var cb2 = function (req, res, next) {
-        if (req.query.lang !== undefined) {
-            req.lang = req.query.lang;
-        } else if (req.body.lang !== undefined) {
-            req.lang = req.body.lang;
-        }
-
-        req.query.lang = req.lang;
-        req.body.lang = req.lang;
-
-        return cbSanitize(req, res, next);
-    };
-
-    // Auth
-    var cb3 = function (req, res) {
-        return new LifeSecurity(req, res, that._auth, cb2);
-    };
-
-    // Debug
-    var cb4 = function (req, res) {
-        if (LifeConfig.dev) {
-            console.log(new Array(80).join('-').toString());
-            console.log(new Date().toISOString());
-            console.log(that._method + ': ' + req.url);
-            if (req.body && Object.keys(req.body).length) {
-                console.log('PARAMS POST: ' +
-                    JSON.stringify(req.body, null, 4));
-            }
-        }
-
-        return cb3(req, res);
+        return expressToLife(context, that._precontroller.slice(), cb);
     };
 
     that._routes.forEach(function (route) {
@@ -247,7 +243,7 @@ LifeRouter.Method.prototype.add = function (cb) {
         route = LifeRouter.makePath(route.route);
 
         var module = route.split('/').splice(0, 4).join('/');
-        that._router.app[that._method](route, cb4);
+        that._router.app[that._method](route, cbExpressToLife);
 
         if (that._router.documentation[module] === undefined) {
             that._router.documentation[module] = [];
@@ -280,73 +276,73 @@ LifeRouter.makePath = function (res) {
 };
 
 /**
- * Create a new HTTP GET LifeRouter.Method Object
+ * Create a new HTTP GET LifeRouter.Route Object
  *
  * @param {String} doc
  * @function
  */
 LifeRouter.prototype.Get = function (doc) {
-    return new LifeRouter.Method(this, 'get', doc);
+    return new LifeRouter.Route(this, 'get', doc);
 };
 
 /**
- * Create a new HTTP POST LifeRouter.Method Object
+ * Create a new HTTP POST LifeRouter.Route Object
  *
  * @param {String} doc
  * @function
  */
 LifeRouter.prototype.Post = function (doc) {
-    return new LifeRouter.Method(this, 'post', doc);
+    return new LifeRouter.Route(this, 'post', doc);
 };
 
 /**
- * Create a new HTTP PUT LifeRouter.Method Object
+ * Create a new HTTP PUT LifeRouter.Route Object
  *
  * @param {String} doc
  * @function
  */
 LifeRouter.prototype.Put = function (doc) {
-    return new LifeRouter.Method(this, 'put', doc);
+    return new LifeRouter.Route(this, 'put', doc);
 };
 
 /**
- * Create a new HTTP DELETE LifeRouter.Method Object
+ * Create a new HTTP DELETE LifeRouter.Route Object
  *
  * @param {String} doc
  * @function
  */
 LifeRouter.prototype.Delete = function (doc) {
-    return new LifeRouter.Method(this, 'delete', doc);
+    return new LifeRouter.Route(this, 'delete', doc);
 };
 
 /**
- * Create a new HTTP PATCH LifeRouter.Method Object
+ * Create a new HTTP PATCH LifeRouter.Route Object
  *
  * @param {String} doc
  * @function
  */
 LifeRouter.prototype.Patch = function (doc) {
-    return new LifeRouter.Method(this, 'patch', doc);
+    return new LifeRouter.Route(this, 'patch', doc);
 };
 
 /**
- * Create a new HTTP HEAD LifeRouter.Method Object
+ * Create a new HTTP HEAD LifeRouter.Route Object
  *
  * @param {String} doc
  * @function
  */
 LifeRouter.prototype.Head = function (doc) {
-    return new LifeRouter.Method(this, 'head', doc);
+    return new LifeRouter.Route(this, 'head', doc);
 };
 
 /**
- * Create a new HTTP OPTIONS LifeRouter.Method Object
+ * Create a new HTTP OPTIONS LifeRouter.Route Object
  *
  * @param {String} doc
  * @function
  */
 LifeRouter.prototype.Options = function (doc) {
-    return new LifeRouter.Method(this, 'options', doc);
+    return new LifeRouter.Route(this, 'options', doc);
 };
 
 module.exports = LifeRouter;

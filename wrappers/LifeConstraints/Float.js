@@ -30,13 +30,7 @@ Float.prototype.validate = function (validator, cb) {
     var number = parseFloat(validator.data[this.key]);
 
     if (Number.isNaN(number)) {
-        validator.errors.push({
-            key: this.key,
-            value: validator.data[this.key],
-            error: Errors.NotANumber
-        });
-    } else if (this.nextConstraint) {
-        return this.nextConstraint.validate(validator, cb);
+        validator.errors.push(new Errors.NotANumber(this.key, validator.data[this.key]));
     }
 
     return Abstract.prototype.validate.call(this, validator, cb);

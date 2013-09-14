@@ -1,5 +1,4 @@
-var RegExpConstraint = require('./RegExpConstraint.js'),
-    Errors = require('./Errors.js');
+var RegExpConstraint = require('./RegExpConstraint.js');
 
 /**
  * Locale class for constraints
@@ -8,7 +7,6 @@ var RegExpConstraint = require('./RegExpConstraint.js'),
  * @constructor
  */
 var Locale = function (key, required) {
-    // TODO: Replace this shitty regexp
     RegExpConstraint.call(this, /^[a-z]{2}(-[A-Z]{2})?$/, key, required);
 };
 

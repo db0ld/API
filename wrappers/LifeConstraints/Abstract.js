@@ -67,18 +67,6 @@ Abstract.prototype.present = function (validator, cb) {
     return cb(validator.data[this.key] !== undefined);
 };
 
-Abstract.prototype.test = function (value, req, cb) {
-    cb = typeof req === 'function' ? req : cb;
-    req = typeof req === 'object' ? req : null;
-
-    var data = {};
-    data[this.key] = value;
-
-    return new LifeValidator([this], req, cb.bind(this, false))
-        .data(data)
-        .validate(cb.bind(this, true));
-};
-
 /**
  * Validation for current constraint
  *
@@ -88,14 +76,6 @@ Abstract.prototype.test = function (value, req, cb) {
  * @method
  */
 Abstract.prototype.validate = function (validator, cb) {
-    if (this.required && this.key && validator.data[this.key] === undefined) {
-        validator.errors.push({
-            key: this.key,
-            value: validator.data[this.key],
-            error: Errors.MissingParameter
-        });
-    }
-
     if (this.nextConstraint) {
         return this.nextConstraint.validate(validator, cb);
     }
@@ -128,10 +108,10 @@ Abstract.prototype.sanitize = function (validator, cb) {
  */
 Abstract.prototype.add = function (nextConstraint) {
     if (this.nextConstraint) {
-        this.nextConstraint.add(nextConstraint);
-    } else {
-        this.nextConstraint = nextConstraint;
+        return this.nextConstraint.add(nextConstraint);
     }
+
+    this.nextConstraint = nextConstraint;
 
     return this;
 };

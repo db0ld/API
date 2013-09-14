@@ -39,16 +39,12 @@
     var typeDisplayer = function(obj) {
         if (obj == Number) {
             return 'Number';
-        } else if (obj instanceof ExtRegExp) {
-            return obj.doc();
         } else if (obj == String || obj instanceof RegExp) {
             return 'String';
         } else if (obj == Boolean) {
             return 'Boolean';
         } else if (obj == Date) {
             return 'Date';
-        } else if (obj instanceof LifeUpload) {
-            return 'File';
         }
     };
 
@@ -145,10 +141,6 @@
                                         <td>
                                             <% if (route['input'][j].type instanceof RegExp) { %>
                                                 <code><%= route['input'][j].type.toString() %></code>
-                                            <% } else if (route['input'][j].type instanceof ExtRegExp) { %>
-                                                <code><%= route['input'][j].type.addon() %></code>
-                                            <% } else if (route['input'][j].type instanceof LifeUpload) { %>
-                                                <code>multipart/form-data is required to send files</code>
                                             <% } %>
                                         </td>
                                     </tr>

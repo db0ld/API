@@ -1,5 +1,4 @@
-var DateTime = require('./DateTime.js'),
-    Errors = require('./Errors.js');
+var DateTime = require('./DateTime.js');
 
 /**
  * DateConstraint class for constraints
@@ -8,7 +7,6 @@ var DateTime = require('./DateTime.js'),
  * @constructor
  */
 var DateConstraint = function (key, required) {
-    // TODO: Replace this shitty regexp
     DateTime.call(this, key, required);
 };
 

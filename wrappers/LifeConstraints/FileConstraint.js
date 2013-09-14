@@ -31,34 +31,6 @@ FileConstraint.prototype.present = function (validator, cb) {
         validator.files[this.key].size > 0);
 };
 
-FileConstraint.prototype.test = function (value, req, cb) {
-    cb = typeof req === 'function' ? req : cb;
-    req = typeof req === 'object' ? req : null;
-
-    var data = {};
-    data[this.key] = value;
-
-    return new LifeValidator([this], req, cb.bind(this, false))
-        .files(data)
-        .validate(cb.bind(this, true));
-};
-
-/**
- * Validation for current constraint
- *
- * @param {*} data
- * @param {Function} cb
- * @callback
- * @method
- */
-FileConstraint.prototype.validate = function (validator, cb) {
-    if (this.nextConstraint) {
-        return this.nextConstraint.validate(validator, cb);
-    }
-
-    return cb();
-};
-
 /**
  * Value sanitization (trim, int cast and so on)
  *

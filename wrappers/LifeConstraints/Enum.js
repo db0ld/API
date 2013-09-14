@@ -1,6 +1,5 @@
 var LifeData = require('../LifeData.js'),
-    RegExpConstraint = require('./RegExpConstraint.js'),
-    Errors = require('./Errors.js');
+    RegExpConstraint = require('./RegExpConstraint.js');
 
 /**
  * Enum class for constraints

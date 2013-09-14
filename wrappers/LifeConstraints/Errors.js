@@ -1,57 +1,35 @@
-var Errors = {};
+var fs = require('fs');
 
-Errors.NotANumber = {
-    'code': 1001,
-    'type': 'NotANumber',
-    'message': 'Not a number'
+/**
+ * A class listing all validation errors returned by the API
+ *
+ * @class Errors
+ * @constructor
+ */
+var Errors = function () {
+
 };
 
-Errors.MissingParameter = {
-    'code': 1000,
-    'type': 'MissingParameter',
-    'message': 'MissingParameter'
-};
+fs.readdirSync(__dirname + '/Errors').forEach(function (file) {
+    if (file.match(/\.js$/) && file !== 'Errors.js') {
+        var name = file.substring(0, file.length - 3);
+        var errorType = require(__dirname + '/Errors/' + file);
 
-Errors.EmptyString = {
-    'code': 1002,
-    'type': 'EmptyString',
-    'message': 'EmptyString'
-};
+        Errors[name] = function (key, value) {
+            for (var i in errorType) {
+                if (errorType.hasOwnProperty(i)) {
+                    this[i] = errorType[i];
+                }
+            }
 
-Errors.InvalidDate = {
-    'code': 1003,
-    'type': 'InvalidDate',
-    'message': 'InvalidDate'
-};
+            this.key = key;
+            this.value = value;
+        };
 
-Errors.BadFormat = {
-    'code': 1004,
-    'type': 'BadFormat',
-    'message': 'BadFormat'
-};
+        Errors[name].prototype = new Errors();
+        Errors[name].prototype.constructor = Errors;
+    }
+});
 
-Errors.RequiredFileNotFound = {
-    'code': 1005,
-    'type': 'RequiredFileNotFound',
-    'message': 'RequiredFileNotFound'
-};
-
-Errors.TooShort = {
-    'code': 1006,
-    'type': 'TooShort',
-    'message': 'TooShort'
-};
-
-Errors.TooLong = {
-    'code': 1007,
-    'type': 'TooLong',
-    'message': 'TooLong'
-};
-
-Errors.NotFound = {
-    'code': 1008,
-    'type': 'TooLong',
-    'message': 'TooLong'
-};
 
 module.exports = Errors;

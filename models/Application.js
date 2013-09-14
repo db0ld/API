@@ -1,9 +1,21 @@
-var LifeSequelize = require('../wrappers/LifeSequelize.js');
+var mongoose = require('mongoose'),
+    element = require('./Element.js');
 
-module.exports = function (sequelize, DataTypes) {
-    return sequelize.define('Application', {
-        name: {type: DataTypes.STRING(64), allowNull: false},
-        app_id: {type: DataTypes.STRING(64), allowNull: false},
-        app_secret: {type: DataTypes.STRING(128), allowNull: false}
-    }, LifeSequelize.params({tableName: 'applications'}));
+var Application = new mongoose.Schema({
+    name: {type : String, required: true },
+    user_agent: {type : String, required: false },
+    secret:  {type : String, required: true }
+});
+
+Application.plugin(element);
+
+Application.statics.queries.userAgent = function (ua) {
+    this._query.and({
+        'user_agent': ua
+    });
+
+    return this;
 };
+
+
+module.exports = mongoose.model('Application', Application);

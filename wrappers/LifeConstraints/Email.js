@@ -1,5 +1,4 @@
-var RegExpConstraint = require('./RegExpConstraint.js'),
-    Errors = require('./Errors.js');
+var RegExpConstraint = require('./RegExpConstraint.js');
 
 /**
  * Email class for constraints
@@ -9,7 +8,7 @@ var RegExpConstraint = require('./RegExpConstraint.js'),
  */
 var Email = function (key, required) {
     // TODO: Replace this shitty regexp
-    RegExpConstraint.call(this, /\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}\b/, key, required);
+    RegExpConstraint.call(this, /\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,6}\b/, key, required);
 };
 
 Email.prototype = new RegExpConstraint();

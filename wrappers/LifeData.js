@@ -1,3 +1,5 @@
+var ObjectId = require('mongoose').Schema.Types.ObjectId;
+
 /**
  * An utility class that performs simple data related operations.
  *

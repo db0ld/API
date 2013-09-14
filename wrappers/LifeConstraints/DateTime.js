@@ -30,13 +30,7 @@ DateTime.prototype.validate = function (validator, cb) {
     var date = new Date(validator.data[this.key]);
 
     if (Number.isNaN(date.getTime())) {
-        validator.errors.push({
-            key: this.key,
-            value: validator.data[this.key],
-            error: Errors.InvalidDate
-        });
-    } else if (this.nextConstraint) {
-        return this.nextConstraint.validate(validator, cb);
+        validator.errors.push(new Errors.InvalidDate(this.key, validator.data[this.key]));
     }
 
     return Abstract.prototype.validate.call(this, validator, cb);

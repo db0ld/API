@@ -1,20 +1,94 @@
-var LifeSequelize = require('../wrappers/LifeSequelize.js');
+var mongoose = require('mongoose'),
+    ObjectId = mongoose.Schema.Types.ObjectId,
+    element = require('./Element.js'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js'),
+    LifeData = require('../wrappers/LifeData.js'),
+    Gender = LifeConstraints.Gender,
+    Email = LifeConstraints.Email;
 
-module.exports = function (sequelize, DataTypes) {
-    return sequelize.define('User', {
-        login: {
-            type: DataTypes.STRING(32),
-            unique: true,
-            allowNull: false,
-            set: function(login) {
-                this.login = login.toLowerCase();
-            }
-        },
-        firstname: {type: DataTypes.STRING(64), allowNull: false},
-        lastname: {type: DataTypes.STRING(64), allowNull: false},
-        gender: {type: DataTypes.STRING(16), allowNull: false},
-        birthday: {type: DataTypes.DATE, allowNull: false},
-        email: {type: DataTypes.STRING(255), allowNull: false},
-        score: {type: DataTypes.INTEGER.UNSIGNED}
-    }, LifeSequelize.params({tableName: 'users'}));
+var User = new mongoose.Schema({
+    login: {type: String, required: true, index: {unique: true}},
+    firstname: {type: String, required: false},
+    lastname: {type: String, required: false},
+    _password: {type: String, required: true},
+    birthday: {type: Date, required: false},
+    //avatar: {type: ObjectId, required: false, ref: 'Picture'},
+    gender: {type: String, match: new Gender().regexp(),
+            required: true, default: 'undefined'},
+    email: {type: String, match: new Email().regexp(),
+            required: true, index: {unique: true}},
+    score: {type: Number, required: true, default: 0},
+});
+
+User.plugin(element);
+
+User.virtual('password').set(function (value) {
+    this._password = value;
+});
+
+User.virtual('password').get(function (value) {
+    return this._password;
+});
+
+User.virtual('level').get(function () {
+    if (this.score <= 0) {
+        return 0;
+    }
+
+    return Math.ceil(Math.log(this.score / 100) / Math.log(2)) + 1;
+});
+
+User.virtual('url').get(function () {
+    return 'http://life.tl/' + this.login;
+});
+
+User.virtual('name').get(function (value) {
+    return [this.firstname, this.lastname]
+        .filter(function (item) { return item; })
+        .join() || this.login;
+});
+
+User.methods.jsonAddon = function (context, level, doc, cb) {
+    if (this.birthday) {
+        doc.birthday = LifeData.dateToString(this.birthday);
+    }
+
+    doc.in_game_network = false; // TODO
+    doc.game_network_total = 0; // TODO
+    doc.other_game_network_total = 0; // TODO
+
+    if (!context.user || context.user.id !== this.id) {
+        delete doc.email;
+    }
+
+    delete doc.password;
+
+    return cb(doc);
 };
+
+User.statics.queries.idOrLogin = function (id) {
+    var filter = {$or: []};
+
+    if (LifeData.isObjectId(id)) {
+        filter.$or.push({_id: id});
+    } else {
+        filter.$or.push({login: id});
+    }
+
+    this._query.and(filter);
+
+    return this;
+};
+
+User.statics.queries.loginOrEmail = function (login) {
+    this._query.and({
+        $or: [
+            {email: login},
+            {login: login}
+        ]
+    });
+
+    return this;
+};
+
+module.exports = mongoose.model('User', User);

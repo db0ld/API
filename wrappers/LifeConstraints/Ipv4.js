@@ -1,5 +1,4 @@
-var RegExpConstraint = require('./RegExpConstraint.js'),
-    Errors = require('./Errors.js');
+var RegExpConstraint = require('./RegExpConstraint.js');
 
 /**
  * Ipv4 class for constraints

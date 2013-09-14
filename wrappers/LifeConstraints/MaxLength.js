@@ -22,13 +22,7 @@ MaxLength.prototype.addon = function () {
 
 MaxLength.prototype.validate = function (validator, cb) {
     if (validator.data[this.key].length > this.maxlength) {
-        validator.errors.push({
-            key: this.key,
-            value: validator.data[this.key],
-            error: Errors.TooLong
-        });
-    } else if (this.nextConstraint) {
-        return this.nextConstraint.validate(validator, cb);
+        validator.errors.push(new Errors.TooLong(this.key, validator.data[this.key]));
     }
 
     return StringConstraint.prototype.validate.call(this, validator, cb);

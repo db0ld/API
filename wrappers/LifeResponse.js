@@ -5,13 +5,11 @@ var LifeConfig = require('./LifeConfig.js'),
  * Response management class
  *
  * @class LifeResponse
- * @param {Object} req Express request
- * @param {Object} res Express response
+ * @param {LifeContext} context Life context
  * @constructor
  */
-var LifeResponse = function (req, res) {
-    this.req = req;
-    this.res = res;
+var LifeResponse = function (context) {
+    this.context = context;
 };
 
 /**
@@ -23,15 +21,15 @@ var LifeResponse = function (req, res) {
  * @method
  */
 LifeResponse.prototype.json = function (item, cb, level) {
-    var that = this;
     var doc = {};
 
     if (typeof level !== 'Number') {
         level = 0;
     }
 
-    if (typeof item === 'object' && typeof item.fullJson === 'function') {
-        return item.fullJson(that.req, that.res, level, cb);
+    if (item !== null && typeof item === 'object' &&
+        typeof item.fullJson === 'function') {
+        return item.fullJson(this.context, level, cb);
     }
 
     return cb(item);
@@ -66,8 +64,8 @@ LifeResponse.prototype.paginate = function (in_data, out_data, size, query,
 
         var resp = {
             server_size: parseInt(size, 10),
-            index: query ? query.index() : 0,
-            limit: query ? query.limit() :
+            index: query ? query.index : 0,
+            limit: query ? query.limit :
                     out_data.length,
             items: out_data
         };
@@ -90,50 +88,70 @@ LifeResponse.prototype.paginate = function (in_data, out_data, size, query,
  * Return a HTTP response for a single item
  *
  * @param {Object} data Data to be returned
- * @param {Function} err Error to be returned
  * @method
  */
-LifeResponse.prototype.single = function (data, err) {
+LifeResponse.prototype.single = function (data) {
     var that = this;
 
     data = (data === undefined) ? null : data;
 
     return that.json(data, function (data) {
         data = {
-            'error': err === undefined ? null : err,
+            'error': null,
             'element': data
         };
 
-        if (LifeConfig.dev && err !== null && err !== undefined) {
-            console.error(err);
-        }
-
-        var http_code = 200;
-        if (err && err.http) {
-            http_code = err.http;
-            delete err.http;
-        }
-
-        that.res.header('Access-Control-Allow-Origin', '*');
-        that.res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-        that.res.header('Access-Control-Allow-Headers', 'Content-Type');
-
-        if (that.req && that.req.query.callback) {
-            return that.res.jsonp(http_code, data);
-        }
-
-        return that.res.json(http_code, data);
+        return that.send(200, data);
     });
+};
+
+/**
+ * Return a HTTP response for an error
+ *
+ * @param {Object} err Error to be returned
+ * @method
+ */
+LifeResponse.prototype.error = function(err) {
+    var data = {
+        'error': err,
+        'element': null
+    };
+
+    if (LifeConfig.dev && err !== null && err !== undefined) {
+        console.error(err);
+    }
+
+    var http_code = 400;
+    if (err && err.http) {
+        http_code = err.http;
+        delete err.http;
+    }
+
+    return this.send(http_code, data);
+};
+
+/**
+ * Return a HTTP response
+ *
+ * @param {Object} data Whole data object
+ * @param {Number} http_code HTTP Status code
+ * @method
+ */
+LifeResponse.prototype.send = function(data, http_code) {
+    if (this.context.query('callback')) {
+        return that.context.send.jsonp(http_code, data);
+    }
+
+    return this.context.send.json(http_code, data);
 };
 
 /**
  * Return a HTTP response for a list
  *
  * @param {Object} data Data to be returned
- * @param {Function} err Error to be returned
  * @method
  */
-LifeResponse.prototype.list = function (data, size, err, query) {
+LifeResponse.prototype.list = function (data, size, query) {
     var that = this;
 
     return that.paginate(data, [], size, query);

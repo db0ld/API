@@ -1,44 +1,39 @@
-var LifeErrors = require('./LifeErrors.js'),
-    LifeResponse = require('./LifeResponse.js');
+var mongoose = require('mongoose'),
+    LifeErrors = require('./LifeErrors.js');
 
 /**
- * An utility class that performs queries on through ORM
- * and handles errors returned by it.
+ * An utility class that performs queries on MongoDB
+ * and handles errors returned by mongoosejs.
  *
  * @class LifeQuery
- * @param {Object} model ORM model to be used
- * @param {Object} req Express request
- * @param {Object} res Express response
- * @param {Function} next Error handling function
+ * @param {Object} model Mongoose model to be used
+ * @param {LifeContext} context Request context
  * @param {Object} [query] Default query parameters
  * @constructor
  */
-var LifeQuery = function (model, req, res, next, query) {
+var LifeQuery = function (model, context, query) {
     var filter;
 
     this.model = model;
+    this.context = context;
 
-    this.req = req !== undefined ? req : null;
-    this.res = res !== undefined ? res : null;
-    this.next = (next !== undefined && next !== null) ? next : function () {};
     this._query =
               typeof query === 'function' ? query
             : (query !== null && typeof query === 'object') ? model.find(query)
             : model.find();
-    this._limit = this.req && this.req.query.limit ? this.req.query.limit
-        : this.model.queryDefaults().limit;
-    this._index = this.req && this.req.query.index ? this.req.query.index
-        : this.model.queryDefaults().index;
+    this.limit = this.context.query('limit', this.model.queryDefaults.limit);
+    this.index = this.context.query('index', this.model.queryDefaults.index);
 
-    this._limit = parseInt(this._limit, 10);
-    this._index = parseInt(this._index, 10);
-    this._populate = this.model.queryDefaults().populate;
-    this._sort = this.model.queryDefaults().sort || 'creation';
+    this.limit = parseInt(this.limit, 10);
+    this.index = parseInt(this.index, 10);
+
+    this._populate = this.model.queryDefaults.populate;
+    this._sort = this.model.queryDefaults.sort || 'creation';
 
     if (model && model.queries) {
         for (filter in model.queries) {
             if (model.queries.hasOwnProperty(filter)) {
-                this[filter] = model.queries[filter];
+                this[filter] = model.queries[filter].bind(this);
             }
         }
     }
@@ -56,8 +51,8 @@ LifeQuery.prototype.exec = function (cb) {
     var that = this;
 
     return that._query.count(function (err, count) {
-        that._query.limit(that._limit);
-        that._query.skip(that._index);
+        that._query.limit(that.limit);
+        that._query.skip(that.index);
         that._query.populate(that._populate);
         that._query.sort(that._sort);
 
@@ -66,15 +61,14 @@ LifeQuery.prototype.exec = function (cb) {
         that._query.exec(function (err, data) {
             if (err) {
                 console.error(err);
-                return that.next(LifeErrors.IOErrorDB);
+                return that.context.send.error(new LifeErrors.IOErrorDB());
             }
 
             if (typeof cb === 'function') {
                 return cb.call(that, data, count);
             }
 
-            return new LifeResponse(that.req, that.res)
-                .list(data, count, null, that);
+            return that.context.send.list(data, count, that);
         });
     });
 };
@@ -100,25 +94,25 @@ LifeQuery.prototype.execOne = function (allow_empty, cb) {
     that._query.find(function (err, data) {
         if (err) {
             console.error(err);
-            return that.next(LifeErrors.IOErrorDB);
+            return that.context.send.error(new LifeErrors.IOErrorDB());
         }
 
         if (data.length === 0) {
             if (!allow_empty) {
-                return that.next(LifeErrors.NotFound);
+                return that.context.send.error(new LifeErrors.NotFound());
             }
 
             data = [null];
 
         } else if (data.length !== 1) {
-            return that.next(LifeErrors.NonUniqueResult);
+            return that.context.send.error(new LifeErrors.NonUniqueResult());
         }
 
         if (typeof cb === 'function') {
             return cb.call(that, data[0]);
         }
 
-        return new LifeResponse(that.req, that.res).single(data[0]);
+        return that.context.send.single(data[0]);
     });
 };
 
@@ -139,14 +133,14 @@ LifeQuery.prototype.remove = function (cb) {
     that._query.remove(function (err, data) {
         if (err) {
             console.error(err);
-            return that.next(LifeErrors.IOErrorDB);
+            return that.single.send.error(new LifeErrors.IOErrorDB());
         }
 
         if (typeof cb === 'function') {
             return cb.call(that, data);
         }
 
-        return new LifeResponse(that.req, that.res).single(data);
+        return that.context.send.single(data);
     });
 };
 
@@ -162,16 +156,15 @@ LifeQuery.prototype.purge = function (item, cb) {
 
     item.remove(function (err) {
         if (err) {
-            var ret_err = LifeErrors.IOErrorDB;
-            ret_err.message = err;
-            return that.next(LifeErrors.IOErrorDB);
+            console.error(err);
+            return that.single.send.error(new LifeErrors.IOErrorDB());
         }
 
         if (typeof cb === 'function') {
             return cb.call(that, item);
         }
 
-        return new LifeResponse(that.req, that.res).single(item);
+        return that.context.send.single(item);
     });
 };
 
@@ -197,348 +190,22 @@ LifeQuery.prototype.save = function (item, data, cb) {
         }
     }
 
-    /*
-    Todo: change dependency
     if (!(item instanceof mongoose.Document)) {
         item = new that.model(item);
     }
-    */
 
     return item.save(function (err) {
         if (err) {
-            var ret_err = LifeErrors.IOErrorDB;
-            ret_err.message = err;
-            return that.next(LifeErrors.IOErrorDB);
+            console.error(err);
+            return that.context.send.error(new LifeErrors.IOErrorDB());
         }
 
         if (typeof cb === 'function') {
             return cb.call(that, item);
         }
 
-        return new LifeResponse(that.req, that.res).single(item);
+        return that.context.send.single(item);
     });
-};
-
-/**
- * Get the value from request if missing from filter calls
- *
- * @param {String} field Field name
- * @param {*} value
- * @return String
- * @method
- */
-LifeQuery.prototype.value = function (field, value) {
-    if (this.req && value === undefined &&
-            this.req.query[field] !== undefined) {
-        return this.req.query[field];
-    }
-
-    return value;
-};
-
-/**
- * Add an equals clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.equals = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).equals(value);
-    }
-
-    return this;
-};
-
-/**
- * Add an in clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype['in'] = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field)['in'](value);
-    }
-
-    return this;
-};
-
-/**
- * Add a greater than clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.gt = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).gt(value);
-    }
-
-    return this;
-};
-
-/**
- * Add a lesser than clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.lt = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).lt(value);
-    }
-
-    return this;
-};
-
-/**
- * Add a greater or equals clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.gte = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).gte(value);
-    }
-
-    return this;
-};
-
-/**
- * Add a lesser or equals clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.lte = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).lte(value);
-    }
-
-    return this;
-};
-
-/**
- * Add an slice clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.slice = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).slice(value);
-    }
-
-    return this;
-};
-
-/**
- * Add a not equals clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.ne = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).ne(value);
-    }
-
-    return this;
-};
-
-/**
- * Add a not in clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.nin = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).nin(value);
-    }
-
-    return this;
-};
-
-/**
- * Add a slice clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.size = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).size(value);
-    }
-
-    return this;
-};
-
-/**
- * Add an all clause to query.
- *
- * @param {string} field Field on which the clause will be added.
- * @param {*} [value] The clause value
- * @method
- */
-LifeQuery.prototype.all = function (field, value) {
-    value = this.value(field, value);
-
-    if (value !== undefined) {
-        this._query.where(field).all(value);
-    }
-
-    return this;
-};
-
-/**
- * Add an and clause to query.
- *
- * @param {*} value The clause value
- * @method
- */
-LifeQuery.prototype.and = function (value) {
-    this._query.and(value);
-
-    return this;
-};
-
-/**
- * Add an or clause to query.
- *
- * @param {*} value The clause value
- * @method
- */
-LifeQuery.prototype.or = function (value) {
-    this._query.or(value);
-
-    return this;
-};
-
-/**
- * Add a not or clause to query.
- *
- * @param {*} value The clause value
- * @method
- */
-LifeQuery.prototype.nor = function (value) {
-    this._query.nor(value);
-
-    return this;
-};
-
-/**
- * Add a sort clause to query.
- *
- * @param {*} value The clause value
- * @method
- */
-LifeQuery.prototype.sort = function (value) {
-    this._query.sort(value);
-
-    return this;
-};
-
-/**
- * Get or set current query value for current instance
- *
- * @param {*} val New value
- */
-LifeQuery.prototype.query = function (val) {
-    if (val === undefined) {
-        return this._query;
-    }
-
-    this._query = val;
-    return this;
-};
-
-/**
- * Get or set current limit value for current query
- *
- * @param {*} val New value
- */
-LifeQuery.prototype.limit = function (val) {
-    if (val === undefined) {
-        return this._limit;
-    }
-
-    this._limit = val;
-    return this;
-};
-
-/**
- * Get or set current index value for current query
- *
- * @param {*} val New value
- */
-LifeQuery.prototype.index = function (val) {
-    if (val === undefined) {
-        return this._index;
-    }
-
-    this._index = val;
-    return this;
-};
-
-/**
- * Get or set current populate value for current query
- *
- * @param {*} val New value
- */
-LifeQuery.prototype.populate = function (val) {
-    if (val === undefined) {
-        return this._populate;
-    }
-
-    this._populate = val;
-    return this;
-};
-
-/**
- * Get or set current sort value for current query
- *
- * @param {*} val New value
- */
-LifeQuery.prototype.sort = function (val) {
-    if (val === undefined) {
-        return this._sort;
-    }
-
-    this._sort = val;
-    return this;
 };
 
 module.exports = LifeQuery;

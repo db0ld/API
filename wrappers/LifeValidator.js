@@ -1,15 +1,16 @@
-var LifeValidator = function (rules, req, next, data) {
+var LifeErrors = require('./LifeErrors.js'),
+    Errors = require('./LifeConstraints/Errors.js');
+
+var LifeValidator = function (context, rules, data) {
     var i;
 
-    this.req = req;
-    this.files = req.files || {};
-    this.data = data || req.body || {};
+    this.context = context;
+    this.data = data || context.body() || {};
     this.output = {};
-    this.rules = rules;
-    this.next = next;
+    this.rules = rules || context._route._input || [];
     this.errors = [];
-    this.validateRules = rules.slice();
-    this.sanitizeRules = rules.slice();
+    this.validateRules = this.rules.slice();
+    this.sanitizeRules = this.rules.slice();
     this.temp = {};
 };
 
@@ -18,7 +19,9 @@ LifeValidator.prototype.validate = function (cb) {
 
     if (that.validateRules.length === 0) {
         if (that.errors.length) {
-            return that.next(this.errors); // TODO
+            var error = new LifeErrors.ValidationFailed(that.errors);
+
+            return that.context.send.error(error);
         }
 
         return cb.call(that);
@@ -35,7 +38,7 @@ LifeValidator.prototype.validate = function (cb) {
             }
 
             if (required) {
-                that.errors.push({});
+                that.errors.push(new Errors.MissingParameter(rule.key));
             }
 
             return that.validate(cb);

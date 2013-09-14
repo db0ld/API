@@ -1,6 +1,4 @@
-var StringConstraint = require('./StringConstraint.js'),
-    Errors = require('./Errors.js'),
-    MinLength = require('./MinLength.js'),
+var MinLength = require('./MinLength.js'),
     bcrypt = require('bcryptjs');
 
 /**
@@ -13,8 +11,8 @@ var Password = function (min_length, key, required) {
     MinLength.call(this, min_length, key, required);
 };
 
-Password.prototype = new StringConstraint();
-Password.prototype.constructor = StringConstraint;
+Password.prototype = new MinLength();
+Password.prototype.constructor = MinLength;
 
 Password.prototype.sanitize = function (validator, cb) {
     var that = this;

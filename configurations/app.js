@@ -2,7 +2,7 @@ module.exports = {
     'port': 2048,
     'version': 1,
     'api_path': '/api/',
-    'db_path': 'mysql://root:root@localhost/life',
+    'db_path': 'mongodb://localhost/life',
     'website_url': 'http://l.ohai.fr/',
     'public_path': 'public',
     'public_uploaded_path': 'files',

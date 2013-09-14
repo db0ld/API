@@ -26,16 +26,10 @@ RegExpConstraint.prototype.regexp = function () {
 
 RegExpConstraint.prototype.validate = function (validator, cb) {
     if (!this._regexp.test(validator.data[this.key])) {
-        validator.errors.push({
-            key: this.key,
-            value: validator.data[this.key],
-            error: Errors.BadFormat
-        });
-    } else if (this.nextConstraint) {
-        return this.nextConstraint.validate(validator, cb);
+        validator.errors.push(new Errors.BadFormat(this.key, validator.data[this.key]));
     }
 
-    return cb();
+    return StringConstraint.prototype.validate.call(this, validator, cb);
 };
 
 module.exports = RegExpConstraint;

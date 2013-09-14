@@ -1,18 +1,18 @@
-var LifeSequelize = require('../wrappers/LifeSequelize.js');
+var mongoose = require('mongoose'),
+    element = require('./Element.js');
 
-module.exports = function (sequelize, DataTypes) {
-    return sequelize.define('Client', {
-        ip: {type: DataTypes.STRING(39), allowNull: false},
-        token: {
-            type: DataTypes.STRING(128),
-            allowNull: false,
-            unique: true,
-            set: function(login) {
-                this.login = login.toLowerCase();
-            }
-        },
-        expiration: {type: DataTypes.DATE, allowNull: false},
-        oauth_provider: {type: DataTypes.STRING(32), allowNull: false},
-        oauth_token: {type: DataTypes.STRING(128), allowNull: false},
-    }, LifeSequelize.params({tableName: 'clients'}));
-};
+var Client = new mongoose.Schema({
+    user: {type : mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    ip: {type : String, required: true },
+    token: {type : String, required: true, index: { unique: true } },
+    application: {type : mongoose.Schema.Types.ObjectId, ref: 'Application', required: true },
+    expiration: {type : String, required: true },
+    oauth_provider: {type : String, required: false },
+    oauth_token: {type : String, required: false }
+});
+
+Client.plugin(element);
+
+Client.statics.queryDefaults.populate = 'user application';
+
+module.exports = mongoose.model('Client', Client);
