@@ -15,4 +15,37 @@ Client.plugin(element);
 
 Client.statics.queryDefaults.populate = 'user application';
 
+Client.methods.jsonAddon = function (context, level, doc, cb) {
+    delete doc.application;
+    delete doc.user;
+    delete doc.ip;
+
+    doc.id = this.token;
+
+    return cb(doc);
+};
+
+Client.statics.queries.tokenAndDate = function (token, date) {
+    if (date === undefined) {
+        date = new Date();
+    }
+
+    var filter = {$and: [
+        {'token': token},
+        {'expiration': {$gt: date}}
+    ]};
+
+    this._query.and(filter);
+
+    return this;
+};
+
+Client.statics.queries.token = function (token) {
+    var filter = {'token': token};
+
+    this._query.and(filter);
+
+    return this;
+};
+
 module.exports = mongoose.model('Client', Client);

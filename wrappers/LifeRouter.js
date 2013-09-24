@@ -51,6 +51,12 @@ var LifeRouter = function (app) {
         },
         {
             fun: function (context, cb) {
+                context.detectApplication(cb);
+            },
+            priority: 60
+        },
+        {
+            fun: function (context, cb) {
                 return new LifeValidator(context).validate(function (ok) {
                     return this.sanitize(function (input) {
                         context.input = input;

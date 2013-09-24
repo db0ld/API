@@ -64,8 +64,8 @@ LifeResponse.prototype.paginate = function (in_data, out_data, size, query,
 
         var resp = {
             server_size: parseInt(size, 10),
-            index: query ? query.index : 0,
-            limit: query ? query.limit :
+            index: query ? query.index() : 0,
+            limit: query ? query.limit() :
                     out_data.length,
             items: out_data
         };

@@ -1,3 +1,10 @@
+var LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeErrors = require('../wrappers/LifeErrors.js'),
+    mongoose = require('mongoose'),
+    Client = mongoose.model('Client');
+
+
+
 /**
  * An utility class that performs security checks.
  * Constructors perform authentification if required or if a token
@@ -15,7 +22,25 @@ var LifeSecurity = function (context) {
  * If a token is provided in request authenticate user
  */
 LifeSecurity.prototype.authenticate = function (cb) {
-    return cb(false);
+    var that = this;
+    var token = this.context.query('token') || this.context.body('token');
+
+    if (!token) {
+        return cb(false);
+    }
+
+    return new LifeQuery(Client, this.context)
+        .tokenAndDate(token)
+        .execOne(true, function (client) {
+            if (!client) {
+                return that.context.send.error(new LifeErrors.AuthenticationError());
+            }
+
+            that.user = client.user;
+            that.client = client;
+
+            return cb(false);
+        });
 };
 
 /**

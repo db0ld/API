@@ -1,3 +1,12 @@
+require('./models/User.js');
+require('./models/Application.js');
+require('./models/Client.js');
+require('./models/Comment.js');
+require('./models/Vote.js');
+require('./models/UserConnection.js');
+require('./models/Achievement.js');
+require('./models/AchievementStatus.js');
+
 var application_root = __dirname,
     express = require('express'),
     path = require('path'),
@@ -6,10 +15,6 @@ var application_root = __dirname,
     mongoose = require('mongoose');
 
 mongoose.connect(LifeConfig.db_path);
-
-require('./models/User.js');
-require('./models/Application.js');
-require('./models/Client.js');
 
 var app = express();
 

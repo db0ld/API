@@ -139,6 +139,24 @@ module.exports = function (schema, options) {
 
     schema.statics.queries = {};
 
+    schema.statics.queries.findById = function (id) {
+        this._query.and({_id: id});
+
+        return this;
+    };
+
+    schema.statics.queries.findById = function (id) {
+        this._query.and({_id: id});
+
+        return this;
+    };
+
+    schema.statics.queries.findByIds = function (ids) {
+        this._query.and({_id: {$in: ids}});
+
+        return this;
+    };
+
     schema.statics.queryDefaults = {
         'populate': 'referenced_users',
         'limit': 10,

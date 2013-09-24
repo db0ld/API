@@ -21,11 +21,11 @@ var LifeQuery = function (model, context, query) {
               typeof query === 'function' ? query
             : (query !== null && typeof query === 'object') ? model.find(query)
             : model.find();
-    this.limit = this.context.query('limit', this.model.queryDefaults.limit);
-    this.index = this.context.query('index', this.model.queryDefaults.index);
+    this._limit = this.context.query('limit', this.model.queryDefaults.limit);
+    this._index = this.context.query('index', this.model.queryDefaults.index);
 
-    this.limit = parseInt(this.limit, 10);
-    this.index = parseInt(this.index, 10);
+    this._limit = parseInt(this._limit, 10);
+    this._index = parseInt(this._index, 10);
 
     this._populate = this.model.queryDefaults.populate;
     this._sort = this.model.queryDefaults.sort || 'creation';
@@ -51,8 +51,11 @@ LifeQuery.prototype.exec = function (cb) {
     var that = this;
 
     return that._query.count(function (err, count) {
-        that._query.limit(that.limit);
-        that._query.skip(that.index);
+        if (that._limit !== null && that._index !== null) {
+            that._query.limit(that._limit);
+            that._query.skip(that._index);
+        }
+
         that._query.populate(that._populate);
         that._query.sort(that._sort);
 
@@ -206,6 +209,34 @@ LifeQuery.prototype.save = function (item, data, cb) {
 
         return that.context.send.single(item);
     });
+};
+
+/**
+ * Get or set current limit value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.limit = function (val) {
+    if (val === undefined) {
+        return this._limit;
+    }
+
+    this._limit = val;
+    return this;
+};
+
+/**
+ * Get or set current index value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.index = function (val) {
+    if (val === undefined) {
+        return this._index;
+    }
+
+    this._index = val;
+    return this;
 };
 
 module.exports = LifeQuery;

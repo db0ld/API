@@ -1,5 +1,6 @@
 var LifeConstraints = require('../wrappers/LifeConstraints.js'),
     LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeErrors = require('../wrappers/LifeErrors.js'),
     mongoose = require('mongoose'),
     User = mongoose.model('User'),
     Client = mongoose.model('Client'),
@@ -44,30 +45,41 @@ module.exports = function (router) {
         .add(function (context) {
             return new LifeQuery(User, context)
                 .loginOrEmail(context.params('id'))
-                .execOne(false, function (user) {
+                .execOne(true, function (user) {
                     if (!user) {
                         return context.send.error(LifeErrors.AuthenticationError);
                     }
 
-                    return bcrypt.compare(context.params('password'), user.password, function (err, res) {
+                    return bcrypt.compare(context.input.password, user._password, function (err, res) {
                         if (err || !res) {
                             return context.send.error(new LifeErrors.AuthenticationError());
                         }
 
-                        /*if (!context.application) {
-                            return context.send.error(new LifeErrors.AuthenticationError());
-                        }*/
+                        if (!context.application) {
+                            return context.send.error(new LifeErrors.AuthenticationError('Unknown client'));
+                        }
+
+                        var expiration = new Date();
+                        expiration.setDate(expiration.getDate() + 7);
 
                         client = new Client();
-                        client.expiration = new Date();
-                        client.expiration.setDate(client.expiration.getDate() + 7);
-                        client.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + token.expiration.getTime();
+                        client.expiration = expiration;
+                        client.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + expiration.getTime();
                         client.user = user;
-                        //client.application = context.application;
-                        client.ip = context.input.ip || req.connection('remoteAddress');
+                        client.application = context.application;
+                        client.ip = context.input.ip || context.connection('remoteAddress');
 
-                        return new LifeQuery(OAuthToken, context).save(client);
+                        return new LifeQuery(Client, context).save(client);
                     });
                 });
+        })
+
+        .Delete('Remove a token')
+        .route(routeBase + '/:id/tokens/:token')
+        .add(function(context) {
+            return new LifeQuery(Client, context)
+                .token(context.params(token))
+                .remove();
         });
+
 };
