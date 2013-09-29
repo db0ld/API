@@ -48,7 +48,7 @@ module.exports = function (router) {
         .route(routeBase)
         .auth(true)
         .add(function (context) {
-            var user = context.params('user_id', context.user && context.user.id);
+            var user = context.params('user_id', context.user().id);
 
             return new LifeQuery(User, context)
                 .idOrLogin(user)
@@ -71,7 +71,7 @@ module.exports = function (router) {
                     return new LifeQuery(Comment, context)
                         .save({
                             content: context.input.content,
-                            author: context.user
+                            author: context.user().id
                         });
                 });
         })
@@ -93,7 +93,7 @@ module.exports = function (router) {
                     return new LifeQuery(Vote, context)
                         .save({
                             vote: 1,
-                            author: context.user
+                            author: context.user().id
                         });
                 });
         })

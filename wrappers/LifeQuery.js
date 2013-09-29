@@ -42,6 +42,30 @@ var LifeQuery = function (model, context, query) {
 };
 
 /**
+ * Count results from query, if no callback is provided data is returned
+ * to the client
+ *
+ * @param {Function} [cb=null] Callback function to be executed on success
+ * @method
+ */
+LifeQuery.prototype.count = function (cb) {
+    var that = this;
+
+    return that._query.count(function (err, count) {
+	if (err) {
+            console.error(err);
+            return that.context.send.error(new LifeErrors.IOErrorDB());
+        }
+
+        if (typeof cb === 'function') {
+            return cb.call(that, count);
+        }
+
+        return that.context.send.single(count);
+    });
+};
+
+/**
  * Execute query, if no callback is provided data is returned to the client
  *
  * @param {Function} [cb=null] Callback function to be executed on success
@@ -50,7 +74,7 @@ var LifeQuery = function (model, context, query) {
 LifeQuery.prototype.exec = function (cb) {
     var that = this;
 
-    return that._query.count(function (err, count) {
+    return that.count(function (count) {
         if (that._limit !== null && that._index !== null) {
             that._query.limit(that._limit);
             that._query.skip(that._index);

@@ -15,6 +15,10 @@ var Achievement = new mongoose.Schema({
 
 Achievement.plugin(element);
 
+Achievement.virtual('url').get(function () {
+    return 'http://life.tl/achievements/' + this.id;
+});
+
 Achievement.methods.jsonAddon = function (context, level, doc, cb) {
     // TODO achievement_status
     // TODO url

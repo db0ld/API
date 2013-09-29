@@ -36,6 +36,13 @@ module.exports = function (router) {
                 .execOne();
         })
 
+        .Get('Get users')
+        .route(routeBase)
+        .add(function (context) {
+            return new LifeQuery(User, context)
+                .exec();
+        })
+
         .Post('Create a token')
         .route(routeBase + '/:id/tokens')
         .input([
@@ -78,7 +85,7 @@ module.exports = function (router) {
         .route(routeBase + '/:id/tokens/:token')
         .add(function(context) {
             return new LifeQuery(Client, context)
-                .token(context.params(token))
+                .token(context.params('token'))
                 .remove();
         });
 

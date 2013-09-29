@@ -1,5 +1,5 @@
 module.exports = {
-    'port': 2048,
+    'port': 8080,
     'version': 1,
     'api_path': '/api/',
     'db_path': 'mongodb://localhost/life',

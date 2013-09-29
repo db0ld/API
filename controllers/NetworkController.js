@@ -13,14 +13,14 @@ module.exports = function (router) {
         .route(routeBase + '/:user_id')
         .add(function (context) {
             return new LifeQuery(UserConnection, context)
-                .selfOtherRelation(context.user.id, context.params('user_id'), 'network')
+                .selfOtherRelation(context.user().id, context.params('user_id'), 'network')
                 .execOne(true, function (connection) {
                     if (connection) {
                         return; // TODO
                     }
 
                     this.save({
-                        self: context.user.id,
+                        self: context.user().id,
                         other: user,
                         relation: 'network'
                     });
@@ -31,7 +31,7 @@ module.exports = function (router) {
         .route(routeBase + '/:user_id')
         .add(function (context) {
             return new LifeQuery(UserConnection, context)
-                .selfOtherRelation(context.user.id, context.params('user_id'), 'network')
+                .selfOtherRelation(context.user().id, context.params('user_id'), 'network')
                 .remove();
         })
 
@@ -39,7 +39,7 @@ module.exports = function (router) {
         .route(routeBase)
         .add(function (context) {
             return new LifeQuery(UserConnection, context)
-                .selfRelation(context.user.id, 'network')
+                .selfRelation(context.user().id, 'network')
                 .exec(function (relations) {
                     var users_ids = relations.map(function (relation) {
                         return relation.other;
@@ -55,7 +55,7 @@ module.exports = function (router) {
         .route('others_network')
         .add(function (context) {
             return new LifeQuery(UserConnection, context)
-                .otherRelation(context.user.id, 'network')
+                .otherRelation(context.user().id, 'network')
                 .exec(function (relations) {
                     var users_ids = relations.map(function (relation) {
                         return relation.self;

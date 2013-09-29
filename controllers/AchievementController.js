@@ -38,11 +38,11 @@ module.exports = function (router) {
         .add(function (context) {
             var query = new LifeQuery(Achievement, context);
 
-            if (!context.query('term', null)) {
+            /*if (!context.query('term', null)) {
                 query.root();
             } else {
                 // TODO: search by term
-            }
+            }*/
 
             return query.exec();
         });

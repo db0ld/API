@@ -19,4 +19,23 @@ Vote.statics.queries.byParent = function (id) {
     return this;
 };
 
+Vote.statics.queries.vote = function (id, vote) {
+    this._query.and({
+        parent: id,
+	vote: vote
+    });
+
+    return this;
+};
+
+Vote.statics.queries.voteByUser = function (id, author) {
+    this._query.and({
+        parent: id,
+	author: author
+    });
+
+    return this;
+};
+
+
 module.exports = mongoose.model('Vote', Vote);

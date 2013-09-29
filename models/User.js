@@ -57,7 +57,7 @@ User.methods.jsonAddon = function (context, level, doc, cb) {
     doc.game_network_total = 0; // TODO
     doc.other_game_network_total = 0; // TODO
 
-    if (!context.user || context.user.id !== this.id) {
+    if (!context.user() || context.user().id !== this.id) {
         delete doc.email;
     }
 

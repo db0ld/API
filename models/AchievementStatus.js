@@ -1,5 +1,6 @@
 var mongoose = require('mongoose'),
     element = require('./Element.js'),
+    approvable = require('./Approvable.js'),
     LifeConstraints = require('../wrappers/LifeConstraints.js'),
     LifeData = require('../wrappers/LifeData.js'),
     AchievementStatusStatus = LifeConstraints.AchievementStatusStatus,
@@ -15,6 +16,11 @@ var AchievementStatus = new mongoose.Schema({
 });
 
 AchievementStatus.plugin(element);
+AchievementStatus.plugin(approvable);
+
+AchievementStatus.virtual('url').get(function () {
+    return 'http://life.tl/u/' + this.owner.login + '/b/' + this.id;
+});
 
 AchievementStatus.statics.queryDefaults.populate = 'owner achievement';
 
