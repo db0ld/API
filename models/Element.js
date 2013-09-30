@@ -5,46 +5,46 @@ var mongoose = require('mongoose'),
 
 module.exports = function (schema, options) {
     schema.methods.objectIdJson = function (i, context, level, doc, cb) {
-	var that = this;
+        var that = this;
 
-	if (true) {
-	    modelName = that.schema.paths[i].options.ref;
-	    model = mongoose.model(modelName);
+        if (true) {
+            modelName = that.schema.paths[i].options.ref;
+            model = mongoose.model(modelName);
 
-	    return new LifeQuery(model, context, {_id: that[i]})
-		.execOne(true, function (item) {
-		    return new LifeResponse(context).json(item, function (subdoc) {
-			doc[i] = subdoc;
-			
-			return cb(doc);
-		    }, level + 1);
-		});
-	}
+            return new LifeQuery(model, context, {_id: that[i]})
+                .execOne(true, function (item) {
+                    return new LifeResponse(context).json(item, function (subdoc) {
+                        doc[i] = subdoc;
 
-	return cb(doc);
+                        return cb(doc);
+                    }, level + 1);
+                });
+        }
+
+        return cb(doc);
     };
 
     schema.methods.arrayJson = function (i, context, level, doc, cb) {
-	var that = this;
+        var that = this;
 
-	return new LifeResponse(context)
-	    .paginate(that[i], [], that[i].length, null, function (subdoc) {
-		doc[i] = subdoc;
-		
-		return cb(doc);
-	    }, level + 1);
+        return new LifeResponse(context)
+            .paginate(that[i], [], that[i].length, null, function (subdoc) {
+                doc[i] = subdoc;
+
+                return cb(doc);
+            }, level + 1);
     };
 
     schema.methods.documentJson = function (i, context, level, doc, cb) {
-	var that = this;
+        var that = this;
 
-	return new LifeResponse(context).json(that[i], function (subdoc) {
-	    doc[i] = subdoc;
-	    
-	    return cb(doc);
-	}, level);
+        return new LifeResponse(context).json(that[i], function (subdoc) {
+            doc[i] = subdoc;
+
+            return cb(doc);
+        }, level);
     };
-    
+
     schema.add({
         modification: Date,
         creation: {type: Date, 'default' : Date.now }
@@ -56,17 +56,17 @@ module.exports = function (schema, options) {
     });
 
     schema.methods.abstractJsonSerialize = function (context, level, subJsons, doc, cb) {
-	var that = this;
+        var that = this;
 
-	if (!subJsons.length) {
-	    return cb(doc);
-	}
+        if (!subJsons.length) {
+            return cb(doc);
+        }
 
-	var currCb = subJsons.pop();
+        var currCb = subJsons.pop();
 
-	return currCb.call(that, context, level, doc, function(doc) {
-	    return that.abstractJsonSerialize(context, level, subJsons, doc, cb);
-	});
+        return currCb.call(that, context, level, doc, function(doc) {
+            return that.abstractJsonSerialize(context, level, subJsons, doc, cb);
+        });
     };
 
     schema.methods.fullJson = function (context, level, cb) {
@@ -76,7 +76,7 @@ module.exports = function (schema, options) {
 
         var that = this,
             doc = that.toJSON(),
-	    subJsons = schema.methods.abstractJson.splice(),
+            subJsons = schema.methods.abstractJson.slice(),
             i;
 
         for (i in doc) {
@@ -88,29 +88,29 @@ module.exports = function (schema, options) {
                     doc[i] = LifeData.dateTimeToString(doc[i]);
 
                 } else if (doc[i] instanceof Array) {
-		    subJsons.push(that.arrayJson.bind(that, i));
+                    subJsons.push(that.arrayJson.bind(that, i));
 
                 } else if (this[i] && that.schema.paths[i] &&
-			   that.schema.paths[i].instance === "ObjectID" &&
-			   that.schema.paths[i].options.ref && i !== 'id' && LifeData.isObjectId(doc[i])) {
+                           that.schema.paths[i].instance === "ObjectID" &&
+                           that.schema.paths[i].options.ref && i !== 'id' && LifeData.isObjectId(doc[i])) {
 
-		    subJsons.push(that.objectIdJson.bind(that, i));
+                    subJsons.push(that.objectIdJson.bind(that, i));
 
                 } else if (that[i] && that[i] instanceof mongoose.Document) {
-		    subJsons.push(that.documentJson.bind(that, i));
+                    subJsons.push(that.documentJson.bind(that, i));
                 }
             }
         }
 
-	subJsons.push(that.jsonAddon);
+        subJsons.push(that.jsonAddon);
 
-	return that.abstractJsonSerialize(context, level + 1, subJsons, doc, function (doc) {
-	    return cb(doc);
-	});
+        return that.abstractJsonSerialize(context, level + 1, subJsons, doc, function (doc) {
+            return cb(doc);
+        });
     };
 
     schema.methods.jsonAddon = function (context, level, doc, cb) {
-	return cb(doc);
+        return cb(doc);
     };
 
     schema.options.toJSON = {

@@ -16,6 +16,8 @@ var LifeQuery = require('../wrappers/LifeQuery.js'),
  */
 var LifeSecurity = function (context) {
     this.context = context;
+    this.client = null;
+    this.user = null;
 };
 
 /**

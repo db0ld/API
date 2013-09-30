@@ -22,12 +22,10 @@ module.exports = function (router) {
             // new LifeConstraints.Pictures('medias', false)
         ])
         .add(function (context) {
-             var achievement_status = _.cloneDeep(context.input);
+             var achievement_status = context.input;
 
-             achievement_status.owner = context.security.user;
-             achievement_status.achievement = context.input.achievement_id;
-
-             console.log(achievement_status);
+             achievement_status.owner = context.user().id;
+             achievement_status.achievement = context.input.achievement_id.id;
 
              return new LifeQuery(AchievementStatus, context)
                 .save(achievement_status);

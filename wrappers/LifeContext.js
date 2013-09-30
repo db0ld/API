@@ -41,7 +41,7 @@ LifeContext.prototype.requestAttribute = function (set, key, defaultValue) {
 };
 
 LifeContext.prototype.hasRolesForRoute = function (cb) {
-    if (this._route._auth !== false && !this.security.user) {
+    if (this._route._auth !== false && !this.user()) {
         return this.send.error(new LifeErrors.AuthenticationRequired());
     }
 
@@ -127,7 +127,7 @@ LifeContext.prototype.headers = function (key, defaultValue) {
 };
 
 LifeContext.prototype.user = function () {
-    return this.security.token && this.security.token.user;
+    return this.security.user;
 };
 
 LifeContext.prototype.route = function () {

@@ -40,4 +40,4 @@ router.init();
 
 // Launch server
 console.log('Listening on port ' + LifeConfig.port + '...');
-app.listen(LifeConfig.port, '::');
+app.listen(LifeConfig.port);
