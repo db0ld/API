@@ -39,7 +39,7 @@ User.virtual('level').get(function () {
 });
 
 User.virtual('url').get(function () {
-    return 'http://life.tl/' + this.login;
+    return 'http://life.tl/u/' + this.login + '//';
 });
 
 User.virtual('name').get(function (value) {

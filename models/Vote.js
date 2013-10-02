@@ -22,7 +22,7 @@ Vote.statics.queries.byParent = function (id) {
 Vote.statics.queries.vote = function (id, vote) {
     this._query.and({
         parent: id,
-	vote: vote
+        vote: vote
     });
 
     return this;
@@ -31,7 +31,7 @@ Vote.statics.queries.vote = function (id, vote) {
 Vote.statics.queries.voteByUser = function (id, author) {
     this._query.and({
         parent: id,
-	author: author
+        author: author
     });
 
     return this;
