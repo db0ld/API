@@ -19,7 +19,7 @@ AchievementStatus.plugin(element);
 AchievementStatus.plugin(approvable);
 
 AchievementStatus.virtual('url').get(function () {
-    return 'http://life.tl/u/' + this.owner.login + '/' . (this.status == 'objective' ? 'bucketlist' : 'board') . '/' + this.id;
+    return 'http://life.tl/u/' + this.owner.login + '/' + (this.status == 'objective' ? 'bucketlist' : 'board') + '/' + this.id;
 });
 
 AchievementStatus.statics.queryDefaults.populate = 'owner achievement';
