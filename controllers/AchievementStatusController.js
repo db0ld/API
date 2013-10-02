@@ -31,6 +31,22 @@ module.exports = function (router) {
                 .save(achievement_status);
         })
 
+        .Put('Update an achievement status')
+        .route(routeBase + '/:achievement_status_id')
+        .auth(true)
+        .input([
+            new LifeConstraints.String('message', false),
+            new LifeConstraints.AchievementStatusStatus('status', false)
+        ])
+        .add(function (context) {
+            return new LifeQuery(AchievementStatus, context)
+                .findById(context.params('achievement_status_id'))
+                .byUserId(context.user().id)
+                .execOne(function (achievement_status) {
+                    this.save(achievement_status, context.input);
+                });
+        })
+
 
         .Get('Get a single achievement status')
         .route(routeBase + '/:achievement_status_id')
