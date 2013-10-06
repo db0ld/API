@@ -8,7 +8,7 @@ var fs = require('fs'),
 var dumpContext = function (context, cb) {
     console.log(new Array(80).join('-').toString());
     console.log(new Date().toISOString());
-    console.log(context._req._method + ': ' + context._req.url);
+    console.log(context._req.method + ': ' + context._req.url);
     if (context.body() && Object.keys(context.body()).length) {
         console.log('PARAMS POST: ' + JSON.stringify(context.body(), null, 4));
     }
