@@ -11,6 +11,7 @@ var Achievement = new mongoose.Schema({
     _parents: [{type: ObjectId, required: false, ref: 'Achievement'}],
     discoverable: {type: Boolean, required: true, default: true},
     secret: {type: Boolean, required: true, default: false},
+    color: {type: String, required: true, default: '#008000'}
 });
 
 Achievement.plugin(element);

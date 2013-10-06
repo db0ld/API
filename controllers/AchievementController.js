@@ -16,6 +16,7 @@ module.exports = function (router) {
             new LifeConstraints.Boolean('category', false),
             new LifeConstraints.Boolean('secret', false),
             new LifeConstraints.Boolean('discoverable', false),
+            new LifeConstraints.HexColor('color', false),
             // new LifeConstraints.Picture('badge', false)
         ])
         .auth(['ROLE_ADMIN_ACHIEVEMENT'])
