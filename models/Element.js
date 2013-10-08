@@ -46,7 +46,7 @@ module.exports = function (schema, options) {
     };
 
     schema.add({
-        modification: Date,
+        modification: {type: Date, 'default' : Date.now },
         creation: {type: Date, 'default' : Date.now }
     });
 

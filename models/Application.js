@@ -17,5 +17,10 @@ Application.statics.queries.userAgent = function (ua) {
     return this;
 };
 
+Application.methods.jsonAddon = function (context, level, doc, cb) {
+    delete doc.secret;
+
+    return cb(doc);
+};
 
 module.exports = mongoose.model('Application', Application);
