@@ -1,4 +1,5 @@
-var LifeConstraints = require('../wrappers/LifeConstraints.js'),
+var _ = require('lodash'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js'),
     LifeQuery = require('../wrappers/LifeQuery.js'),
     LifeErrors = require('../wrappers/LifeErrors.js'),
     mongoose = require('mongoose'),
@@ -14,7 +15,10 @@ module.exports = function (router) {
         .input([
                 new LifeConstraints.Length(2, 32, 'login')
                     .add(new LifeConstraints.MongooseUnique(User, 'login', 'login')),
-                new LifeConstraints.Password(6, 'password'),
+                new LifeConstraints.Or([
+                    new LifeConstraints.Password(6, 'password', false),
+                    new LifeConstraints.OAuthCouple(false)
+                ]),
                 new LifeConstraints.Email('email')
                     .add(new LifeConstraints.MongooseUnique(User, 'email', 'email')),
                 new LifeConstraints.Length(2, 32, 'firstname', false),
@@ -25,7 +29,26 @@ module.exports = function (router) {
             ])
         .route(routeBase)
         .add(function (context) {
-            return new LifeQuery(User, context).save(context.input);
+            var user = new User(_.cloneDeep(context.input));
+
+            if (context.input.site_name && context.input.site_token_user) {
+                return new LifeQuery(User, context)
+                    .searchByOAuthToken(context.input.site_name, context.input.site_token_user.id)
+                    .execOne(true, function (found_user) {
+                        if (found_user) {
+                            return context.send.error(new LifeErrors.UserExtTokenAlreadyRegistered());
+                        }
+
+                        user._oauth.push({
+                            site: context.input.site_name,
+                            user_id: context.input.site_token_user.id
+                        });
+
+                        return new LifeQuery(User, context).save(user);
+                    });
+            }
+
+            return new LifeQuery(User, context).save(user);
         })
 
         .Get('Get a user')
@@ -53,8 +76,8 @@ module.exports = function (router) {
             return new LifeQuery(User, context)
                 .loginOrEmail(context.params('id'))
                 .execOne(true, function (user) {
-                    if (!user) {
-                        return context.send.error(LifeErrors.AuthenticationError);
+                    if (!user || ! user._password) {
+                        return context.send.error(new LifeErrors.AuthenticationError());
                     }
 
                     return bcrypt.compare(context.input.password, user._password, function (err, res) {
@@ -66,15 +89,7 @@ module.exports = function (router) {
                             return context.send.error(new LifeErrors.AuthenticationError('Unknown client'));
                         }
 
-                        var expiration = new Date();
-                        expiration.setDate(expiration.getDate() + 7);
-
-                        client = new Client();
-                        client.expiration = expiration;
-                        client.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + expiration.getTime();
-                        client.user = user;
-                        client.application = context.application;
-                        client.ip = context.input.ip || context.connection('remoteAddress');
+                        var client = Client.buildToken(context, user);
 
                         return new LifeQuery(Client, context).save(client);
                     });

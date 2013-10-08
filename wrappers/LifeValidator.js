@@ -27,7 +27,7 @@ LifeValidator.prototype.validate = function (cb) {
         return cb.call(that);
     }
 
-    var rule = that.validateRules.pop();
+    var rule = that.validateRules.shift();
 
     return rule.required(function (required) {
         return rule.present(that, function (present) {
@@ -53,7 +53,7 @@ LifeValidator.prototype.sanitize = function (cb) {
         return cb.call(that, that.output);
     }
 
-    var rule = that.sanitizeRules.pop();
+    var rule = that.sanitizeRules.shift();
 
     return rule.present(that, function (present) {
         if (present) {

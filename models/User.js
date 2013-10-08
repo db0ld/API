@@ -4,13 +4,14 @@ var mongoose = require('mongoose'),
     LifeConstraints = require('../wrappers/LifeConstraints.js'),
     LifeData = require('../wrappers/LifeData.js'),
     Gender = LifeConstraints.Gender,
-    Email = LifeConstraints.Email;
+    Email = LifeConstraints.Email
+    OAuthSupported = LifeConstraints.OAuthSupported;
 
 var User = new mongoose.Schema({
     login: {type: String, required: true, index: {unique: true}},
     firstname: {type: String, required: false},
     lastname: {type: String, required: false},
-    _password: {type: String, required: true},
+    _password: {type: String, required: false},
     birthday: {type: Date, required: false},
     //avatar: {type: ObjectId, required: false, ref: 'Picture'},
     gender: {type: String, match: new Gender().regexp(),
@@ -18,6 +19,10 @@ var User = new mongoose.Schema({
     email: {type: String, match: new Email().regexp(),
             required: true, index: {unique: true}},
     score: {type: Number, required: true, default: 0},
+    _oauth: [{
+        site: {type: String, match: new OAuthSupported().regexp(), required: true},
+        user_id: {type: String, required: true}
+    }]
 });
 
 User.plugin(element);
@@ -86,6 +91,19 @@ User.statics.queries.loginOrEmail = function (login) {
             {email: login},
             {login: login}
         ]
+    });
+
+    return this;
+};
+
+User.statics.queries.searchByOAuthToken = function (site, id) {
+    this._query.and({
+        _oauth: {
+            $elemMatch : {
+                'site': site,
+                'user_id': id
+            }
+        }
     });
 
     return this;
