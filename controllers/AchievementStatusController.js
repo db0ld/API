@@ -78,6 +78,7 @@ module.exports = function (router) {
         .input([
             new LifeConstraints.String('content', false)
         ])
+        .auth(true)
         .add(function (context) {
             return new LifeQuery(AchievementStatus, context)
                 .findById(context.params('achievement_status_id'))
@@ -100,6 +101,7 @@ module.exports = function (router) {
 
         .Post('Approve an achievement status')
         .route('/users/:user_id/achievement_statuses/:achievement_status_id/approvers')
+        .auth(true)
         .add(function (context) {
             return new LifeQuery(AchievementStatus, context)
                 .findById(context.params('achievement_status_id'))
@@ -114,6 +116,7 @@ module.exports = function (router) {
 
         .Post('Disapprove an achievement status')
         .route('/users/:user_id/achievement_statuses/:achievement_status_id/disapprovers')
+        .auth(true)
         .add(function (context) {
             return new LifeQuery(AchievementStatus, context)
                 .findById(context.params('achievement_status_id'))
@@ -121,7 +124,7 @@ module.exports = function (router) {
                     return new LifeQuery(Vote, context)
                         .save({
                             vote: -1,
-                            author: context.user
+                            author: context.user().id
                         });
                 });
         });

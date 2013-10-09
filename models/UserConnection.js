@@ -7,7 +7,7 @@ var UserConnection = new mongoose.Schema({
     relation: {type : String, required: true, default: 'network' },
 });
 
-UserConnection.index({self: 1, other: 1, relation: 1}, {unique: true});
+//UserConnection.index({self: 1, other: 1, relation: 1}, {unique: true});
 
 UserConnection.plugin(element);
 
@@ -25,7 +25,7 @@ UserConnection.statics.queries.selfOtherRelation = function (self, other, rel) {
     return this;
 };
 
-UserConnection.statics.queries.selfRelation = function (self, other, rel) {
+UserConnection.statics.queries.selfRelation = function (self, rel) {
     var filter = {$and: [
         {'self': self},
         {'relation': rel}
@@ -36,7 +36,7 @@ UserConnection.statics.queries.selfRelation = function (self, other, rel) {
     return this;
 };
 
-UserConnection.statics.queries.otherRelation = function (self, other, rel) {
+UserConnection.statics.queries.otherRelation = function (other, rel) {
     var filter = {$and: [
         {'other': other},
         {'relation': rel}

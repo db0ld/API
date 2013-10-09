@@ -236,6 +236,20 @@ LifeQuery.prototype.save = function (item, data, cb) {
 };
 
 /**
+ * Get or set current populate value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.populate = function (val) {
+    if (val === undefined) {
+        return this._populate;
+    }
+
+    this._populate = val;
+    return this;
+};
+
+/**
  * Get or set current limit value for current query
  *
  * @param {*} val New value
