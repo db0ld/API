@@ -14,8 +14,12 @@ module.exports = function (router) {
         .auth(true)
         .add(function (context) {
             return new LifeQuery(User, context)
-                .idOrLogin(context.user().id)
+                .idOrLogin(context.params('user_id'))
                 .execOne(function (user) {
+                    if (context.user().id == user.id) {
+                        return context.send.error(new LifeErrors.UserLogicError());
+                    }
+
                     return new LifeQuery(UserConnection, context)
                         .selfOtherRelation(context.user().id, user.id, 'network')
                         .execOne(true, function (connection) {
