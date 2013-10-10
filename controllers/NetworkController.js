@@ -45,40 +45,60 @@ module.exports = function (router) {
                 .remove();
         })
 
-        .Get('Get users from game network')
+        .Get('Get users from someone game network')
         .route(routeBase)
-        .auth(true)
+        .route('users/:user_id/network')
         .add(function (context) {
-            return new LifeQuery(UserConnection, context)
-                .selfRelation(context.user().id, 'network')
-                .populate("")
-                .exec(function (relations) {
-                    var user_ids = relations.map(function (relation) {
-                        return relation.other;
-                    });
+            if (!(context.params('user_id') || (context.user() && context.user().id))) {
+                return context.send.error(new LifeErrors.NotFound());
+            }
 
-                    return new LifeQuery(User, context)
-                        .findByIds(user_ids)
-                        .exec();
-                });
+            return new LifeQuery(User, context)
+                .idOrLogin(context.params('user_id') || context.user().id)
+                .execOne(function (user) {
+                    return new LifeQuery(UserConnection, context)
+                        .selfRelation(user.id, 'network')
+                        .populate("")
+                        .exec(function (relations) {
+                            var user_ids = relations.map(function (relation) {
+                                return relation.other;
+                            });
+
+                            return new LifeQuery(User, context)
+                                .findByIds(user_ids)
+                                .limit(0)
+                                .index(0)
+                                .exec();
+                    });
+            });
         })
 
-        .Get('Get the users who have me in their Game Network')
+        .Get('Get the users who have someone in their Game Network')
         .route('others_network')
-        .auth(true)
+        .route('users/:user_id/others_network')
         .add(function (context) {
-            return new LifeQuery(UserConnection, context)
-                .otherRelation(context.user().id, 'network')
-                .populate("")
-                .exec(function (relations) {
-                    var user_ids = relations.map(function (relation) {
-                        return relation.self;
-                    });
+            if (!(context.params('user_id') || (context.user() && context.user().id))) {
+                return context.send.error(new LifeErrors.NotFound());
+            }
 
-                    return new LifeQuery(User, context)
-                        .findByIds(user_ids)
-                        .exec();
-                });
+            return new LifeQuery(User, context)
+                .idOrLogin(context.params('user_id') || context.user().id)
+                .execOne(function (user) {
+                    return new LifeQuery(UserConnection, context)
+                        .otherRelation(user.id, 'network')
+                        .populate("")
+                        .exec(function (relations) {
+                            var user_ids = relations.map(function (relation) {
+                                return relation.self;
+                            });
+
+                            return new LifeQuery(User, context)
+                                .findByIds(user_ids)
+                                .limit(0)
+                                .index(0)
+                                .exec();
+                    });
+            });
         })
         ;
 };
