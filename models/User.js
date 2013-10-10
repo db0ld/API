@@ -3,6 +3,7 @@ var mongoose = require('mongoose'),
     element = require('./Element.js'),
     LifeConstraints = require('../wrappers/LifeConstraints.js'),
     LifeData = require('../wrappers/LifeData.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js')
     Gender = LifeConstraints.Gender,
     Email = LifeConstraints.Email
     OAuthSupported = LifeConstraints.OAuthSupported;
@@ -53,14 +54,54 @@ User.virtual('name').get(function (value) {
         .join() || this.login;
 });
 
+// doc.in_game_network
+User.methods.abstractJson.push(function (context, level, doc, cb) {
+    var UserConnection = mongoose.model('UserConnection');
+
+    if (!context.user()) {
+        return cb(doc);
+    }
+
+    new LifeQuery(UserConnection, context)
+        .selfOtherRelation(context.user().id, this.id, 'network')
+        .count(function (count) {
+            doc.in_game_network = count > 0;
+
+            return cb(doc);
+        });
+});
+
+// doc.game_network_total
+User.methods.abstractJson.push(function (context, level, doc, cb) {
+    var UserConnection = mongoose.model('UserConnection');
+
+    new LifeQuery(UserConnection, context)
+        .selfRelation(this.id, 'network')
+        .count(function (count) {
+            doc.game_network_total = count;
+
+            return cb(doc);
+        });
+});
+
+// doc.game_network_total
+User.methods.abstractJson.push(function (context, level, doc, cb) {
+    var UserConnection = mongoose.model('UserConnection');
+
+    new LifeQuery(UserConnection, context)
+        .otherRelation(this.id, 'network')
+        .count(function (count) {
+            doc.other_game_network_total = count;
+
+            return cb(doc);
+        });
+});
+
+
 User.methods.jsonAddon = function (context, level, doc, cb) {
     if (this.birthday) {
         doc.birthday = LifeData.dateToString(this.birthday);
     }
-
-    doc.in_game_network = false; // TODO
-    doc.game_network_total = 0; // TODO
-    doc.other_game_network_total = 0; // TODO
 
     if (!context.user() || context.user().id !== this.id) {
         delete doc.email;
