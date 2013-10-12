@@ -123,12 +123,6 @@ module.exports = function (schema, options) {
     schema.statics.queries = {};
 
     schema.statics.queries.findById = function (id) {
-        this._query.and({_id: id});
-
-        return this;
-    };
-
-    schema.statics.queries.findById = function (id) {
         if (!LifeData.isObjectId(id)) {
             id = "000000000000000000000000";
         }

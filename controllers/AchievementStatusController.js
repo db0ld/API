@@ -34,13 +34,16 @@ module.exports = function (router) {
         .Put('Update an achievement status')
         .route(routeBase + '/:achievement_status_id')
         .auth(true)
+        .params([
+            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
+        ])
         .input([
             new LifeConstraints.String('message', false),
             new LifeConstraints.AchievementStatusStatus('status', false)
         ])
         .add(function (context) {
             return new LifeQuery(AchievementStatus, context)
-                .findById(context.params('achievement_status_id'))
+                .findById(context.params('achievement_status_id').id)
                 .byUserId(context.user().id)
                 .execOne(function (achievement_status) {
                     this.save(achievement_status, context.input);
@@ -51,18 +54,21 @@ module.exports = function (router) {
         .Get('Get a single achievement status')
         .route(routeBase + '/:achievement_status_id')
         .auth(true)
+        .params([
+            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
+        ])
         .add(function (context) {
-            return new LifeQuery(AchievementStatus, context)
-                .findById(context.params('achievement_status_id'))
-                .execOne();
+            return context.send.single(context.params('achievement_status_id'));
         })
 
         .Get('Get achievement statuses')
         .route('users/:user_id/achievement_statuses')
-        .route(routeBase)
+        .params([
+            new LifeConstraints.UserIdLogin('user_id', true, true, true),
+        ])
         .auth(true)
         .add(function (context) {
-            var user = context.params('user_id', context.user().id);
+            var user = context.params('user_id');
 
             return new LifeQuery(User, context)
                 .idOrLogin(user)
@@ -78,21 +84,24 @@ module.exports = function (router) {
         .input([
             new LifeConstraints.String('content', false)
         ])
+        .params([
+            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
+        ])
         .auth(true)
         .add(function (context) {
-            return new LifeQuery(AchievementStatus, context)
-                .findById(context.params('achievement_status_id'))
-                .execOne(function (achievement_status) {
-                    return new LifeQuery(Comment, context)
-                        .save({
-                            content: context.input.content,
-                            author: context.user().id
-                        });
+            return new LifeQuery(Comment, context)
+                .save({
+                    content: context.input.content,
+                    author: context.user().id,
+                    parent: context.params('achievement_status_id')
                 });
         })
 
         .Get('Get achievement status comments')
         .route('users/:user_id/achievement_statuses/:achievement_status_id/comments')
+        .params([
+            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
+        ])
         .add(function (context) {
             return new LifeQuery(Comment, context)
                 .byParent(context.params('achievement_status_id'))
@@ -102,30 +111,30 @@ module.exports = function (router) {
         .Post('Approve an achievement status')
         .route('/users/:user_id/achievement_statuses/:achievement_status_id/approvers')
         .auth(true)
+        .params([
+            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
+        ])
         .add(function (context) {
-            return new LifeQuery(AchievementStatus, context)
-                .findById(context.params('achievement_status_id'))
-                .execOne(function (achievement_status) {
-                    return new LifeQuery(Vote, context)
-                        .save({
-                            vote: 1,
-                            author: context.user().id
-                        });
+            return new LifeQuery(Vote, context)
+                .save({
+                    vote: 1,
+                    author: context.user().id,
+                    parent: context.params('achievement_status_id')
                 });
         })
 
         .Post('Disapprove an achievement status')
         .route('/users/:user_id/achievement_statuses/:achievement_status_id/disapprovers')
         .auth(true)
+        .params([
+            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
+        ])
         .add(function (context) {
-            return new LifeQuery(AchievementStatus, context)
-                .findById(context.params('achievement_status_id'))
-                .execOne(function (achievement_status) {
-                    return new LifeQuery(Vote, context)
-                        .save({
-                            vote: -1,
-                            author: context.user().id
-                        });
+            return new LifeQuery(Vote, context)
+                .save({
+                    vote: -1,
+                    author: context.user().id,
+                    parent: context.params('achievement_status_id')
                 });
         });
 };

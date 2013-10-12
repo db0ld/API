@@ -52,11 +52,12 @@ module.exports = function (router) {
         })
 
         .Get('Get a user')
-        .route(routeBase + '/:id')
+        .route(routeBase + '/:user_id')
+        .params([
+            new LifeConstraints.UserIdLogin('user_id', true, true, true),
+        ])
         .add(function (context) {
-            return new LifeQuery(User, context)
-                .idOrLogin(context.params('id'))
-                .execOne();
+            return context.send.single(context.params('user_id'));
         })
 
         .Get('Get users')
@@ -67,37 +68,42 @@ module.exports = function (router) {
         })
 
         .Post('Create a token')
-        .route(routeBase + '/:id/tokens')
+        .route(routeBase + '/:user_login/tokens')
+        .params([
+                new LifeConstraints.UserLoginEmail('user_login', true, true, true),
+            ])
         .input([
                 new LifeConstraints.String('password'),
                 new LifeConstraints.String('ip', false)
             ])
         .add(function (context) {
-            return new LifeQuery(User, context)
-                .loginOrEmail(context.params('id'))
-                .execOne(true, function (user) {
-                    if (!user || ! user._password) {
-                        return context.send.error(new LifeErrors.AuthenticationError());
-                    }
+            var user = context.params('user_login');
 
-                    return bcrypt.compare(context.input.password, user._password, function (err, res) {
-                        if (err || !res) {
-                            return context.send.error(new LifeErrors.AuthenticationError());
-                        }
+            if (!user._password) {
+                return context.send.error(new LifeErrors.AuthenticationError());
+            }
 
-                        if (!context.application) {
-                            return context.send.error(new LifeErrors.AuthenticationError('Unknown client'));
-                        }
+            return bcrypt.compare(context.input.password, user._password, function (err, res) {
+                if (err || !res) {
+                    return context.send.error(new LifeErrors.AuthenticationError());
+                }
 
-                        var client = Client.buildToken(context, user);
+                if (!context.application) {
+                    return context.send.error(new LifeErrors.AuthenticationError('Unknown client'));
+                }
 
-                        return new LifeQuery(Client, context).save(client);
-                    });
-                });
+                var client = Client.buildToken(context, user);
+
+                return new LifeQuery(Client, context).save(client);
+            });
         })
 
         .Delete('Remove a token')
-        .route(routeBase + '/:id/tokens/:token')
+        .route(routeBase + '/:user_id/tokens/:token')
+        .params([
+            new LifeConstraints.UserIdLogin('user_id', true, true, true),
+            new LifeConstraints.String('token'),
+        ])
         .add(function(context) {
             return new LifeQuery(Client, context)
                 .token(context.params('token'))

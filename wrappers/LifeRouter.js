@@ -61,7 +61,19 @@ var LifeRouter = function (app) {
             fun: function (context, cb) {
                 context.detectApplication(cb);
             },
-            priority: 60
+            priority: 72
+        },
+        {
+            fun: function (context, cb) {
+                return new LifeValidator(context, context._route._params, context._req.params).validate(function (ok) {
+                    return this.sanitize(function (input) {
+                        context._req.params = input;
+
+                        return cb(true);
+                    });
+                });
+            },
+            priority: 70
         },
         {
             fun: function (context, cb) {
@@ -73,10 +85,8 @@ var LifeRouter = function (app) {
                     });
                 });
             },
-            priority: 75
+            priority: 65
         },
-
-
     ];
 };
 
@@ -118,6 +128,7 @@ LifeRouter.Route = function (router, method, doc) {
     this._output = null;
     this._errors = [];
     this._routes = [];
+    this._params = [];
     this._auth = false;
     this._list = false;
     this._precontroller = router.precontroller.slice();
@@ -186,6 +197,20 @@ LifeRouter.Route.prototype.auth = function (auth) {
  */
 LifeRouter.Route.prototype.input = function (input) {
     this._input = input;
+
+    return this;
+};
+
+/**
+ * Input format for URL parameters.
+ *
+ * This format will be validated on request
+ *
+ * @param {object} input
+ * @method
+ */
+LifeRouter.Route.prototype.params = function (params) {
+    this._params = params;
 
     return this;
 };
@@ -272,7 +297,8 @@ LifeRouter.Route.prototype.add = function (cb) {
             'output': that._output,
             'errors': that._errors,
             'method': that._method,
-            'list': that._list
+            'list': that._list,
+            'params': that._params
         });
     });
 

@@ -1,4 +1,5 @@
-var ObjectId = require('mongoose').Schema.Types.ObjectId;
+var mongoose = require('mongoose'),
+    ObjectId = mongoose.Schema.Types.ObjectId;
 
 /**
  * An utility class that performs simple data related operations.
@@ -60,6 +61,7 @@ LifeData.i18nPicker = function (strings, lang) {
  */
 LifeData.isObjectId = function (item) {
     return (item instanceof ObjectId ||
+            item instanceof mongoose.Document ||
         (item && item.toString && item.toString().match(/^[0-9a-fA-F]{24}$/)));
 };
 
