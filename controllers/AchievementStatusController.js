@@ -70,13 +70,9 @@ module.exports = function (router) {
         .add(function (context) {
             var user = context.params('user_id');
 
-            return new LifeQuery(User, context)
-                .idOrLogin(user)
-                .execOne(function (user) {
-                    return new LifeQuery(AchievementStatus, context)
-                        .byUserId(user.id)
-                        .exec();
-                });
+            return new LifeQuery(AchievementStatus, context)
+                .byUserId(user.id)
+                .exec();
         })
 
         .Post('Add an achievement status comment')

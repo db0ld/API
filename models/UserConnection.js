@@ -47,4 +47,14 @@ UserConnection.statics.queries.otherRelation = function (other, rel) {
     return this;
 };
 
+UserConnection.post('save', function (doc) {
+    if (doc.relation !== 'network') {
+        return;
+    }
+
+    var Activity = require('mongoose').model('Activity');
+
+    Activity.add(doc.self, 'network_addition', {users: [doc.other]});
+});
+
 module.exports = mongoose.model('UserConnection', UserConnection);

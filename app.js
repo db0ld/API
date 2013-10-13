@@ -6,6 +6,7 @@ require('./models/Vote.js');
 require('./models/UserConnection.js');
 require('./models/Achievement.js');
 require('./models/AchievementStatus.js');
+require('./models/Activity.js');
 
 var application_root = __dirname,
     express = require('express'),

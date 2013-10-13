@@ -30,4 +30,17 @@ AchievementStatus.statics.queries.byUserId = function (user_id) {
     return this;
 };
 
+AchievementStatus.post('save', function (doc) {
+    var Activity = require('mongoose').model('Activity');
+    var old_status = (doc._original && doc._original.status) || '';
+
+    if (old_status != doc.status) {
+        if (doc.status == 'achieved') {
+            Activity.add(doc.owner, 'achievement_unlocked', {achievement_statuses: [doc]});
+        } else if (old_status !== 'achieved' && doc.status == 'objective') {
+            Activity.add(doc.owner, 'new_objective', {achievement_statuses: [doc]});
+        }
+    }
+});
+
 module.exports = mongoose.model('AchievementStatus', AchievementStatus);

@@ -142,6 +142,10 @@ module.exports = function (schema, options) {
         return this;
     };
 
+    schema.post('init', function() {
+        this._original = this.toObject();
+    });
+
     schema.statics.queryDefaults = {
         'populate': 'referenced_users',
         'limit': 10,
