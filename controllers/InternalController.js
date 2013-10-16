@@ -19,7 +19,7 @@ module.exports = function (router) {
         .Options('Returns HTTP CORS headers for option request')
         .route('*')
         .add(function (context) {
-            return context.send.json();
+            return context.send.json(200);
         })
 
         .Get('Show documentation. This documentation. So meta.')
