@@ -66,7 +66,6 @@ module.exports = function (router) {
         .params([
             new LifeConstraints.UserIdLogin('user_id', true, true, true),
         ])
-        .auth(true)
         .add(function (context) {
             var user = context.params('user_id');
 
