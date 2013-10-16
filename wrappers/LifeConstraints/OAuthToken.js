@@ -36,6 +36,9 @@ OAuthToken.prototype.validate = function (validator, cb) {
             return StringConstraint.prototype.validate.call(that, validator, cb);
         });
     }
+
+    validator.errors.push(new Errors.WrongOAuthToken);
+    return StringConstraint.prototype.validate.call(that, validator, cb);
 };
 
 module.exports = OAuthToken;
