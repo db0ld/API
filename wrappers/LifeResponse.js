@@ -56,7 +56,7 @@ LifeResponse.prototype.paginate = function (in_data, out_data, size, query,
         level = 0;
     }
 
-    in_data = (in_data === undefined) ? [] : in_data;
+    in_data = (in_data === undefined) ? [] : in_data.slice();
     out_data = (out_data === undefined) ? [] : out_data;
 
     if (in_data.length === 0) {

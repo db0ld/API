@@ -24,10 +24,15 @@ module.exports = function (router) {
         .add(function (context) {
             var achievement = _.cloneDeep(context.input);
 
-            achievement.name = {};
-            achievement.name[context.locale] = context.input.name;
-            achievement.description = {};
-            achievement.description[context.locale] = context.input.description;
+            achievement.name = [{
+                string: context.input.name,
+                locale: 'en-US'
+            }];
+
+            achievement.description = [{
+                string: context.input.description,
+                locale: 'en-US'
+            }];
 
             achievement._parents = context.input.parents;
 

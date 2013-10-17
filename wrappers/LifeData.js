@@ -14,42 +14,25 @@ var LifeData = function () {};
  *
  * User locale, user language, US English, English, first language available
  *
- * @param {String} lang
+ * @param {String} locale
  * @param {Object} strings
  * @function
  */
-LifeData.i18nPicker = function (strings, lang) {
-    lang = lang || 'en-US';
+LifeData.i18nPicker = function (strings, locale) {
+    var candidate = null;
+    var lang = locale.substring(0, 2);
 
-    var i,
-        user_lang = lang.match(/^[a-z]{2}/)[0],
-        string_user_lang = null,
-        string_en_us = null,
-        string_en = null,
-        string = null;
-
-    for (i in strings) {
-        if (strings.hasOwnProperty(i)) {
-            if (i === lang) {
-                return strings[i];
-            }
-
-            if (!string_user_lang && i.substring(0, 2) === user_lang) {
-                string_user_lang = strings[i];
-            } else if (i === 'en_US') {
-                string_en_us = strings[i];
-            } else if (!string_en && i.substring(0, 2) === 'en') {
-                string_en = strings[i];
-            } else {
-                string = strings[i];
-            }
+    for (var i = strings.length - 1; i >= 0; i--) {
+        if (strings[i].locale == locale) {
+            return strings[i].string;
         }
-    }
 
-    return string_user_lang ||
-        string_en_us ||
-        string_en ||
-        string;
+        if (strings[i].locale.substring(0, 2) == lang) {
+            candidate = strings[i].string;
+        }
+    };
+
+    return candidate || (strings[0] && strings[0].string) || '';
 };
 
 /**

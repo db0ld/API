@@ -62,7 +62,7 @@ module.exports = function (schema, options) {
             return cb(doc);
         }
 
-        var currCb = subJsons.pop();
+        var currCb = subJsons.shift();
 
         return currCb.call(that, context, level, doc, function(doc) {
             return that.abstractJsonSerialize(context, level, subJsons, doc, cb);
