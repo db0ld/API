@@ -64,6 +64,9 @@ Client.statics.buildToken = function(context, user) {
     client.application = context.application;
     client.ip = context.input.ip || context.connection('remoteAddress');
 
+    context.security.user = user;
+    context.security.client = client;
+
     return client;
 }
 
