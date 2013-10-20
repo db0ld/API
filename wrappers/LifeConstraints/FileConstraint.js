@@ -126,7 +126,8 @@ FileConstraint.prototype.sanitize = function (validator, cb) {
     return fs.stat(validator.files[this.key].path, function (err, infos) {
         return fs.rename(validator.files[that.key].path, file_path, function (err) {
             if (err) {
-                return validator.next(LifeErrors.UploadError);
+                validator.errors.push(new Errors.UploadError());
+                return cb();
             }
 
             validator.files[that.key].path = file_path;
