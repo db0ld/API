@@ -53,7 +53,7 @@ User.virtual('url').get(function () {
 User.virtual('name').get(function (value) {
     return [this.firstname, this.lastname]
         .filter(function (item) { return item; })
-        .join() || this.login;
+        .join(' ') || this.login;
 });
 
 // doc.in_game_network
