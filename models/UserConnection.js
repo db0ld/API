@@ -7,8 +7,6 @@ var UserConnection = new mongoose.Schema({
     relation: {type : String, required: true, default: 'network' },
 });
 
-//UserConnection.index({self: 1, other: 1, relation: 1}, {unique: true});
-
 UserConnection.plugin(element);
 
 UserConnection.statics.queryDefaults.populate = 'self other';

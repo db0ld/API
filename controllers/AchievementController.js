@@ -17,7 +17,7 @@ module.exports = function (router) {
             new LifeConstraints.Boolean('secret', false),
             new LifeConstraints.Boolean('discoverable', false),
             new LifeConstraints.HexColor('color', false),
-            // new LifeConstraints.Picture('badge', false)
+            new LifeConstraints.Picture('badge', false, {output_picture: true}),
         ])
         .auth(['ROLE_ADMIN_ACHIEVEMENT'])
         .route(routeBase)

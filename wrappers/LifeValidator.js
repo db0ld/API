@@ -6,6 +6,7 @@ var LifeValidator = function (context, rules, data) {
 
     this.context = context;
     this.data = data || context.body() || {};
+    this.files = context.files() || {};
     this.output = {};
     this.rules = rules || context._route._input || [];
     this.errors = [];

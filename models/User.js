@@ -14,7 +14,7 @@ var User = new mongoose.Schema({
     lastname: {type: String, required: false},
     _password: {type: String, required: false},
     birthday: {type: Date, required: false},
-    //avatar: {type: ObjectId, required: false, ref: 'Picture'},
+    avatar: {type: ObjectId, required: false, ref: 'Picture'},
     gender: {type: String, match: new Gender().regexp(),
             required: true, default: 'undefined'},
     email: {type: String, match: new Email().regexp(),
@@ -27,6 +27,8 @@ var User = new mongoose.Schema({
 });
 
 User.plugin(element);
+
+User.statics.queryDefaults.populate = 'avatar';
 
 User.virtual('password').set(function (value) {
     this._password = value;

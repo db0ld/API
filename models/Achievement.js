@@ -11,7 +11,7 @@ var I18nString = {
 var Achievement = new mongoose.Schema({
     name: [I18nString],
     description: [I18nString],
-    //badge: {type: ObjectId, required: false, ref: 'Picture'},
+    badge: {type: ObjectId, required: false, ref: 'Picture'},
     category: {type: Boolean, required: true, default: false},
     _parents: [{type: ObjectId, required: false, ref: 'Achievement'}],
     discoverable: {type: Boolean, required: true, default: true},
@@ -30,8 +30,6 @@ Achievement.methods.jsonAddon = function (context, level, doc, cb) {
 
     doc.description = LifeData.i18nPicker(this.description, context.locale);
     doc.name = LifeData.i18nPicker(this.name, context.locale);
-
-    console.log(doc);
 
     return cb(doc);
 };

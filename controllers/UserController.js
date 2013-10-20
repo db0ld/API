@@ -25,7 +25,7 @@ module.exports = function (router) {
                 new LifeConstraints.Length(2, 32, 'lastname', false),
                 new LifeConstraints.Gender('gender', false),
                 new LifeConstraints.Date('birthday', false),
-                // new LifeConstraints.Picture('avatar', false),
+                new LifeConstraints.Picture('avatar', false, {output_picture: true}),
             ])
         .route(routeBase)
         .add(function (context) {

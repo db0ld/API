@@ -7,6 +7,8 @@ require('./models/UserConnection.js');
 require('./models/Achievement.js');
 require('./models/AchievementStatus.js');
 require('./models/Activity.js');
+require('./models/Picture.js');
+require('./models/Media.js');
 
 var application_root = __dirname,
     express = require('express'),
