@@ -50,10 +50,16 @@ Client.statics.queries.token = function (token) {
 Client.statics.buildToken = function(context, user) {
     var client = new this();
     var expiration = new Date();
+
+    var token = '';
+    for (var i = 0; i < 128; i++) {
+        token += Math.floor(Math.random() * 36).toString(36);
+    }
+
     expiration.setDate(expiration.getDate() + 7);
 
     client.expiration = expiration;
-    client.token = user.login + '-' + Math.floor(Math.random() *  4294967295) + '-' + expiration.getTime();
+    client.token = user.id + '-' + token + '-' + expiration.getTime().toString(36);
     client.user = user;
     client.application = context.application;
     client.ip = context.input.ip || context.connection('remoteAddress');
