@@ -17,8 +17,12 @@ var MongooseObjectId = function (model, key, required) {
 MongooseObjectId.prototype = new MongooseObjectIds();
 MongooseObjectId.prototype.constructor = MongooseObjectIds;
 
-MongooseObjectId.prototype.addon = function () {
-    return 'Max len. ' + this.MongooseObjectId;
+MongooseObjectIds.prototype.doc = function () {
+    return 'ObjectId';
+};
+
+MongooseObjectIds.prototype.addon = function () {
+    return null;
 };
 
 MongooseObjectId.prototype.validate = function (validator, cb) {

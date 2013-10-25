@@ -3,11 +3,15 @@
 <head>
     <title>Life API - Documentation</title>
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
     <script>
     $(function() {
         $(document).on('click', 'h3, .method-summary', function(evt) {
             $(this).closest('div').children('div').toggleClass('hide');
+        });
+
+        $(document).on('click', '#toggleall', function (evt) {
+            $('*').removeClass('hide');
         });
     });
     </script>
@@ -33,6 +37,12 @@
 
         .method-summary .pull-right {
             color: #08c;
+        }
+
+        @media print {
+            .noprint {
+                display: none;
+            }
         }
     </style>
     <script><%
@@ -80,7 +90,7 @@
 </head>
 <body>
     <div class="container">
-    <h1>Life API - Documentation</h1>
+    <h1>Life API - Documentation <a href="#" class="noprint pull-right muted" id="toggleall">Toggle all</a></h1>
     <h2>Models</h2>
     <h2>Methods</h2>
         <% for (var module in doc) { %>
@@ -95,14 +105,14 @@
                         <%= '/' + route['route'].split('/').splice(4).join('/') %>
                         <span class="pull-right">
                             <%= route['doc'] %>
-                            <span class="label <% if(route['private']) { %>label-success<% } %>" title="Private method"><i class="icon-eye-close icon-white"></i></span>
-                            <span class="label <% if(route['auth']) { %>label-success<% } %>" title="Require auth"><i class="icon-user icon-white"></i></span>
+                            <span class="label <% if(route['private']) { %>label-success<% } %> noprint" title="Private method"><i class="icon-eye-close icon-white"></i></span>
+                            <span class="label <% if(route['auth']) { %>label-success<% } %> noprint" title="Require auth"><i class="icon-user icon-white"></i></span>
                         </span>
                     </p>
                     <div class="method_details well hide">
-                        <div class="input-prepend">
+                        <div class="input-prepend noprint">
                                 <strong class="add-on"><%= route['method'].toUpperCase() %></strong>
-                                <input type="text" value="<%= route['route'] %>" disabled="disabled" class="span5">
+                                <input type="text" value="<%= route['route'] %>" disabled="disabled" class="span9">
                         </div>
                         <ul>
                             <% if (route['auth']) { %>
@@ -128,21 +138,15 @@
                                         <th class="span2">Param</th>
                                         <th class="span3">Type</th>
                                         <th class="span1">Required</th>
-                                        <th class="span3">Default value</th>
                                         <th>Notes</th>
                                     </tr>
 
                                     <% for (var j in route['input']) { %>
                                     <tr>
-                                        <th><%= j %></th>
-                                        <td><%= typeDisplayer(route['input'][j].type) %></td>
-                                        <td><% if (typeof route['input'][j].required == 'undefined' || route['input'][j].required) { %><span class="label label-success">Yes</span><% } %></td>
-                                        <td><% if (typeof route['input'][j].default !== 'undefined') { %><code><%= route['input'][j].default %></code><% } %></td>
-                                        <td>
-                                            <% if (route['input'][j].type instanceof RegExp) { %>
-                                                <code><%= route['input'][j].type.toString() %></code>
-                                            <% } %>
-                                        </td>
+                                        <th><%= route['input'][j].key %></th>
+                                        <td><%= route['input'][j].doc() %></td>
+                                        <td><% if (route['input'][j]._required) { %><span class="label label-success">Yes</span><% } %></td>
+                                        <td><% if (route['input'][j].addon()) { %><code><%= route['input'][j].addon() %><% } %></td>
                                     </tr>
                                     <% } %>
                                 </table>

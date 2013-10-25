@@ -24,7 +24,7 @@ Image.prototype = new FileConstraint();
 Image.prototype.constructor = FileConstraint;
 
 Image.prototype.addon = function () {
-    return 'An Image file';
+    return 'An Image file, or an Image URL';
 };
 
 /**

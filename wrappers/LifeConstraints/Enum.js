@@ -22,6 +22,10 @@ Enum.prototype = new RegExpConstraint();
 Enum.prototype.constructor = RegExpConstraint;
 
 Enum.prototype.addon = function () {
+    return 'Enum';
+};
+
+Enum.prototype.addon = function () {
     return '{' + this.enum_values.join(',') + '}';
 };
 

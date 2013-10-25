@@ -18,7 +18,11 @@ MongooseObjectIds.prototype = new Abstract();
 MongooseObjectIds.prototype.constructor = Abstract;
 
 MongooseObjectIds.prototype.doc = function () {
-    return 'MongooseObjectIds';
+    return 'ObjectIds';
+};
+
+MongooseObjectIds.prototype.addon = function () {
+    return 'A comma separated list of ObjectIds';
 };
 
 /**
