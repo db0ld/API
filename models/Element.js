@@ -42,7 +42,7 @@ module.exports = function (schema, options) {
             doc[i] = subdoc;
 
             return cb(doc);
-        }, level);
+        }, level + 1);
     };
 
     schema.add({
@@ -71,7 +71,7 @@ module.exports = function (schema, options) {
 
     schema.methods.fullJson = function (context, level, cb) {
         if (level >= 4) {
-            return null;
+            return cb(null);
         }
 
         var that = this,

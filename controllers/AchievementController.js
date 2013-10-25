@@ -51,6 +51,15 @@ module.exports = function (router) {
             }*/
 
             return query.exec();
+        })
+
+        .Get('Get a single achievement')
+        .route(routeBase + '/:achievement_id')
+        .params([
+            new LifeConstraints.MongooseObjectId(Achievement, 'achievement_id'),
+        ])
+        .add(function (context) {
+            return context.send.single(context.params('achievement_id'));
         });
 
 

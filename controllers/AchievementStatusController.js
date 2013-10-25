@@ -6,6 +6,7 @@ var _ = require('lodash'),
     Vote = mongoose.model('Vote'),
     LifeConstraints = require('../wrappers/LifeConstraints.js'),
     LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeErrors = require('../wrappers/LifeErrors.js'),
     User = mongoose.model('User'),
     routeBase = 'achievement_statuses';
 
@@ -22,13 +23,22 @@ module.exports = function (router) {
             // new LifeConstraints.Pictures('medias', false)
         ])
         .add(function (context) {
-             var achievement_status = context.input;
+            return new LifeQuery(AchievementStatus, context)
+                .byUserId(context.user().id)
+                .byAchievement(context.input.achievement_id.id)
+                .execOne(true, function (achievement_status) {
+                    if (achievement_status) {
+                        return context.send.error(new LifeErrors.UserLogicError());
+                    }
 
-             achievement_status.owner = context.user().id;
-             achievement_status.achievement = context.input.achievement_id.id;
+                    achievement_status = context.input;
 
-             return new LifeQuery(AchievementStatus, context)
-                .save(achievement_status);
+                    achievement_status.owner = context.user().id;
+                    achievement_status.achievement = context.input.achievement_id.id;
+
+                    return new LifeQuery(AchievementStatus, context)
+                       .save(achievement_status);
+                });
         })
 
         .Put('Update an achievement status')
@@ -53,7 +63,6 @@ module.exports = function (router) {
 
         .Get('Get a single achievement status')
         .route(routeBase + '/:achievement_status_id')
-        .auth(true)
         .params([
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
         ])

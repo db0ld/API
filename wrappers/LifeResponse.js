@@ -23,7 +23,7 @@ var LifeResponse = function (context) {
 LifeResponse.prototype.json = function (item, cb, level) {
     var doc = {};
 
-    if (typeof level !== 'Number') {
+    if (level === undefined) {
         level = 0;
     }
 

@@ -1,6 +1,8 @@
 var mongoose = require('mongoose'),
     element = require('./Element.js'),
+    LifeQuery = require('../wrappers/LifeQuery.js'),
     LifeData = require('../wrappers/LifeData.js'),
+    LifeResponse = require('../wrappers/LifeResponse.js'),
     ObjectId = mongoose.Schema.Types.ObjectId;
 
 var I18nString = {
@@ -25,9 +27,32 @@ Achievement.virtual('url').get(function () {
     return 'http://life.tl/achievements/' + this.id;
 });
 
-Achievement.methods.jsonAddon = function (context, level, doc, cb) {
-    // TODO achievement_status
+// doc.achievement_status
+Achievement.methods.abstractJson.push(function (context, level, doc, cb) {
+    if (!context.user()) {
+        return cb(doc);
+    }
 
+    var AchievementStatus = mongoose.model('AchievementStatus');
+
+    return new LifeQuery(AchievementStatus, context)
+        .byUserId(context.user().id)
+        .byAchievement(this.id)
+        .execOne(true, function (achievement_status) {
+            if (achievement_status) {
+                return achievement_status.fullJson(context, level, function (subdoc) {
+                    doc.achievement_status = subdoc;
+
+                    return cb(doc);
+                });
+            }
+
+            return cb(doc);
+        });
+});
+
+
+Achievement.methods.jsonAddon = function (context, level, doc, cb) {
     doc.description = LifeData.i18nPicker(this.description, context.locale);
     doc.name = LifeData.i18nPicker(this.name, context.locale);
 

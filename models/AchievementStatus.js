@@ -30,6 +30,12 @@ AchievementStatus.statics.queries.byUserId = function (user_id) {
     return this;
 };
 
+AchievementStatus.statics.queries.byAchievement = function (achievement_id) {
+    this._query.and({achievement: achievement_id});
+
+    return this;
+};
+
 AchievementStatus.post('save', function (doc) {
     var Activity = require('mongoose').model('Activity');
     var old_status = (doc._original && doc._original.status) || '';
