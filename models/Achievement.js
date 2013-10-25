@@ -65,4 +65,43 @@ Achievement.statics.queries.root = function () {
     return this;
 };
 
+Achievement.statics.filters.term = {
+    key: "term",
+    filter: function (term) {
+        var that = this;
+
+        that._query.and({
+            $or: [
+                {
+                    name: {
+                        $elemMatch : {
+                            'locale': that.context.locale,
+                            'string': new RegExp('/' + term + '/')
+                        },
+                    }
+                },
+                {
+                    description: {
+                        $elemMatch : {
+                            'locale': that.context.locale,
+                            'string': new RegExp('/' + term + '/')
+                        },
+                    }
+                }
+            ]
+        });
+    }
+};
+
+Achievement.statics.filters.is_category = {
+    key: "is_category",
+    filter: function (is_category) {
+        var that = this;
+
+        that._query.and({
+            category: !!is_category
+        });
+    }
+};
+
 module.exports = mongoose.model('Achievement', Achievement);
