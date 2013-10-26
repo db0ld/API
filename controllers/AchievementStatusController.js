@@ -20,7 +20,7 @@ module.exports = function (router) {
             new LifeConstraints.String('message', false),
             new LifeConstraints.AchievementStatusStatus('status'),
             new LifeConstraints.MongooseObjectId(Achievement, 'achievement_id'),
-            // new LifeConstraints.Pictures('medias', false)
+            new LifeConstraints.Picture('media', false, {output_picture: true}),
         ])
         .add(function (context) {
             return new LifeQuery(AchievementStatus, context)
@@ -32,6 +32,11 @@ module.exports = function (router) {
                     }
 
                     achievement_status = context.input;
+
+                    if (context.input.media) {
+                        achievement_status.medias.push(context.input.media);
+                        delete achievement_status.media;
+                    }
 
                     achievement_status.owner = context.user().id;
                     achievement_status.achievement = context.input.achievement_id.id;
