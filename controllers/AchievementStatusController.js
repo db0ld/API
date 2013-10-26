@@ -84,7 +84,7 @@ module.exports = function (router) {
         })
 
         .Post('Add an achievement status comment')
-        .route('users/:user_id/achievement_statuses/:achievement_status_id/comments')
+        .route('achievement_statuses/:achievement_status_id/comments')
         .input([
             new LifeConstraints.String('content', false)
         ])
@@ -102,7 +102,7 @@ module.exports = function (router) {
         })
 
         .Get('Get achievement status comments')
-        .route('users/:user_id/achievement_statuses/:achievement_status_id/comments')
+        .route('achievement_statuses/:achievement_status_id/comments')
         .params([
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
         ])
@@ -113,7 +113,7 @@ module.exports = function (router) {
         })
 
         .Post('Approve an achievement status')
-        .route('/users/:user_id/achievement_statuses/:achievement_status_id/approvers')
+        .route('achievement_statuses/:achievement_status_id/approvers')
         .auth(true)
         .params([
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
@@ -128,7 +128,7 @@ module.exports = function (router) {
         })
 
         .Post('Disapprove an achievement status')
-        .route('/users/:user_id/achievement_statuses/:achievement_status_id/disapprovers')
+        .route('achievement_statuses/:achievement_status_id/disapprovers')
         .auth(true)
         .params([
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),

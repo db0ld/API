@@ -97,17 +97,5 @@ module.exports = function (router) {
                 return new LifeQuery(Client, context).save(client);
             });
         })
-
-        .Delete('Remove a token')
-        .route(routeBase + '/:user_id/tokens/:token')
-        .params([
-            new LifeConstraints.UserIdLogin('user_id', true, true, true),
-            new LifeConstraints.String('token'),
-        ])
-        .add(function(context) {
-            return new LifeQuery(Client, context)
-                .token(context.params('token'))
-                .remove();
-        });
-
+        ;
 };
