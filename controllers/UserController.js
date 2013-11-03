@@ -67,6 +67,31 @@ module.exports = function (router) {
                 .exec();
         })
 
+        .Put('Update a user')
+        .route(routeBase + '/:user_login')
+        .auth(true)
+        .params([
+                new LifeConstraints.UserLoginEmail('user_login', true, true, true),
+        ])
+        .input([
+                new LifeConstraints.Password(6, 'password', false),
+                new LifeConstraints.Email('email', false)
+                    .add(new LifeConstraints.MongooseUnique(User, 'email', 'email')),
+                new LifeConstraints.Length(2, 32, 'firstname', false),
+                new LifeConstraints.Length(2, 32, 'lastname', false),
+                new LifeConstraints.Gender('gender', false),
+                new LifeConstraints.DateTime('birthday', false),
+                new LifeConstraints.Picture('avatar', false, {output_picture: true}),
+        ])
+        .add(function (context) {
+            return new LifeQuery(User, context)
+                .findById(context.params('user_login').id)
+                .execOne(function (user) {
+                    this.save(user, context.input);
+                });
+        })
+
+
         .Post('Create a token')
         .route(routeBase + '/:user_login/tokens')
         .params([
