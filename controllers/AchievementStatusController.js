@@ -124,12 +124,7 @@ module.exports = function (router) {
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
         ])
         .add(function (context) {
-            return new LifeQuery(Vote, context)
-                .save({
-                    vote: 1,
-                    author: context.user().id,
-                    parent: context.params('achievement_status_id')
-                });
+            return Vote.registerUserVote(context, context.user(), context.params('achievement_status_id'), 1);
         })
 
         .Post('Disapprove an achievement status')
@@ -139,11 +134,6 @@ module.exports = function (router) {
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
         ])
         .add(function (context) {
-            return new LifeQuery(Vote, context)
-                .save({
-                    vote: -1,
-                    author: context.user().id,
-                    parent: context.params('achievement_status_id')
-                });
+            return Vote.registerUserVote(context, context.user(), context.params('achievement_status_id'), -1);
         });
 };
