@@ -135,5 +135,17 @@ module.exports = function (router) {
         ])
         .add(function (context) {
             return Vote.registerUserVote(context, context.user(), context.params('achievement_status_id'), -1);
-        });
+        })
+
+
+        .Delete('Remove an achievement approval')
+        .route('achievement_statuses/:achievement_status_id/approvers')
+        .auth(true)
+        .params([
+            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
+        ])
+        .add(function (context) {
+            return Vote.removeUserVote(context, context.user(), context.params('achievement_status_id'))
+        })
+        ;
 };

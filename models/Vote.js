@@ -12,6 +12,20 @@ Vote.plugin(element);
 
 Vote.statics.queryDefaults.populate = 'author';
 
+Vote.statics.removeUserVote = function(context, user, object, cb) {
+    var VoteModel = mongoose.model('Vote');
+
+    if (cb === undefined) {
+        cb = function () {
+            return context.send.single(object);
+        }
+    }
+
+    return new LifeQuery(VoteModel, context)
+        .voteByUser(object.id, user.id)
+        .remove(cb);
+};
+
 Vote.statics.registerUserVote = function(context, user, object, value, cb) {
     var VoteModel = mongoose.model('Vote');
 
