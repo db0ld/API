@@ -1,4 +1,5 @@
 var mongoose = require('mongoose'),
+    approvable = require('./Approvable.js'),
     element = require('./Element.js');
 
 var Comment = new mongoose.Schema({
@@ -8,6 +9,7 @@ var Comment = new mongoose.Schema({
 });
 
 Comment.plugin(element);
+Comment.plugin(approvable);
 
 Comment.statics.queryDefaults.populate = 'author';
 
