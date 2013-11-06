@@ -62,8 +62,10 @@ module.exports = function (router) {
 
         .Get('Get users')
         .route(routeBase)
+        .filters(User.filters)
         .add(function (context) {
             return new LifeQuery(User, context)
+                .filters()
                 .exec();
         })
 

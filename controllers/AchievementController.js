@@ -41,16 +41,11 @@ module.exports = function (router) {
 
         .Get('Get achievements')
         .route(routeBase)
+        .filters(Achievement.filters)
         .add(function (context) {
-            var query = new LifeQuery(Achievement, context);
-
-            /*if (!context.query('term', null)) {
-                query.root();
-            } else {
-                // TODO: search by term
-            }*/
-
-            return query.exec();
+            return new LifeQuery(Achievement, context)
+                .filters()
+                .exec();
         })
 
         .Get('Get a single achievement')

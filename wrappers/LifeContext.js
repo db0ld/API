@@ -138,4 +138,8 @@ LifeContext.prototype.token = function () {
     return this.security.token;
 };
 
+LifeContext.prototype.filters = function () {
+    return this._route._filters;
+}
+
 module.exports = LifeContext;

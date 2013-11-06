@@ -152,4 +152,22 @@ User.statics.queries.searchByOAuthToken = function (site, id) {
     return this;
 };
 
+User.statics.queries.term = function (term) {
+    var search_scope = [
+        { firstname: new RegExp('/' + term + '/') },
+        { lastname: new RegExp('/' + term + '/') },
+        { login: new RegExp('/' + term + '/') }
+    ];
+
+    if (Email.regexp().match(term)) {
+        search_scope = [{ email: new RegExp('/' + term + '/') }];
+    }
+
+    this._query.and({
+        $or: search_scope
+    });
+
+    return this;
+};
+
 module.exports = mongoose.model('User', User);

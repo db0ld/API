@@ -131,6 +131,7 @@ LifeRouter.Route = function (router, method, doc) {
     this._params = [];
     this._auth = false;
     this._list = false;
+    this._filters = [];
     this._precontroller = router.precontroller.slice();
 };
 
@@ -211,6 +212,18 @@ LifeRouter.Route.prototype.input = function (input) {
  */
 LifeRouter.Route.prototype.params = function (params) {
     this._params = params;
+
+    return this;
+};
+
+/**
+ * Input format for GET filters.
+ *
+ * @param {object} input
+ * @method
+ */
+LifeRouter.Route.prototype.filters = function (filters) {
+    this._filters = filters;
 
     return this;
 };

@@ -236,6 +236,30 @@ LifeQuery.prototype.save = function (item, data, cb) {
 };
 
 /**
+ * Applies filters based on current request GET parameters to query
+ *
+ * @param {Array} filters
+ * @method
+ */
+LifeQuery.prototype.filters = function (filters) {
+    var that = this;
+
+    if (filters === undefined) {
+        filters = that.context.filters();
+    }
+
+    filters.forEach(function (filter) {
+        var value = that.context.query(filter.key);
+
+        if (value !== undefined) {
+            filter.filter.call(that, value);
+        }
+    });
+
+    return this;
+};
+
+/**
  * Get or set current populate value for current query
  *
  * @param {*} val New value

@@ -51,6 +51,7 @@ module.exports = function (router) {
 
         .Get('Get users from someone game network')
         .route('users/:user_id/network')
+        .filters(User.filters)
         .params([
             new LifeConstraints.UserIdLogin('user_id', true, true, true),
         ])
@@ -59,6 +60,8 @@ module.exports = function (router) {
 
             return new LifeQuery(UserConnection, context)
                 .selfRelation(user.id, 'network')
+                .limit(0)
+                .index(0)
                 .populate("")
                 .exec(function (relations) {
                     var user_ids = relations.map(function (relation) {
@@ -67,14 +70,14 @@ module.exports = function (router) {
 
                     return new LifeQuery(User, context)
                         .findByIds(user_ids)
-                        .limit(0)
-                        .index(0)
+                        .filters()
                         .exec();
             });
         })
 
         .Get('Get the users who have someone in their Game Network')
         .route('users/:user_id/others_network')
+        .filters(User.filters)
         .params([
             new LifeConstraints.UserIdLogin('user_id', true, true, true),
         ])
@@ -84,6 +87,8 @@ module.exports = function (router) {
             return new LifeQuery(UserConnection, context)
                 .otherRelation(user.id, 'network')
                 .populate("")
+                .limit(0)
+                .index(0)
                 .exec(function (relations) {
                     var user_ids = relations.map(function (relation) {
                         return relation.self;
@@ -91,8 +96,7 @@ module.exports = function (router) {
 
                     return new LifeQuery(User, context)
                         .findByIds(user_ids)
-                        .limit(0)
-                        .index(0)
+                        .filters()
                         .exec();
             });
         })

@@ -65,43 +65,49 @@ Achievement.statics.queries.root = function () {
     return this;
 };
 
+Achievement.statics.queries.term = function (term) {
+    var that = this;
+
+    that._query.and({
+        $or: [
+            {
+                name: {
+                    $elemMatch : {
+                        'locale': that.context.locale,
+                        'string': new RegExp('/' + term + '/')
+                    },
+                }
+            },
+            {
+                description: {
+                    $elemMatch : {
+                        'locale': that.context.locale,
+                        'string': new RegExp('/' + term + '/')
+                    },
+                }
+            }
+        ]
+    });
+
+    return that;
+};
+
+Achievement.statics.queries.is_category = function (is_category) {
+    var that = this;
+
+    that._query.and({
+        category: !!is_category
+    });
+};
+
 Achievement.statics.filters.term = {
     key: "term",
-    filter: function (term) {
-        var that = this;
-
-        that._query.and({
-            $or: [
-                {
-                    name: {
-                        $elemMatch : {
-                            'locale': that.context.locale,
-                            'string': new RegExp('/' + term + '/')
-                        },
-                    }
-                },
-                {
-                    description: {
-                        $elemMatch : {
-                            'locale': that.context.locale,
-                            'string': new RegExp('/' + term + '/')
-                        },
-                    }
-                }
-            ]
-        });
-    }
+    filter: Achievement.statics.queries.term
 };
 
 Achievement.statics.filters.is_category = {
     key: "is_category",
-    filter: function (is_category) {
-        var that = this;
-
-        that._query.and({
-            category: !!is_category
-        });
-    }
+    filter: Achievement.statics.queries.is_category
 };
 
 module.exports = mongoose.model('Achievement', Achievement);
