@@ -29,7 +29,7 @@ module.exports = function (schema, options) {
 
         return new LifeResponse(context)
             .paginate(that[i], [], that[i].length, null, function (subdoc) {
-                doc[i] = subdoc;
+                doc[i] = subdoc.items;
 
                 return cb(doc);
             }, level + 1);
