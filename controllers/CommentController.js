@@ -1,5 +1,6 @@
 var mongoose = require('mongoose'),
 	Comment = mongoose.model('Comment'),
+    LifeConstraints = require('../wrappers/LifeConstraints.js'),
 	Vote = mongoose.model('Vote');
 
 

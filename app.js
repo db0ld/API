@@ -1,8 +1,8 @@
 require('./models/User.js');
 require('./models/Application.js');
 require('./models/Client.js');
-require('./models/Comment.js');
 require('./models/Vote.js');
+require('./models/Comment.js');
 require('./models/UserConnection.js');
 require('./models/Achievement.js');
 require('./models/AchievementStatus.js');
