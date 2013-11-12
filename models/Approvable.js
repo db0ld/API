@@ -38,7 +38,7 @@ module.exports = function (schema, options) {
 
         new LifeQuery(Vote, context)
             .voteByUser(that.id, context.user().id)
-            .exec(function (vote) {
+            .execOne(true, function (vote) {
                 if (vote) {
                     doc.vote = (vote.vote == 1) ? 'approved' : 'disapproved';
                 }
