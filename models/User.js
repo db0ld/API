@@ -154,13 +154,13 @@ User.statics.queries.searchByOAuthToken = function (site, id) {
 
 User.statics.queries.term = function (term) {
     var search_scope = [
-        { firstname: new RegExp('/' + term + '/') },
-        { lastname: new RegExp('/' + term + '/') },
-        { login: new RegExp('/' + term + '/') }
+        { firstname: new RegExp(term) },
+        { lastname: new RegExp(term) },
+        { login: new RegExp(term) }
     ];
 
-    if (Email.regexp().match(term)) {
-        search_scope = [{ email: new RegExp('/' + term + '/') }];
+    if (new Email().regexp().test(term)) {
+        search_scope = [{ email: term }];
     }
 
     this._query.and({
@@ -168,6 +168,11 @@ User.statics.queries.term = function (term) {
     });
 
     return this;
+};
+
+User.statics.filters.term = {
+    key: "term",
+    filter: User.statics.queries.term
 };
 
 module.exports = mongoose.model('User', User);

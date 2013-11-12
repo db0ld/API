@@ -248,13 +248,16 @@ LifeQuery.prototype.filters = function (filters) {
         filters = that.context.filters();
     }
 
-    filters.forEach(function (filter) {
-        var value = that.context.query(filter.key);
+    console.log(filters);
 
-        if (value !== undefined) {
+    for (var filter in filters) {
+        filter = filters[filter];
+        var value = that.context.query(filter.key, null);
+
+        if (value !== null) {
             filter.filter.call(that, value);
         }
-    });
+    };
 
     return this;
 };

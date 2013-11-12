@@ -65,7 +65,7 @@ module.exports = function (router) {
         .filters(User.filters)
         .add(function (context) {
             return new LifeQuery(User, context)
-                .filters()
+                .filters(User.filters)
                 .exec();
         })
 
