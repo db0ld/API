@@ -21,7 +21,8 @@ var FileConstraint = function (key, required, options) {
     Abstract.call(this, key, required);
 
     this.options = {
-        allow_http: true
+        allow_http: true,
+        allowed_extensions: [],
     };
 
     _.merge(this.options, options);
@@ -46,6 +47,14 @@ FileConstraint.prototype.present = function (validator, cb) {
 };
 
 FileConstraint.prototype.validate_internal = function (validator, cb) {
+    var that = this;
+    var ext = path.extname(validator.files[this.key].name).substr(1);
+
+    if (ext && that.options.allowed_extensions.length && that.options.allowed_extensions.indexOf(ext) == -1) {
+        validator.errors.push(new Errors.UploadError(that.key, 'Unallowed file type'));
+        return cb();
+    }
+
     if (this.nextConstraint) {
         return this.nextConstraint.validate(validator, cb);
     }
@@ -115,22 +124,27 @@ FileConstraint.prototype.validate = function (validator, cb) {
  */
 FileConstraint.prototype.sanitize = function (validator, cb) {
     var that = this;
-    var filename = validator.files[that.key].name;
+
+    var file_name = '';
 
     if (validator.context.user()) {
-        filename = validator.context.user().id + '-' + filename;
+        file_name = validator.context.user().id + '-' + file_name;
     }
 
-    var file_path = path.join(LifeConfig.dir_uploaded, filename);
-
+    for (var i = 0; i < 32; i++) {
+        file_name += Math.floor(Math.random() * 16).toString(16);
+    }
+    file_name += path.extname(validator.files[this.key].name);
+    file_name = path.join(LifeConfig.dir_uploaded, file_name);
+    
     return fs.stat(validator.files[this.key].path, function (err, infos) {
-        return fs.rename(validator.files[that.key].path, file_path, function (err) {
+        return fs.rename(validator.files[that.key].path, file_name, function (err) {
             if (err) {
-                validator.errors.push(new Errors.UploadError());
+                validator.errors.push(new Errors.UploadError(that.key, 'Error on saving file'));
                 return cb();
             }
 
-            validator.files[that.key].path = file_path;
+            validator.files[that.key].path = file_name;
             validator.output[that.key] = validator.files[that.key];
 
             return cb();

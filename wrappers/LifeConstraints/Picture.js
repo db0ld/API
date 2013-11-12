@@ -14,7 +14,8 @@ var Image = function (key, required, options) {
 
     this.options = {
         output_picture: false,
-        allow_http: true
+        allow_http: true,
+        allowed_extensions: ['jpg', 'png', 'jpeg']
     };
 
     _.merge(this.options, options);
@@ -50,7 +51,7 @@ Image.prototype.sanitize = function (validator, cb) {
         var pic = new Picture();
         pic._file_path = validator.output[that.key].path
             .replace(/\\/g, '/')
-            .replace('public/', '');
+            .replace(/^public\//, '');
 
         return new LifeQuery(Picture, validator.context).save(pic, function (pic) {
             var media = new Media();
