@@ -48,7 +48,7 @@ FileConstraint.prototype.present = function (validator, cb) {
 
 FileConstraint.prototype.validate_internal = function (validator, cb) {
     var that = this;
-    var ext = path.extname(validator.files[this.key].name).substr(1);
+    var ext = path.extname(validator.files[this.key].name).substr(1).toLowerCase();
 
     if (ext && that.options.allowed_extensions.length && that.options.allowed_extensions.indexOf(ext) == -1) {
         validator.errors.push(new Errors.UploadError(that.key, 'Unallowed file type'));
@@ -88,7 +88,7 @@ FileConstraint.prototype.validate = function (validator, cb) {
             file_name += Math.floor(Math.random() * 16).toString(16);
         }
 
-        file_name += path.extname(file_url).replace(/(\.[a-z0-9]+).*/, '$1');
+        file_name += path.extname(file_url).substr(1).toLowerCase();
 
         var file = new File({
             path: path.join(LifeConfig.dir_uploaded, file_name),
@@ -136,7 +136,7 @@ FileConstraint.prototype.sanitize = function (validator, cb) {
     }
     file_name += path.extname(validator.files[this.key].name);
     file_name = path.join(LifeConfig.dir_uploaded, file_name);
-    
+
     return fs.stat(validator.files[this.key].path, function (err, infos) {
         return fs.rename(validator.files[that.key].path, file_name, function (err) {
             if (err) {

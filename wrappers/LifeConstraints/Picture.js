@@ -48,6 +48,10 @@ Image.prototype.sanitize = function (validator, cb) {
     var Media = require('mongoose').model('Media');
 
     return FileConstraint.prototype.sanitize.call(this, validator, function () {
+        if (validator.errors.length) {
+            return cb();
+        }
+
         var pic = new Picture();
         pic._file_path = validator.output[that.key].path
             .replace(/\\/g, '/')
