@@ -70,7 +70,7 @@ module.exports = function (schema, options) {
     };
 
     schema.methods.fullJson = function (context, level, cb) {
-        if (level >= 4) {
+        if (level >= 5) {
             return cb(null);
         }
 
