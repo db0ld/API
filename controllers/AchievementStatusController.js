@@ -117,29 +117,21 @@ module.exports = function (router) {
                 .exec();
         })
 
-        .Post('Approve an achievement status')
-        .route('achievement_statuses/:achievement_status_id/approvers')
+        .Post('Approve or disaprove an achievement status')
+        .route('achievement_statuses/:achievement_status_id/approvement')
         .auth(true)
+        .input([
+            new LifeConstraints.ApprovementVote('vote'),
+        ])
         .params([
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
         ])
         .add(function (context) {
-            return Vote.registerUserVote(context, context.user(), context.params('achievement_status_id'), 1);
+            return Vote.registerUserVote(context, context.user(), context.params('achievement_status_id'), context.input.vote);
         })
-
-        .Post('Disapprove an achievement status')
-        .route('achievement_statuses/:achievement_status_id/disapprovers')
-        .auth(true)
-        .params([
-            new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
-        ])
-        .add(function (context) {
-            return Vote.registerUserVote(context, context.user(), context.params('achievement_status_id'), -1);
-        })
-
 
         .Delete('Remove an achievement approval')
-        .route('achievement_statuses/:achievement_status_id/approvers')
+        .route('achievement_statuses/:achievement_status_id/approvement')
         .auth(true)
         .params([
             new LifeConstraints.MongooseObjectId(AchievementStatus, 'achievement_status_id'),
