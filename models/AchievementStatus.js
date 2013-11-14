@@ -36,6 +36,12 @@ AchievementStatus.statics.queries.byAchievement = function (achievement_id) {
     return this;
 };
 
+AchievementStatus.statics.queries.byStatus = function (status) {
+    this._query.and({status: status});
+
+    return this;
+};
+
 AchievementStatus.post('save', function (doc) {
     var Activity = require('mongoose').model('Activity');
     var old_status = (doc._original && doc._original.status) || '';
@@ -48,5 +54,10 @@ AchievementStatus.post('save', function (doc) {
         }
     }
 });
+
+AchievementStatus.statics.filters.status = {
+    key: 'status',
+    filter: AchievementStatus.statics.queries.byStatus
+};
 
 module.exports = mongoose.model('AchievementStatus', AchievementStatus);

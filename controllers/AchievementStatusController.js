@@ -80,10 +80,12 @@ module.exports = function (router) {
         .params([
             new LifeConstraints.UserIdLogin('user_id', true, true, true),
         ])
+        .filters(AchievementStatus.filters)
         .add(function (context) {
             var user = context.params('user_id');
 
             return new LifeQuery(AchievementStatus, context)
+                .filters(AchievementStatus.filters)
                 .byUserId(user.id)
                 .exec();
         })
