@@ -130,7 +130,7 @@ module.exports = function (router) {
         .Get('Get user\'s feed activities')
         .route(routeBase + '/:user_login/feed')
         .params([
-                new LifeConstraints.UserLoginEmail('user_login', true, true, true),
+                new LifeConstraints.UserIdLogin('user_login', true, true, true),
             ])
         .auth(true)
         .add(function (context) {
