@@ -74,7 +74,7 @@ Achievement.statics.queries.term = function (term) {
                 name: {
                     $elemMatch : {
                         'locale': that.context.locale,
-                        'string': new RegExp(term)
+                        'string': new RegExp(term, 'i')
                     },
                 }
             },
@@ -82,7 +82,7 @@ Achievement.statics.queries.term = function (term) {
                 description: {
                     $elemMatch : {
                         'locale': that.context.locale,
-                        'string': new RegExp(term)
+                        'string': new RegExp(term, 'i')
                     },
                 }
             }

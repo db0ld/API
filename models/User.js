@@ -154,9 +154,9 @@ User.statics.queries.searchByOAuthToken = function (site, id) {
 
 User.statics.queries.term = function (term) {
     var search_scope = [
-        { firstname: new RegExp(term) },
-        { lastname: new RegExp(term) },
-        { login: new RegExp(term) }
+        { firstname: new RegExp(term, 'i') },
+        { lastname: new RegExp(term, 'i') },
+        { login: new RegExp(term, 'i') }
     ];
 
     if (new Email().regexp().test(term)) {
