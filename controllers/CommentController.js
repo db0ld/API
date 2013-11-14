@@ -8,7 +8,7 @@ module.exports = function (router) {
     router
 
         .Post('Approve or disaprove a comment')
-        .route('achievement_statuses/:comment_id/approvement')
+        .route('comments/:comment_id/approvement')
         .auth(true)
         .input([
             new LifeConstraints.ApprovementVote('vote'),
@@ -21,7 +21,7 @@ module.exports = function (router) {
         })
 
         .Delete('Remove a comment approval')
-        .route('achievement_statuses/:comment_id/approvement')
+        .route('comments/:comment_id/approvement')
         .auth(true)
         .params([
             new LifeConstraints.MongooseObjectId(Comment, 'comment_id'),
