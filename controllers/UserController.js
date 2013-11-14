@@ -148,7 +148,7 @@ module.exports = function (router) {
                     owners.push(context.user().id);
 
                     for (var i = connections.length - 1; i >= 0; i--) {
-                        owners.push(connections[i].id);
+                        owners.push(connections[i].other);
                     };
 
                     return new LifeQuery(Activity, context)
