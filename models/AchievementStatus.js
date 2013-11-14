@@ -12,7 +12,7 @@ var AchievementStatus = new mongoose.Schema({
     status: {type: String, match: new AchievementStatusStatus().regexp(),
             required: true},
     message: {type: String, required: false},
-    //medias: [{type: ObjectId, required: false, ref: 'Picture'}],
+    medias: [{type: ObjectId, required: false, ref: 'Picture'}],
 });
 
 AchievementStatus.plugin(element);
@@ -22,7 +22,7 @@ AchievementStatus.virtual('url').get(function () {
     return 'http://life.tl/u/' + this.owner.login + '/' + (this.status == 'objective' ? 'bucketlist' : 'board') + '/' + this.id;
 });
 
-AchievementStatus.statics.queryDefaults.populate = 'owner achievement';
+AchievementStatus.statics.queryDefaults.populate = 'owner achievement medias';
 
 AchievementStatus.statics.queries.byUserId = function (user_id) {
     this._query.and({owner: user_id});
