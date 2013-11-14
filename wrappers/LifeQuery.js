@@ -53,7 +53,7 @@ LifeQuery.prototype.count = function (cb) {
     var that = this;
 
     return that._query.count(function (err, count) {
-	if (err) {
+        if (err) {
             console.error(err);
             return that.context.send.error(new LifeErrors.IOErrorDB());
         }
@@ -249,8 +249,6 @@ LifeQuery.prototype.filters = function (filters) {
     if (filters === undefined) {
         filters = that.context.filters();
     }
-
-    console.log(filters);
 
     for (var filter in filters) {
         filter = filters[filter];
