@@ -4,6 +4,8 @@ var _ = require('lodash'),
     LifeErrors = require('../wrappers/LifeErrors.js'),
     mongoose = require('mongoose'),
     User = mongoose.model('User'),
+    Activity = mongoose.model('Activity'),
+    UserConnection = mongoose.model('UserConnection')
     Client = mongoose.model('Client'),
     bcrypt = require('bcryptjs'),
     routeBase = 'users';
@@ -123,6 +125,36 @@ module.exports = function (router) {
 
                 return new LifeQuery(Client, context).save(client);
             });
+        })
+
+        .Get('Get user\'s feed activities')
+        .route(routeBase + '/:user_login/feed')
+        .params([
+                new LifeConstraints.UserLoginEmail('user_login', true, true, true),
+            ])
+        .auth(true)
+        .add(function (context) {
+            var user = context.user();
+
+            return new LifeQuery(UserConnection, context)
+                .select('other')
+                .populate('')
+                .selfRelation(context.user().id, 'network')
+                .limit(0)
+                .index(0)
+                .exec(function (connections) {
+                    var owners = [];
+
+                    owners.push(context.user().id);
+
+                    for (var i = connections.length - 1; i >= 0; i--) {
+                        owners.push(connections[i].id);
+                    };
+
+                    return new LifeQuery(Activity, context)
+                        .findByOwners(owners)
+                        .exec();
+                });
         })
         ;
 };

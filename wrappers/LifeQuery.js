@@ -26,6 +26,7 @@ var LifeQuery = function (model, context, query) {
 
     this._limit = parseInt(this._limit, 10);
     this._index = parseInt(this._index, 10);
+    this._select = {};
 
     this._populate = this.model.queryDefaults.populate;
     this._sort = this.model.queryDefaults.sort || 'creation';
@@ -82,6 +83,7 @@ LifeQuery.prototype.exec = function (cb) {
 
         that._query.populate(that._populate);
         that._query.sort(that._sort);
+        this._query.select(that._select);
 
         that._query.find();
 
@@ -287,6 +289,20 @@ LifeQuery.prototype.limit = function (val) {
     }
 
     this._limit = val;
+    return this;
+};
+
+/**
+ * Get or set current limit value for current query
+ *
+ * @param {*} val New value
+ */
+LifeQuery.prototype.select = function (val) {
+    if (val === undefined) {
+        return this._select;
+    }
+
+    this._select = val;
     return this;
 };
 

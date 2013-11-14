@@ -27,6 +27,12 @@ Activity.statics.queries.findByOwner = function (user_id) {
     return this;
 };
 
+Activity.statics.queries.findByOwners = function (user_ids) {
+    this._query.and({owner: {$in: user_ids}});
+
+    return this;
+};
+
 Activity.statics.add =  function (owner, type, params, template) {
     var User = require('mongoose').model('User');
     var Activity = require('mongoose').model('Activity');
