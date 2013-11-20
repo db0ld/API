@@ -73,7 +73,18 @@ module.exports = function (router) {
         ])
         .add(function (context) {
             return context.send.single(context.params('achievement_id'));
-        });
+        })
 
+        .Delete('Delete an achievement')
+        .route(routeBase + '/:achievement_id')
+        .auth(['ROLE_ADMIN_ACHIEVEMENT'])
+        .params([
+            new LifeConstraints.MongooseObjectId(Achievement, 'achievement_id'),
+        ])
+        .add(function (context) {
+            return new LifeQuery(Achievement, context)
+                .findById(context.params('achievement_id').id)
+                .remove();
+        });
 
 };
