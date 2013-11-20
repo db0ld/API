@@ -36,6 +36,51 @@ LifeData.i18nPicker = function (strings, locale) {
 };
 
 /**
+ * Add, remove or edit i18n inside object
+ *
+ * @param {String[]} keys
+ * @param {Object} object
+ * @param {String} locale
+ * @param {Object} sources
+ */
+LifeData.i18nFiller = function (keys, object, locale, sources) {
+    var i;
+    var found = false;
+
+    keys.forEach(function (key) {
+        if (typeof object[key] !== 'object') {
+            object[key] = [];
+        }
+
+        if (sources[key] === undefined) {
+            return;
+        }
+
+        for (i in object[key]) {
+            if (object[key].locale == locale) {
+                if (sources[key] === '') {
+                    object[key].string = sources[key];
+                } else {
+                    object[key].remove(object[key]);
+                }
+
+                found = true;
+                break;
+            }
+        }
+
+        if (found == false && sources[key] !== '') {
+            object[key].push({
+                string: sources[key],
+                locale: locale
+            });
+        }
+    });
+
+    return object;
+};
+
+/**
  * Check whenever something can be converted to an ObjectId
  *
  * @param {Object|String} item

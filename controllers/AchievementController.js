@@ -3,6 +3,7 @@ var _ = require('lodash'),
     Achievement = mongoose.model('Achievement'),
     LifeConstraints = require('../wrappers/LifeConstraints.js'),
     LifeQuery = require('../wrappers/LifeQuery.js'),
+    LifeData = require('../wrappers/LifeData.js'),
     routeBase = 'achievements';
 
 module.exports = function (router) {
@@ -24,15 +25,32 @@ module.exports = function (router) {
         .add(function (context) {
             var achievement = _.cloneDeep(context.input);
 
-            achievement.name = [{
-                string: context.input.name,
-                locale: 'en-US'
-            }];
+            LifeData.i18nFiller(['name', 'description'], achievement, context.locale, context.input);
 
-            achievement.description = [{
-                string: context.input.description,
-                locale: 'en-US'
-            }];
+            achievement._parents = context.input.parents;
+
+            return new LifeQuery(Achievement, context).save(achievement);
+        })
+
+        .Put('Edit an achievement')
+        .input([
+            new LifeConstraints.Length(2, 255, 'name', false),
+            new LifeConstraints.String('description', false),
+            new LifeConstraints.Boolean('category', false),
+            new LifeConstraints.Boolean('secret', false),
+            new LifeConstraints.Boolean('discoverable', false),
+            new LifeConstraints.HexColor('color', false),
+            new LifeConstraints.Picture('badge', false, {output_picture: true}),
+        ])
+        .auth(['ROLE_ADMIN_ACHIEVEMENT'])
+        .route(routeBase + '/:achievement_id')
+        .params([
+            new LifeConstraints.MongooseObjectId(Achievement, 'achievement_id'),
+        ])
+        .add(function (context) {
+            var achievement = context.params('achievement_id')
+
+            LifeData.i18nFiller(['name', 'description'], achievement, context.locale, context.input);
 
             achievement._parents = context.input.parents;
 
