@@ -1,4 +1,6 @@
 var StringConstraint = require('./StringConstraint.js'),
+    OAuthSupported = new require('./OAuthSupported.js'),
+    LifeThirdParty = require('../LifeThirdParty.js'),
     Errors = require('./Errors.js');
 
 /**
@@ -20,15 +22,17 @@ OAuthToken.prototype.validate = function (validator, cb) {
 
     if (validator.errors.length == 0) {
         var sitename = validator.data[that.site_key];
-        sitename = sitename.charAt(0).toUpperCase() + sitename.slice(1).toLowerCase();
 
-        var ThirdParty = require('../LifeThirdParty/' + sitename + '.js');
+        if (LifeThirdParty[sitename] === undefined) {
+            return cb();
+        }
 
+        var ThirdParty = LifeThirdParty[sitename];
         var thirdParty = new ThirdParty(validator.context, validator.data[that.key]);
 
         return thirdParty.getSelf(function (user) {
             if (user === false) {
-                validator.errors.push(new Errors.WrongOAuthToken);
+                validator.errors.push(new Errors.WrongOAuthToken());
             } else {
                 validator.output[that.key + '_user'] = user;
             }

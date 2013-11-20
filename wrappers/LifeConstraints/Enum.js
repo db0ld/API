@@ -10,9 +10,9 @@ var LifeData = require('../LifeData.js'),
 var Enum = function (enum_values, key, required) {
     this.enum_values = enum_values;
 
-    var regexp = enum_values.map(function (value) {
+    var regexp = '^(' + enum_values.map(function (value) {
         return LifeData.regexpEscape(value);
-    }).join('|');
+    }).join('|') + ')$';
 
 
     RegExpConstraint.call(this, new RegExp(regexp), key, required);
