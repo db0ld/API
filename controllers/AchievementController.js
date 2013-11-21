@@ -85,6 +85,16 @@ module.exports = function (router) {
             return new LifeQuery(Achievement, context)
                 .findById(context.params('achievement_id').id)
                 .remove();
-        });
+        })
 
+        .Get('Get an achievement parents')
+        .route(routeBase + '/:achievement_id/parents')
+        .params([
+            new LifeConstraints.MongooseObjectId(Achievement, 'achievement_id'),
+        ])
+        .add(function (context) {
+            return new LifeQuery(Achievement, context)
+                .findByIds(context.params('achievement_id')._parents)
+                .exec();
+        });
 };
