@@ -2,6 +2,7 @@ var LifeSecurity = require('./LifeSecurity.js'),
     LifeQuery = require('./LifeQuery.js'),
     LifeErrors = require('./LifeErrors.js'),
     LifeHttpResponse = require('./LifeHttpResponse.js'),
+    LifeConstraints = require('./LifeConstraints.js'),
     mongoose = require('mongoose'),
     Application = mongoose.model('Application');
 
@@ -51,7 +52,11 @@ LifeContext.prototype.hasRolesForRoute = function (cb) {
 };
 
 LifeContext.prototype.detectLanguage = function (cb) {
-    this.locale = 'en-US';
+    this.locale = this.requestAttribute(null, 'locale');
+
+    if (!this.locale || !new (LifeConstraints.Locale)().regexp().test(this.locale)) {
+        this.locale = 'en-US';
+    }
 
     return cb(true);
 };
